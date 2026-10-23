@@ -33,6 +33,9 @@ try {
     if (!$binary.Contains('CHLORIUM_NORMAL_BINARY_V1') -or $binary.Contains('CHLORIUM_RUNTIME_AUDIT_BINARY_V1') -or
         $binary.Contains('CHLORIUM_EXPERIMENTAL_')) { throw 'Not a normal production DLL' }
     $dllHash = Hash-Bytes $dllBytes
+    if (!$binary.Contains('CHLORIUM_NATIVE_GPU_TRANSFERS_ONLY_V1') -or $binary.Contains('CHLORIUM_NATIVE_ATLAS_CACHE_IMPLEMENTATION_V1')) {
+        throw 'The normal candidate must use native GPU transfers without the retired atlas cache'
+    }
     $manifest.links.source = $sourceManifest.links.source
     $manifest.developer = $sourceManifest.developer
     $outputPath = [IO.Path]::GetFullPath($OutputPackage)

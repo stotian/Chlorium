@@ -15,6 +15,8 @@ $measurementOnly = $cacheText -match '(?m)^CHLORIUM_MEASUREMENT_ONLY:BOOL=ON\r?$
 $streaming = $cacheText -match '(?m)^CHLORIUM_EXPERIMENTAL_NATIVE_STREAMING:BOOL=ON\r?$'
 $area = $cacheText -match '(?m)^CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS:BOOL=ON\r?$'
 $matrix = $cacheText -match '(?m)^CHLORIUM_EXPERIMENTAL_MATRIX_REUSE:BOOL=ON\r?$'
+$retiredAtlas = $cacheText -match '(?m)^CHLORIUM_NATIVE_ATLAS_CACHE:BOOL=ON\r?$'
+if (!$Audit -and $retiredAtlas) { throw 'The retired GPU atlas cache cannot be packaged as a normal mod' }
 if (($streaming -or $area -or $matrix) -and !$Experimental) { throw 'Use -Experimental with a separate output directory for experimental builds' }
 if ($Experimental -and ((!$streaming -and !$area -and !$matrix) -or $Audit -or
     [IO.Path]::GetFullPath((Join-Path $root $OutputDirectory)) -eq (Join-Path $root 'dist'))) {
@@ -62,6 +64,11 @@ $binaryText = [Text.Encoding]::ASCII.GetString([IO.File]::ReadAllBytes($dll))
 $identity = if ($Audit) { 'CHLORIUM_RUNTIME_AUDIT_BINARY_V1' } else { 'CHLORIUM_NORMAL_BINARY_V1' }
 if (!$binaryText.Contains($identity)) {
     throw 'The DLL build identity does not match this package: a fresh build is required'
+}
+if (!$Audit -and !$Experimental -and
+    (!$binaryText.Contains('CHLORIUM_NATIVE_GPU_TRANSFERS_ONLY_V1') -or
+      $binaryText.Contains('CHLORIUM_NATIVE_ATLAS_CACHE_IMPLEMENTATION_V1'))) {
+    throw 'Normal packages require native GPU transfers and no retired atlas cache'
 }
 if ($streaming -ne $binaryText.Contains('CHLORIUM_EXPERIMENTAL_NATIVE_STREAMING_V1')) {
     throw 'Streaming build identity mismatch: rebuild before packaging'

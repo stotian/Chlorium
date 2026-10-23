@@ -67,3 +67,13 @@ Priorite aux ecrans noirs supplementaires avec Chlorium. Qualite complete :
 LDM desactive, secousses desactivees dans la copie de niveau du harnais.
 Ces options doivent etre identiques sans/avec, affichees et verifiees apres
 initialisation du PlayLayer. Aucun changement des sauvegardes utilisateur.
+
+Critere de reussite rappele par l'utilisateur : frames regulieres et plus de
+60 FPS dans tous les passages, sans ecran noir cause par Chlorium. Une moyenne
+superieure a 60 n'est pas une validation. Les effets sombres natifs doivent
+rester visuellement fideles. Des essais avec les mods personnels ont ete demandes.
+
+Derniere consigne : arreter les nouveaux tests et se concentrer sur les ecrans
+noirs. Aucun nouveau niveau n'est lance apres cette consigne. La candidate
+alpha.6 retire les hooks d'atlas du paquet normal ; compilation seulement,
+verification en jeu encore a effectuer apres nouvelle autorisation.

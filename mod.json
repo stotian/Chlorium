@@ -5,7 +5,7 @@
   },
   "id": "local.chlorium",
   "name": "Chlorium",
-  "version": "v0.2.0-alpha.5",
+  "version": "v0.2.0-alpha.6",
   "developer": "stotian (based on IliasHDZ/Bismuth)",
   "description": "Native-compatible rendering optimizations for GD 2.2081; independent Bismuth fork",
   "dependencies": {

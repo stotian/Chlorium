@@ -14,6 +14,11 @@ try {
     try { $dllStream.CopyTo($dllReader); $binary = [Text.Encoding]::ASCII.GetString($dllReader.ToArray()) }
     finally { $dllStream.Dispose(); $dllReader.Dispose() }
     if ($binary.Contains('CHLORIUM_EXPERIMENTAL_NATIVE_STREAMING_V1') -or $binary.Contains('CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS_V1') -or $binary.Contains('CHLORIUM_EXPERIMENTAL_MATRIX_REUSE_V1')) { throw 'Experiments must remain separate from the installed normal package' }
+    $sourceManifest = Get-Content -LiteralPath (Join-Path $root 'mod.json') -Raw | ConvertFrom-Json
+    if ($manifest.version -ne $sourceManifest.version) { throw 'Source and package versions must match before export' }
+    if (!$binary.Contains('CHLORIUM_NATIVE_GPU_TRANSFERS_ONLY_V1') -or $binary.Contains('CHLORIUM_NATIVE_ATLAS_CACHE_IMPLEMENTATION_V1')) {
+        throw 'The normal candidate must use native GPU transfers without the retired atlas cache'
+    }
 } finally { $zip.Dispose() }
 New-Item -ItemType Directory -Force -Path $Destination | Out-Null
 Copy-Item -LiteralPath $package -Destination $Destination -Force

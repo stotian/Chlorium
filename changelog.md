@@ -1,3 +1,22 @@
+# 0.2.0-alpha.6 - Native GPU transfers, black-screen mitigation candidate
+
+Remove the atlas upload cache and every one of its lifecycle/draw hooks from
+normal builds. Native draws now always own their original dirty flag, storage
+and complete GPU upload. Retain exact native math reuse. The retired cache is
+restricted to audit builds; packaging requires a native-transfer identity and
+rejects the cache implementation in normal packages.
+
+This removes Chlorium's geometry-upload suppression path, whose storage
+assumptions cannot cover arbitrary external GL writes. It is a conservative
+mitigation, not a demonstrated fix for every reported black screen. Compiled
+only after the user's instruction to stop runtime tests; no new level run or
+60 FPS guarantee. Previously measured alpha.5 stays available separately.
+
+Add full-stack diagnostic support with exact installed-package hashes,
+verified active-mod inventory, temporary full-detail/input-assist safeguards,
+and restoration of the original settings. Keep private settings and logs out
+of Git. Accept historical pretty JSON inventory records without losing data.
+
 # 23 October 2026 - Repository and diagnostic tooling
 
 Add private-repository documentation, version records, exact upstream licence

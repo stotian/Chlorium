@@ -36,6 +36,8 @@ using namespace geode::prelude;
 using Clock = std::chrono::steady_clock;
 extern "C" __declspec(dllexport) const char chloriumAutoCollisionIdentity[] =
     "CHLORIUM_AUTO_COLLISIONS_ALLOWLIST_V4";
+extern "C" __declspec(dllexport) const char chloriumUserModProfileIdentity[] =
+    "CHLORIUM_AUTO_USER_MOD_PROFILE_V1";
 bool chloriumAuditUseNative() { return std::getenv("CHLORIUM_AUDIT_NATIVE") != nullptr; }
 #ifdef CHLORIUM_MEASUREMENT_ONLY
 extern "C" __declspec(dllexport) extern const char chloriumPassiveTransformTimingIdentity[] =
@@ -473,6 +475,38 @@ void tick() {
         static bool variantChecked = false;
         if (!variantChecked) {
             variantChecked = true;
+            matjson::Value modInventory = matjson::Value::array();
+            for (auto mod : Loader::get()->getAllMods()) {
+                matjson::Value item = matjson::Value::object();
+                item["id"] = mod->getID(); item["version"] = fmt::format("{}", mod->getVersion());
+                item["loaded"] = mod->isLoaded();
+                modInventory.push(std::move(item));
+                for (auto hook : mod->getHooks()) {
+                    const auto& name = hook->getDisplayName();
+                    if (name.find("CCTextureAtlas::") == std::string::npos &&
+                        name.find("processTransformActions") == std::string::npos &&
+                        name.find("updateVisibility") == std::string::npos &&
+                        name.find("ShaderLayer::") == std::string::npos &&
+                        name.find("handleButton") == std::string::npos) continue;
+                    line(fmt::format("{{\"event\":\"compatibility_hook\",\"mod\":{},\"name\":{},\"enabled\":{}}}",
+                        matjson::Value(mod->getID()).dump(), matjson::Value(name).dump(), hook->isEnabled()));
+                }
+            }
+            line(fmt::format("{{\"event\":\"mod_inventory\",\"mods\":{}}}", modInventory.dump(matjson::NO_INDENTATION)));
+            const bool userMods = std::getenv("CHLORIUM_EXPECTED_USER_MODS") != nullptr;
+            if (userMods) {
+                std::stringstream expected(std::getenv("CHLORIUM_EXPECTED_USER_MODS"));
+                std::string id;
+                while (std::getline(expected, id, ',')) {
+                    const auto mod = Loader::get()->getLoadedMod(id);
+                    if (!mod || !mod->isLoaded()) {
+                        line(fmt::format("{{\"event\":\"missing_user_mod\",\"id\":{}}}", matjson::Value(id).dump()));
+                        stop(false, "An enabled user mod did not load; full-stack comparison is unavailable"); return;
+                    }
+                }
+            }
+            line(fmt::format("{{\"event\":\"mod_profile\",\"name\":\"{}\",\"expected_mods_verified\":true}}",
+                userMods ? "user-mods" : "isolated"));
 #ifdef CHLORIUM_MEASUREMENT_ONLY
         auto production = Loader::get()->getLoadedMod("local.chlorium");
         const bool productionEnabled = production && production->getSettingValue<bool>("enabled");
@@ -599,6 +633,12 @@ void tick() {
         qualityLabel->setScale(.22f); qualityLabel->setAnchorPoint({1,0});
         qualityLabel->setPosition({CCDirector::get()->getWinSize().width - 8, 46});
         scene->addChild(qualityLabel, INT_MAX);
+        if (std::getenv("CHLORIUM_EXPECTED_USER_MODS")) {
+            auto profileLabel = CCLabelBMFont::create("MES MODS CHARGES", "bigFont.fnt");
+            profileLabel->setScale(.22f); profileLabel->setAnchorPoint({1,0});
+            profileLabel->setPosition({CCDirector::get()->getWinSize().width - 8, 60});
+            scene->addChild(profileLabel, INT_MAX);
+        }
         line(fmt::format("{{\"event\":\"test_overlay\",\"label\":\"{}\",\"fps\":true}}",
             chloriumAuditUseNative() ? "SANS CHLORIUM" : "AVEC CHLORIUM"));
         using SwapInterval = BOOL(WINAPI*)(int);

@@ -1,0 +1,12 @@
+{
+  "Version": "v0.2.0-alpha.6",
+  "Game": "2.2081",
+  "Geode": "5.11.2",
+  "PackageSHA256": "7939B0339E33C2F0F8B8E2A9FEDA9B1793A5C36D6F2558BDC4BC4C2877533AEA",
+  "DllSHA256": "1FAF7DD38C45EF2D0B3F0ADD260459666BF0AA35611B01B3F6823C7B18584D76",
+  "NativeGPUTransfersOnly": true,
+  "RetiredAtlasCachePresent": false,
+  "RuntimeTested": false,
+  "MainInstallationReplaced": false,
+  "Verification": "Compilation and static package inspection only; runtime tests paused by user"
+}

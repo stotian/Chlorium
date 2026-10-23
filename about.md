@@ -5,8 +5,10 @@ et Geode 5.11.2. Objectif : ameliorer la regularite des images sans perte
 visuelle et sans changer les collisions.
 
 Le candidat actuel conserve le dessin, les effets et les calculs natifs.
-L'optimisation des transferts graphiques reste en verification. Le remplacement
-statique du rendu herite de Bismuth est desactive dans cette version.
+Les transferts graphiques sont integralement natifs dans l'alpha.6 : le cache
+d'atlas a ete retire du paquet normal pour eliminer ce chemin de donnees GPU
+potentiellement perimees. Les reutilisations mathematiques natives restent
+actives. Le remplacement statique herite de Bismuth est desactive.
 Les 60 FPS stables ne sont pas encore atteints. Voir le rapport d'audit fourni
 avec les sources pour les mesures et limites connues.
 

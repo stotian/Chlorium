@@ -15,6 +15,8 @@
 #include <windows.h>
 
 using namespace geode::prelude;
+extern "C" __declspec(dllexport) extern const char chloriumAtlasCacheImplementation[] =
+    "CHLORIUM_NATIVE_ATLAS_CACHE_IMPLEMENTATION_V1";
 
 namespace chlorium::native {
 namespace {

@@ -17,6 +17,16 @@ option(CHLORIUM_MEASUREMENT_ONLY "Measure an absent or separately packaged produ
 option(CHLORIUM_EXPERIMENTAL_NATIVE_STREAMING "Experimental native VBO streaming backend" OFF)
 option(CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS "Experimental exact Area quotient reuse" OFF)
 option(CHLORIUM_EXPERIMENTAL_MATRIX_REUSE "Experimental helper matrix linear-part reuse" OFF)
+option(CHLORIUM_NATIVE_ATLAS_CACHE "Retired atlas upload cache, audit builds only" OFF)
+if(CHLORIUM_NATIVE_ATLAS_CACHE AND NOT CHLORIUM_RUNTIME_AUDIT)
+    message(FATAL_ERROR "The retired GPU atlas cache is restricted to audit builds")
+endif()
+if(CHLORIUM_NATIVE_ATLAS_CACHE AND (CHLORIUM_EXPERIMENTAL_STATIC_RENDERER OR
+   CHLORIUM_ENABLE_PROFILER OR CHLORIUM_MEASUREMENT_ONLY OR CHLORIUM_AUDIT_HARNESS_ONLY OR
+   CHLORIUM_EXPERIMENTAL_NATIVE_STREAMING OR CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS OR
+   CHLORIUM_EXPERIMENTAL_MATRIX_REUSE))
+    message(FATAL_ERROR "Retired atlas cache audits must remain separate from other renderers")
+endif()
 if(CHLORIUM_EXPERIMENTAL_MATRIX_REUSE AND (CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS OR CHLORIUM_EXPERIMENTAL_NATIVE_STREAMING OR CHLORIUM_EXPERIMENTAL_STATIC_RENDERER OR CHLORIUM_ENABLE_PROFILER OR CHLORIUM_MEASUREMENT_ONLY OR CHLORIUM_EXPERIMENTAL_NATIVE_MOVES OR CHLORIUM_AUDIT_HARNESS_ONLY))
     message(FATAL_ERROR "Matrix reuse must be isolated from other experiments")
 endif()
@@ -59,7 +69,12 @@ endif()
 if(NOT CHLORIUM_EXPERIMENTAL_STATIC_RENDERER AND NOT CHLORIUM_ENABLE_PROFILER)
     # The native path needs no shader compiler, static renderer or developer
     # scene hooks. Keep that implementation in sources without loading it.
-    set(SOURCES src/renderer/NativeAtlasUploads.cpp src/renderer/NativeTransformCache.cpp src/BuildIdentity.cpp)
+    set(SOURCES src/renderer/NativeTransformCache.cpp src/BuildIdentity.cpp)
+    if(CHLORIUM_NATIVE_ATLAS_CACHE)
+        list(APPEND SOURCES src/renderer/NativeAtlasUploads.cpp)
+    else()
+        list(APPEND SOURCES src/renderer/NativeAtlasStatsEmpty.cpp)
+    endif()
     if(CHLORIUM_RUNTIME_AUDIT)
         list(APPEND SOURCES src/BProfiler.cpp)
     endif()
@@ -89,6 +104,12 @@ if(CHLORIUM_EXPERIMENTAL_MATRIX_REUSE)
     endif()
 endif()
 add_library(Chlorium SHARED ${SOURCES})
+if(NOT CHLORIUM_EXPERIMENTAL_STATIC_RENDERER AND NOT CHLORIUM_ENABLE_PROFILER AND
+   NOT CHLORIUM_NATIVE_ATLAS_CACHE AND NOT CHLORIUM_MEASUREMENT_ONLY AND
+   NOT CHLORIUM_AUDIT_HARNESS_ONLY AND NOT CHLORIUM_EXPERIMENTAL_NATIVE_STREAMING AND
+   NOT CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS AND NOT CHLORIUM_EXPERIMENTAL_MATRIX_REUSE)
+    target_compile_definitions(Chlorium PRIVATE CHLORIUM_NATIVE_GPU_TRANSFERS_ONLY=1)
+endif()
 if(CHLORIUM_EXPERIMENTAL_MATRIX_REUSE)
     target_compile_definitions(Chlorium PRIVATE CHLORIUM_EXPERIMENTAL_MATRIX_REUSE=1)
 endif()

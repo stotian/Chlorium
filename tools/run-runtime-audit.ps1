@@ -1,4 +1,5 @@
-param([switch]$Native, [switch]$VisualWatch, [switch]$AtlasStorageRegression, [string]$GameDirectory, [string]$Package, [string]$ProductionPackage, [string]$ReportDirectory,
+param([switch]$Native, [switch]$VisualWatch, [switch]$WithUserMods, [switch]$AtlasStorageRegression, [string]$GameDirectory, [string]$Package, [string]$ProductionPackage, [string]$ReportDirectory,
+    [string]$UserGameDirectory = 'C:\Program Files (x86)\Steam\steamapps\common\Geometry Dash',
     [ValidateSet(0,133260800,129598490,88952972)][int]$FetchLevel = 0,
     [ValidateSet(133260800,129598490,88952972)][int]$Level = 133260800,
     [int]$BenchmarkSeconds = 900,
@@ -33,6 +34,9 @@ try {
     if (!$binary.Contains('CHLORIUM_AUTO_COLLISIONS_ALLOWLIST_V4') -or
         !$binary.Contains('CHLORIUM_RUNTIME_AUDIT_BINARY_V1')) { throw 'Only the collision-preserving auto-level harness is authorized' }
     $measurementOnly = $binary.Contains('CHLORIUM_MEASUREMENT_ONLY_V1')
+    if ($WithUserMods -and (!$measurementOnly -or !$binary.Contains('CHLORIUM_AUTO_USER_MOD_PROFILE_V1'))) {
+        throw 'Full-stack tests require the measurement harness with verified mod inventory'
+    }
     $binary = $null
 } finally { $auditZip.Dispose() }
 if ($ProductionPackage -and !$measurementOnly) { throw 'A production package requires the independent measurement module' }
@@ -63,12 +67,8 @@ if ($measurementOnly -and !$Native) {
         $binary = $null
     } finally { $productionZip.Dispose() }
 }
-if ($VisualWatch -and (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'diagnostic-report.py'))) {
-    # Update the readable report only between games, never during measurement.
-    $diagnosticOutput = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'chlorium\diagnostic'
-    & 'C:\Users\stoti\scoop\apps\python\current\python.exe' (Join-Path $PSScriptRoot 'diagnostic-report.py') $reportRoot $diagnosticOutput
-    if ($LASTEXITCODE -ne 0) { throw 'Diagnostic report generation failed before the next run' }
-}
+# Generate reports explicitly after a completed pair. A first run in a new
+# directory must not erase an existing readable report with an empty one.
 $previous = $env:CHLORIUM_AUDIT_OUTPUT
 $previousNative = $env:CHLORIUM_AUDIT_NATIVE
 $previousFetch = $env:CHLORIUM_AUDIT_FETCH_ID
@@ -79,15 +79,82 @@ $previousStorageTest = $env:CHLORIUM_ATLAS_STORAGE_REGRESSION
 $previousFrom = $env:CHLORIUM_TARGET_FROM
 $previousTo = $env:CHLORIUM_TARGET_TO
 $previousStreamMode = $env:CHLORIUM_STREAM_MODE
+$previousExpectedMods = $env:CHLORIUM_EXPECTED_USER_MODS
 $testProcess = $null
 $resourceTrace = $null
 $stagedProduction = $false
 $restoreProductionLoadFlag = $false
+$stagedUserMods = [Collections.Generic.List[string]]::new()
+$temporarySettings = [Collections.Generic.List[object]]::new()
+$userModManifest = @()
+$profileHash = $null
+$profileSettingsHash = $null
 $loaderSavedPath = Join-Path $env:LOCALAPPDATA 'GeometryDash\geode\mods\geode.loader\saved.json'
 try {
     if (Test-Path -LiteralPath ($output + '.stop-request')) { Remove-Item -LiteralPath ($output + '.stop-request') }
     if (Test-Path -LiteralPath $output) { Remove-Item -LiteralPath $output }
     Copy-Item -LiteralPath $Package -Destination $destination
+    if ($WithUserMods) {
+        if ([IO.Path]::GetFullPath($game).TrimEnd('\') -eq [IO.Path]::GetFullPath($UserGameDirectory).TrimEnd('\')) {
+            throw 'Full-stack tests must use a separate game fixture'
+        }
+        $loaderPreferences = Get-Content -LiteralPath $loaderSavedPath -Raw | ConvertFrom-Json -AsHashtable
+        foreach ($source in (Get-ChildItem -LiteralPath (Join-Path $UserGameDirectory 'geode\mods') -Filter '*.geode' -File | Sort-Object Name)) {
+            $zip = [IO.Compression.ZipFile]::OpenRead($source.FullName)
+            try {
+                $reader = [IO.StreamReader]::new($zip.GetEntry('mod.json').Open())
+                try { $modInfo = $reader.ReadToEnd() | ConvertFrom-Json } finally { $reader.Dispose() }
+            } finally { $zip.Dispose() }
+            if ($modInfo.id -in @('local.chlorium','local.chlorium.audit','iliashdz.bismuth')) { continue }
+            $target = Join-Path $game ('geode\mods\' + $source.Name)
+            $hash = (Get-FileHash -LiteralPath $source.FullName).Hash
+            if (Test-Path -LiteralPath $target) {
+                if ((Get-FileHash -LiteralPath $target).Hash -ne $hash) { throw "Fixture has a different package: $($source.Name)" }
+            } else {
+                Copy-Item -LiteralPath $source.FullName -Destination $target
+                $stagedUserMods.Add($target)
+            }
+            $key = 'should-load-' + $modInfo.id
+            $requested = !$loaderPreferences.ContainsKey($key) -or [bool]$loaderPreferences[$key]
+            $userModManifest += [ordered]@{ id=$modInfo.id; version=$modInfo.version; package=$source.Name; sha256=$hash; requested_enabled=$requested }
+        }
+        $profileBytes = [Text.Encoding]::UTF8.GetBytes(($userModManifest | ConvertTo-Json -Depth 8 -Compress))
+        $profileHash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($profileBytes))
+        $userModManifest | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath ($output + '.mods.json') -Encoding UTF8
+        # Back up exact bytes before the only test overrides. Both mods stay
+        # loaded; their LDM/input-assist options cannot falsify the requested run.
+        $settingOverrides = @(
+            @{ relative='eclipse.eclipse-menu\config.json'; values=@{
+                'level.autoldm'=$false; 'player.noclip'=$false;
+                'global.speedhack.toggle'=$false; 'player.autoclick'=$false;
+                'player.autokill'=$false; 'player.framestepper'=$false
+            } },
+            @{ relative='local.clickassist\saved.json'; values=@{ 'stage'=4 } },
+            @{ relative='geode.loader\settings.json'; values=@{ 'file-log-level'='info' } }
+        )
+        $backupFolder = Join-Path $reportRoot ('settings-before-' + $Level + '-' + $mode)
+        New-Item -ItemType Directory -Force -Path $backupFolder | Out-Null
+        $effectiveSettings = [Collections.Generic.List[string]]::new()
+        foreach ($override in $settingOverrides) {
+            $path = Join-Path (Join-Path $env:LOCALAPPDATA 'GeometryDash\geode\mods') $override.relative
+            if (!(Test-Path -LiteralPath $path)) { continue }
+            $bytes = [IO.File]::ReadAllBytes($path)
+            $settings = [Text.Encoding]::UTF8.GetString($bytes).TrimStart([char]0xfeff) | ConvertFrom-Json -AsHashtable
+            foreach ($key in $override['values'].Keys) { $settings[$key] = $override['values'][$key] }
+            $backup = Join-Path $backupFolder ($override.relative.Replace('\','-'))
+            if (Test-Path -LiteralPath $backup) { throw 'Settings backup already exists; recover or choose a fresh report directory' }
+            [IO.File]::WriteAllBytes($backup, $bytes)
+            $temporarySettings.Add(@{ path=$path; bytes=$bytes; backup=$backup })
+            $canonical = [ordered]@{}
+            foreach ($key in ($settings.Keys | Sort-Object)) { $canonical[$key] = $settings[$key] }
+            $json = $canonical | ConvertTo-Json -Depth 100
+            [IO.File]::WriteAllText($path, $json, [Text.UTF8Encoding]::new($false))
+            $effectiveSettings.Add($override.relative + ':' + $json)
+        }
+        $profileSettingsHash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData(
+            [Text.Encoding]::UTF8.GetBytes(($effectiveSettings -join "`n"))))
+        $env:CHLORIUM_EXPECTED_USER_MODS = (($userModManifest | Where-Object requested_enabled | ForEach-Object id) -join ',')
+    } else { $env:CHLORIUM_EXPECTED_USER_MODS = $null }
     if ($measurementOnly -and !$Native) {
         Copy-Item -LiteralPath $ProductionPackage -Destination $productionDestination
         $stagedProduction = $true
@@ -113,6 +180,8 @@ try {
         exact_transform_math_verification = [bool]$env:CHLORIUM_TRANSFORM_VERIFY
         target_from_percent = $FromPercent; target_to_percent = $ToPercent
         low_detail_requested = $false; disable_shake_requested = $true
+        mod_profile = if ($WithUserMods) { 'user-mods' } else { 'isolated' }
+        mod_profile_sha256 = $profileHash; profile_settings_sha256 = $profileSettingsHash
         experimental_stream_mode = $StreamMode
     } | ConvertTo-Json | Set-Content -LiteralPath ($output + '.provenance.json') -Encoding UTF8
     $resourceTrace = [IO.StreamWriter]::new($output + '.process.csv', $false)
@@ -167,6 +236,7 @@ try {
     $env:CHLORIUM_TARGET_FROM = $previousFrom
     $env:CHLORIUM_TARGET_TO = $previousTo
     $env:CHLORIUM_STREAM_MODE = $previousStreamMode
+    $env:CHLORIUM_EXPECTED_USER_MODS = $previousExpectedMods
     if ($resourceTrace) { $resourceTrace.Dispose() }
     if ($testProcess -and !$testProcess.HasExited) { Stop-Process -Id $testProcess.Id -ErrorAction SilentlyContinue }
     if ($testProcess) { $testProcess.WaitForExit(5000) | Out-Null; $testProcess.Dispose() }
@@ -177,5 +247,14 @@ try {
         if ($hadProductionLoadFlag) { $loaderSaved['should-load-local.chlorium'] = $previousProductionLoadFlag }
         else { $loaderSaved.Remove('should-load-local.chlorium') }
         [IO.File]::WriteAllText($loaderSavedPath, ($loaderSaved | ConvertTo-Json -Depth 100), [Text.UTF8Encoding]::new($false))
+    }
+    foreach ($snapshot in $temporarySettings) {
+        [IO.File]::WriteAllBytes($snapshot.path, $snapshot.bytes)
+        if ((Get-FileHash -LiteralPath $snapshot.path).Hash -ne (Get-FileHash -LiteralPath $snapshot.backup).Hash) {
+            throw 'User settings restoration verification failed'
+        }
+    }
+    foreach ($path in $stagedUserMods) {
+        if (Test-Path -LiteralPath $path) { Remove-Item -LiteralPath $path }
     }
 }

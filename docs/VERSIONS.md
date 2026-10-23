@@ -8,7 +8,8 @@ Le manifeste Geode n'accepte qu'un suffixe de prerelease reconnu et numerique.
 
 | Version | Nature | Etat |
 |---|---|---|
-| `v0.2.0-alpha.5` | Candidate normale | Cache borne pour scenes denses ; paquet de reference actuel |
+| `v0.2.0-alpha.6` | Candidate normale | Transferts GPU natifs ; mitigation des donnees d'atlas perimees, non testee en jeu |
+| `v0.2.0-alpha.5` | Reference mesuree | Ancien cache borne pour scenes denses ; prerelease conservee |
 | `v0.2.0-alpha.4` | Historique local | Reutilisation exacte des calculs `atan2f` natifs |
 | `v0.2.0-alpha.3` | Historique local | Invalidation lors de la recreation du stockage GPU, correction reproduite |
 | `v0.2.0-alpha.2` | Historique local | Retour au pipeline natif et cache de transferts |
@@ -20,6 +21,7 @@ Le manifeste Geode n'accepte qu'un suffixe de prerelease reconnu et numerique.
 Les numeros 601-603 identifient des experiences, pas une progression validee
 de performances. Ne pas remplacer automatiquement l'alpha.5 par une experience.
 Un seul paquet partageant l'identifiant `local.chlorium` peut etre charge.
+L'alpha.6 ne remplace pas automatiquement l'installation avant validation.
 
 Les versions alpha.1 a alpha.4 documentent les etapes du travail local. Aucun
 tag ni aucune archive de sources ancienne n'est invente pour ces versions.

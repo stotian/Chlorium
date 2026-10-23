@@ -11,6 +11,7 @@ import statistics
 import sys
 from collections import defaultdict
 from pathlib import Path
+from audit_json import read_events
 
 
 def percentile(values, q):
@@ -31,7 +32,7 @@ def summarize(rows):
 
 
 def read(report, expected_loaded):
-    events = [json.loads(s) for s in report.read_text(encoding='utf-8-sig').splitlines() if s.strip()]
+    events = read_events(report)
     variants = [e for e in events if e.get('event') == 'comparison_variant']
     if len(variants) != 1 or variants[0]['production_loaded'] != expected_loaded:
         raise ValueError(f'{report}: production presence was not verified')
@@ -53,7 +54,8 @@ def compare(baseline, candidate, destination):
         raise ValueError('Different levels, measurement modules or game binaries')
     if ap.get('level_sha256') != bp.get('level_sha256') or not ap.get('level_sha256'):
         raise ValueError('Level data equivalence has not been recorded')
-    for key in ('target_from_percent', 'target_to_percent', 'visual_diagnostic', 'low_detail_requested', 'disable_shake_requested'):
+    for key in ('target_from_percent', 'target_to_percent', 'visual_diagnostic', 'low_detail_requested', 'disable_shake_requested',
+                'mod_profile', 'mod_profile_sha256', 'profile_settings_sha256'):
         if ap.get(key) != bp.get(key):
             raise ValueError(f'Different comparison conditions: {key}')
     coverage = []

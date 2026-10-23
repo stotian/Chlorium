@@ -2,7 +2,7 @@
   <img src="logo.png" width="144" alt="Logo Chlorium" />
   <h1>Chlorium</h1>
   <p>Optimiser Geometry Dash en conservant ses effets et son gameplay.</p>
-  <p><strong>Windows x64 · GD 2.2081 · Geode 5.11.2 · alpha.5</strong></p>
+  <p><strong>Windows x64 · GD 2.2081 · Geode 5.11.2 · alpha.6 en préparation</strong></p>
 </div>
 
 Chlorium est une adaptation indépendante de
@@ -21,15 +21,20 @@ la fluidité.
 
 ## Ce que fait la candidate actuelle
 
-La version normale **v0.2.0-alpha.5** conserve les transformations, la visibilité,
-les collisions, les shaders, le tri et les dessins natifs de GD. Elle tente de
-réduire les transferts GPU redondants en comparant exactement les données des
-atlas et de réutiliser certains résultats mathématiques natifs identiques.
+La candidate normale **v0.2.0-alpha.6** conserve les transformations, la visibilité,
+les collisions, les shaders, le tri et les dessins natifs de GD. Elle réutilise
+certains résultats mathématiques natifs identiques.
 
-Le cache est borné : 32 Mio au total, 512 Kio par atlas et un budget de travail
-supplémentaire de 2 Mio / 64 opérations par image. Les changements denses
-provoquent un retour progressif aux transferts natifs. Les données dont la
-présence sur le GPU n'est pas établie conservent le chemin natif.
+**Le cache de transferts d'atlas de l'alpha.5 a été retiré du paquet normal.**
+GD gère à nouveau intégralement ses transferts GPU et ses marqueurs de données
+modifiées. Cette mesure supprime le chemin de Chlorium susceptible de conserver
+une ancienne géométrie lorsque le stockage GPU est modifié hors de ses gardes.
+Elle n'est pas encore une correction validée de chaque écran noir signalé.
+Voir [la modification de l'alpha.6](docs/BLACKSCREENS-ALPHA6.md).
+
+L'alpha.6 est compilée séparément, sans nouveau parcours depuis la demande
+d'arrêt des tests. L'alpha.5 mesurée reste disponible dans sa prerelease ;
+l'installation principale n'est pas remplacée automatiquement.
 
 Le remplacement complet du rendu hérité de Bismuth reste dans les sources,
 **désactivé dans les paquets normaux** : sa couverture des effets GD 2.2 est
@@ -53,7 +58,8 @@ les autres plateformes et binaires ne sont pas validés.
 
 | Branche de travail | Version Geode | État |
 |---|---|---|
-| Candidate normale | `v0.2.0-alpha.5` | Référence actuelle ; optimisations encore en validation |
+| Candidate normale | `v0.2.0-alpha.6` | Transferts GPU entièrement natifs ; compilation seulement, tests en pause |
+| Référence mesurée | `v0.2.0-alpha.5` | Ancien cache d'atlas ; version mesurée conservée séparément |
 | Streaming GPU | `v0.2.0-alpha.601` | Expérience isolée ; gain synthétique, pas de gain général prouvé |
 | Arithmétique Area v2 | `v0.2.0-alpha.602` | Équivalence numérique vérifiée ; intérêt variable selon les données |
 | Matrices v3 | `v0.2.0-alpha.603` | Aucun appel éligible sur Grief 22–40 %, donc aucune accélération possible de ce passage |
@@ -107,6 +113,10 @@ chemins locaux ne remplacent pas les prérequis ci-dessus.
 
 ## Tests et diagnostic
 
+**Les nouveaux tests en jeu sont actuellement suspendus à la demande de
+l'utilisateur.** Les commandes ci-dessous décrivent l'outillage ; elles ne
+constituent pas une autorisation de lancer des parcours.
+
 Les vérifications CPU des plages d'atlas et du cache mathématique sont lancées
 par la CI Windows sans redistribuer le jeu. Les scripts `test-*.cmd` servent
 aux contrôles locaux ; certains exigent le SDK, OpenGL ou les DLL du jeu
@@ -120,6 +130,12 @@ autorisés par cet outil sont :
 - Orbit auto : **133260800** ;
 - Heliopolis auto : **129598490** ;
 - Grief auto : **88952972**.
+
+`-WithUserMods` copie les paquets installés dans la fixture, conserve leurs
+activations, enregistre leurs empreintes et vérifie les modules réellement
+chargés. Les réglages imposés pour l'essai sont sauvegardés puis restaurés.
+Les préférences, jetons et journaux privés restent hors de Git. Le profil de
+mods et ses réglages doivent correspondre entre les deux modes pour comparer.
 
 Il atteint les sections par le gameplay natif, sans saut de position ni noclip,
 et s'arrête à la cible, à la fin ou après deux morts. Exemple local :

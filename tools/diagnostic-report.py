@@ -14,17 +14,13 @@ import sys
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
+from audit_json import read_events
 
 LEVELS = {133260800: 'Orbit auto', 129598490: 'Heliopolis auto', 88952972: 'Grief auto'}
 
 
 def events(path):
-    result = []
-    if path.exists():
-        for line in path.read_text(encoding='utf-8-sig').splitlines():
-            try: result.append(json.loads(line))
-            except json.JSONDecodeError: pass  # A live/aborted run can end mid-line.
-    return result
+    return read_events(path, allow_partial_tail=True)
 
 
 def rows(path):
@@ -172,7 +168,7 @@ def write_report(source, output, additional_sources=()):
     lines = ['# Diagnostic Chlorium', '', 'Généré le '+datetime.now(timezone.utc).isoformat(timespec='seconds')+' (UTC).', '',
              'Niveaux autorisés : Orbit auto **133260800**, Heliopolis auto **129598490**, Grief auto **88952972**. ',
              'Collisions natives, aucun noclip ni input artificiel ; arrêt à la fin, après deux morts ou sur demande.', '',
-             'Cette série utilise l’installation de test isolée ; les interactions avec l’ensemble des autres mods du jeu principal ne sont pas couvertes.', '',
+             'Les parcours utilisent une installation de test. Le profil de chaque parcours indique si les mods personnels ont été copiés et leur chargement vérifié. Les mods désactivés par l’utilisateur restent désactivés.', '',
              '## Lecture des résultats', '',
              '« Sans » signifie que le paquet normal est absent ; « avec » signifie chargé et activé, vérification faite dans le jeu. ',
              'Les FPS ci-dessous utilisent les intervalles réels entre images, comme le compteur visible. ',
@@ -204,6 +200,8 @@ def write_report(source, output, additional_sources=()):
             graphics=next((e for e in es if e.get('event')=='graphics_context'),{})
             objects=next((e.get('objects') for e in es if e.get('event')=='level_objects'),None)
             quality=next((e for e in es if e.get('event')=='test_quality'),{})
+            profile=next((e for e in es if e.get('event')=='mod_profile'),{})
+            inventory=next((e.get('mods',[]) for e in es if e.get('event')=='mod_inventory'),[])
             resources=[e for e in es if e.get('event')=='resources' and e.get('process_memory_valid')]
             peak=max((e['private_bytes'] for e in resources),default=0)/1024**2
             details += [f"- **{mode.upper()} Chlorium** : présence du mod {'vérifiée' if r['variant_verified'] else 'NON VÉRIFIÉE'}, "
@@ -215,6 +213,7 @@ def write_report(source, output, additional_sources=()):
                         f"- Module de mesure : `{p.get('measurement_sha256','inconnu')}`.",
                         f"- Paquet normal : `{p.get('production_sha256') or 'absent'}`.",
                         f"- Réglages effectifs : LDM={quality.get('low_detail_effective','non vérifié')}, secousses désactivées={quality.get('skip_camera_shake_effective','non vérifié')}.",
+                        f"- Profil : {p.get('mod_profile','isolated')}, chargement attendu vérifié={profile.get('expected_mods_verified','non vérifié')}, {sum(bool(m.get('loaded')) for m in inventory)} modules chargés.",
                         f"- Exclusions : `{json.dumps(r['excluded'],ensure_ascii=False)}`.", '']
             if coverage.get('targeted'):
                 details += [f"**Test ciblé : {coverage.get('target_from')}–{coverage.get('target_to')} %.** "
@@ -242,7 +241,7 @@ def write_report(source, output, additional_sources=()):
             quality_keys=('low_detail_effective','skip_camera_shake_effective')
             qualities=[next((e for e in pair[m]['events'] if e.get('event')=='test_quality'),{}) for m in ('sans','avec')]
             quality_matched=all(k in qualities[0] and k in qualities[1] and qualities[0][k]==qualities[1][k] for k in quality_keys)
-            conditions=('target_from_percent','target_to_percent','visual_diagnostic')
+            conditions=('target_from_percent','target_to_percent','visual_diagnostic','mod_profile','mod_profile_sha256','profile_settings_sha256')
             conditions_matched=all(pair['sans']['provenance'].get(k)==pair['avec']['provenance'].get(k) for k in conditions)
             comparison_verified=matched and quality_matched and conditions_matched and all(r['variant_verified'] for r in pair.values())
             details += ['Collecte, exécutable et données du niveau : **'+('identiques' if matched else 'différents ou non vérifiés ; comparaison limitée')+'**.', '']
