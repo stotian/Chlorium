@@ -1,0 +1,49 @@
+{
+  "geode": "5.11.2",
+  "gd": {
+    "win": "2.2081"
+  },
+  "id": "local.chlorium",
+  "name": "Chlorium",
+  "version": "v0.2.0-alpha.5",
+  "developer": "stotian (based on IliasHDZ/Bismuth)",
+  "description": "Native-compatible rendering optimizations for GD 2.2081; independent Bismuth fork",
+  "dependencies": {
+    "geode.node-ids": ">=v1.20.0"
+  },
+  "tags": [
+    "performance"
+  ],
+  "links": {
+    "source": "https://github.com/stotian/Chlorium"
+  },
+  "resources": {
+    "files": [
+      "resources/shaders/*.vert",
+      "resources/shaders/*.frag",
+      "resources/shaders/*.comp",
+      "resources/shaders/*.h",
+      "resources/shaders/headers/*.h",
+      "resources/*.json"
+    ]
+  },
+  "settings": {
+    "enabled": {
+      "name": "Enable Chlorium",
+      "type": "bool",
+      "default": true
+    },
+    "ingame_enable": {
+      "name": "Compatibility diagnostics",
+      "type": "bool",
+      "default": false,
+      "description": "Keeps native CPU updates for diagnostics. F3 toggles performance information; may reduce performance."
+    },
+    "use_mapped_buffers": {
+      "name": "Use mapped buffer uploads",
+      "type": "bool",
+      "default": false,
+      "description": "Maps GPU buffers only while uploading data, then unmaps before drawing. Performance depends on your graphics driver."
+    }
+  }
+}

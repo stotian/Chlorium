@@ -1,0 +1,30 @@
+name: Bug de rendu ou de performance
+description: Signaler un probleme reproductible de Chlorium.
+title: "[Bug] "
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version de Chlorium, GD et Geode
+      placeholder: "alpha.5 / GD 2.2081 / Geode 5.11.2"
+    validations:
+      required: true
+  - type: input
+    id: level
+    attributes:
+      label: ID du niveau et pourcentage concerne
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Etapes et resultat observe
+      description: "Preciser si le probleme existe aussi sans Chlorium, le reglage LDM et les autres mods actifs."
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Mesures ou captures utiles
+      description: "Retirer les informations personnelles et les jetons des journaux avant de les joindre."
+

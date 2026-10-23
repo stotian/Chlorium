@@ -1,0 +1,33 @@
+name: CPU and source checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows-cpu:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1
+        with:
+          arch: x64
+      - name: Exact atlas range reconstruction
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force build-tests | Out-Null
+          cl /nologo /std:c++20 /EHsc /O2 /I src tests/native_atlas_regressions.cpp /Fobuild-tests/atlas.obj /Febuild-tests/atlas.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./build-tests/atlas.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Exact native math and cache policy
+        shell: pwsh
+        run: |
+          cl /nologo /std:c++20 /EHsc /O2 /I src tests/native_transform_math_regressions.cpp /Fobuild-tests/transform.obj /Febuild-tests/transform.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ./build-tests/transform.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Python syntax
+        run: python -m compileall -q tools
+
