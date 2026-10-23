@@ -286,8 +286,8 @@ def write_report(source, output, additional_sources=()):
         file=output/f'niveau-{level}.md'; text='\n'.join(details)+'\n'; file.write_text(text,encoding='utf-8')
         readable_html(text,file.with_suffix('.html'))
         lines += ['', f"Détail de **{LEVELS[level]}** : [FPS par pourcentage, épisodes sombres et captures](niveau-{level}.md)."]
-    lines += ['', '## Régression graphique ciblée', '',
-              'Le cache doit être invalidé si le moteur recrée le stockage GPU, même si les identifiants et la capacité ne changent pas.', '',
+    lines += ['', '## Régression graphique historique', '',
+              'Ce contrôle de l’ancien cache reproduisait une désynchronisation corrigée entre les alpha.2 et alpha.3. Il ne valide pas le paquet des parcours ci-dessus ; leurs empreintes identifient la version réellement testée.', '',
               '| Version | Octet initial | Après recréation | Après rafraîchissement | Attendu | Résultat |', '|---|---:|---:|---:|---:|---|']
     root=Path(__file__).resolve().parent.parent
     for name,title in [('storage-before','Avant correction'),('storage-after','Après correction')]:
@@ -296,7 +296,7 @@ def write_report(source, output, additional_sources=()):
         if e:
             lines.append(f"| {title} | {e['initial_gpu_byte']} | {e['remapped_gpu_byte']} | {e['final_gpu_byte']} | 77 | {'Conforme' if e['final_gpu_byte']==77 else 'Données périmées reproduites'} |")
             evidence=output/'preuves'; evidence.mkdir(exist_ok=True); shutil.copyfile(p,evidence/(name+'.jsonl'))
-    lines += ['', 'Ce test démontre la correction d’une désynchronisation du cache. Il ne prouve pas que toutes les coupures signalées avaient cette cause.', '',
+    lines += ['', 'Cette preuve historique ne démontre pas que toutes les coupures signalées avaient cette cause. Le cache d’atlas est absent du paquet normal depuis l’alpha.6.', '',
               '## Fichiers de mesure', '',
               '- [FPS, temps d’image et étapes CPU par pourcentage](fps-par-pourcentage.csv).',
               '- [Épisodes sombres et couverture](episodes-sombres.csv).',

@@ -1,0 +1,9 @@
+{
+  "Version": "v0.2.0-alpha.6",
+  "InstalledPackageSHA256": "7939B0339E33C2F0F8B8E2A9FEDA9B1793A5C36D6F2558BDC4BC4C2877533AEA",
+  "PreviousPackageSHA256": "EBEDE54A1456CECC38E11B51A401A5D36B08134AB49A2386F2432806D8B3AF1E",
+  "Rollback": "Documents/chlorium/versions/alpha5/installed-before-alpha6.geode",
+  "SettingsUnchanged": true,
+  "Enabled": true,
+  "RuntimeReport": "Documents/chlorium/diagnostic-alpha6/DIAGNOSTIC.html"
+}

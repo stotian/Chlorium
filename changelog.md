@@ -8,9 +8,12 @@ rejects the cache implementation in normal packages.
 
 This removes Chlorium's geometry-upload suppression path, whose storage
 assumptions cannot cover arbitrary external GL writes. It is a conservative
-mitigation, not a demonstrated fix for every reported black screen. Compiled
-only after the user's instruction to stop runtime tests; no new level run or
-60 FPS guarantee. Previously measured alpha.5 stays available separately.
+mitigation, not a demonstrated fix for every reported black screen. After
+runtime testing was reauthorized, paired full-mod runs of Grief 0-40% and full
+Heliopolis completed without deaths or crashes. Every detected dark episode
+with alpha.6 also occurred without Chlorium nearby; no additional episode was
+detected in these runs. Stable 60 FPS is not achieved. Installed locally with
+the previous alpha.5 package backed up. See VALIDATION-ALPHA6-20261023.md.
 
 Add full-stack diagnostic support with exact installed-package hashes,
 verified active-mod inventory, temporary full-detail/input-assist safeguards,

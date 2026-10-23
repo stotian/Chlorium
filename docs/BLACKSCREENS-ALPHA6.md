@@ -56,10 +56,22 @@ entre les deux parcours avec mods. Ces episodes existent aussi dans la reference
 native isolee. Les longues pauses et les differences de cadence limitent une
 attribution causale a Chlorium ; ils ne sont pas declares corriges.
 
-## Verification restante
+## Verification apres reprise autorisee
 
-La consigne actuelle interdit de nouveaux parcours. L'alpha.6 est preparee
-par lecture du code et compilation, sans nouveau test en jeu. La fidelite,
-l'absence de noirs supplementaires et les temps par image restent a verifier
-lorsque les tests seront de nouveau autorises. Les 60 FPS stables partout
-restent l'objectif, pas un resultat acquis.
+Apres la demande « commence », quatre parcours ont ete effectues avec les
+mods personnels : Grief 0-40 % et Heliopolis entier, chacun sans et avec alpha.6.
+Meme executable, donnees de niveau, module de mesure, paquets personnels et
+reglages verifies pour chaque paire. Aucune mort ni crash.
+
+Grief : 15 episodes sombres dans chaque mode, tous rapproches aux memes
+passages ; 80 images sombres sans et 91 avec, avec des cadences differentes.
+Heliopolis : un episode dans chaque mode a 99.075 %, 61 images sans et 60 avec.
+Aucun episode quasi noir supplementaire n'a ete detecte avec alpha.6 dans
+cette serie. Cela ne prouve ni l'identite de chaque pixel, ni la correction
+de tous les episodes signales ailleurs. Les captures de Grief vers 8.53 % ont
+aussi ete inspectees : la quasi-obscurite est presente dans les deux modes.
+
+Le cache mathematique est installe, mais ses appels cibles sont nuls dans ces
+parcours ; il ne peut donc pas y expliquer un gain de FPS. Les 60 FPS stables
+ne sont pas atteints. L'alpha.6 est installee avec sauvegarde de l'alpha.5.
+Voir VALIDATION-ALPHA6-20261023.md et alpha6-runtime-verdict.json.

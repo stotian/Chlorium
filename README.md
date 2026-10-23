@@ -2,7 +2,7 @@
   <img src="logo.png" width="144" alt="Logo Chlorium" />
   <h1>Chlorium</h1>
   <p>Optimiser Geometry Dash en conservant ses effets et son gameplay.</p>
-  <p><strong>Windows x64 · GD 2.2081 · Geode 5.11.2 · alpha.6 en préparation</strong></p>
+  <p><strong>Windows x64 · GD 2.2081 · Geode 5.11.2 · alpha.6</strong></p>
 </div>
 
 Chlorium est une adaptation indépendante de
@@ -29,12 +29,14 @@ certains résultats mathématiques natifs identiques.
 GD gère à nouveau intégralement ses transferts GPU et ses marqueurs de données
 modifiées. Cette mesure supprime le chemin de Chlorium susceptible de conserver
 une ancienne géométrie lorsque le stockage GPU est modifié hors de ses gardes.
-Elle n'est pas encore une correction validée de chaque écran noir signalé.
+Les nouveaux essais n'ont pas détecté d'épisode quasi noir supplémentaire sur
+Grief 0–40 % et Heliopolis entier avec les mods personnels. Ils ne valident pas
+chaque écran noir signalé sur tous les niveaux.
 Voir [la modification de l'alpha.6](docs/BLACKSCREENS-ALPHA6.md).
 
-L'alpha.6 est compilée séparément, sans nouveau parcours depuis la demande
-d'arrêt des tests. L'alpha.5 mesurée reste disponible dans sa prerelease ;
-l'installation principale n'est pas remplacée automatiquement.
+Les tests ont repris après autorisation. L'alpha.6 est installée sur le PC de
+développement après ces quatre parcours ; l'alpha.5 reste sauvegardée.
+Voir [le bilan de l'alpha.6](docs/VALIDATION-ALPHA6-20261023.md).
 
 Le remplacement complet du rendu hérité de Bismuth reste dans les sources,
 **désactivé dans les paquets normaux** : sa couverture des effets GD 2.2 est
@@ -58,7 +60,7 @@ les autres plateformes et binaires ne sont pas validés.
 
 | Branche de travail | Version Geode | État |
 |---|---|---|
-| Candidate normale | `v0.2.0-alpha.6` | Transferts GPU entièrement natifs ; compilation seulement, tests en pause |
+| Candidate normale | `v0.2.0-alpha.6` | Transferts GPU entièrement natifs ; aucun épisode sombre supplémentaire détecté sur les deux comparaisons avec mods |
 | Référence mesurée | `v0.2.0-alpha.5` | Ancien cache d'atlas ; version mesurée conservée séparément |
 | Streaming GPU | `v0.2.0-alpha.601` | Expérience isolée ; gain synthétique, pas de gain général prouvé |
 | Arithmétique Area v2 | `v0.2.0-alpha.602` | Équivalence numérique vérifiée ; intérêt variable selon les données |
@@ -113,9 +115,10 @@ chemins locaux ne remplacent pas les prérequis ci-dessus.
 
 ## Tests et diagnostic
 
-**Les nouveaux tests en jeu sont actuellement suspendus à la demande de
-l'utilisateur.** Les commandes ci-dessous décrivent l'outillage ; elles ne
-constituent pas une autorisation de lancer des parcours.
+Les tests en jeu ont repris sur autorisation de l'utilisateur, centrés sur les
+écrans noirs de Grief et Heliopolis avec ses mods. Les commandes ci-dessous
+décrivent l'outillage ; leur présence ne constitue pas une autorisation de
+lancer d'autres niveaux.
 
 Les vérifications CPU des plages d'atlas et du cache mathématique sont lancées
 par la CI Windows sans redistribuer le jeu. Les scripts `test-*.cmd` servent

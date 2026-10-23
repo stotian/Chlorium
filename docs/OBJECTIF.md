@@ -77,3 +77,10 @@ Derniere consigne : arreter les nouveaux tests et se concentrer sur les ecrans
 noirs. Aucun nouveau niveau n'est lance apres cette consigne. La candidate
 alpha.6 retire les hooks d'atlas du paquet normal ; compilation seulement,
 verification en jeu encore a effectuer apres nouvelle autorisation.
+
+Puis l'utilisateur a demande « commence » : reprise des comparaisons alpha.6
+avec les mods personnels, Grief 0-40 % et Heliopolis entier, LDM desactive,
+secousses desactivees. Quatre parcours termines sans mort ni crash ; aucun
+episode quasi noir supplementaire detecte avec Chlorium dans cette serie.
+L'alpha.6 a ete installee avec sauvegarde du paquet precedent. Les 60 FPS
+stables restent non atteints. Voir VALIDATION-ALPHA6-20261023.md.
