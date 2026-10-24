@@ -1,7 +1,7 @@
-#ifdef CHLORIUM_EXPERIMENTAL_AREA_MATH
 #include <Geode/Geode.hpp>
 #include <Geode/modify/PlayLayer.hpp>
 using namespace geode::prelude;
+extern "C" __declspec(dllexport) const char chloriumPauseGuardIdentity[] = "CHLORIUM_DETACHED_PAUSE_GUARD_V1";
 
 // Installed GD 2.2081 pauseGame dereferences getParent() when adding its pause
 // layer. During scene transitions PlayLayer::get() may already return a layer
@@ -17,4 +17,3 @@ class $modify(ChloriumTransitionPauseGuard, PlayLayer) {
         PlayLayer::pauseGame(p0);
     }
 };
-#endif

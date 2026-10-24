@@ -8,6 +8,7 @@
 #include <Geode/binding/PlayLayer.hpp>
 #include <float.h>
 #include <cstdlib>
+#include "OwnedMathBodyHash.hpp"
 using namespace geode::prelude;
 
 namespace chlorium::matrix {
@@ -87,8 +88,8 @@ bool nativeBodiesMatch() {
     // two GJBaseGameLayer hooks are excluded from their respective hashes.
     if (hash(cocos + 0x37f0, 0x468) != 0x7abc292bc9db4855ull ||
         hash(cocos + 0x6560, 0x33) != 0x5b70839e8e476f88ull ||
-        hash(game + 0x22c680 + 32, 0xf30 - 32) != 0x32a610f5884e6c0cull ||
-        hash(game + 0x229720 + 32, 0x662 - 32) != 0x6680410ab39143d4ull ||
+        chlorium::native::mathBodyHash(game + 0x22c680 + 32, 0xf30 - 32) != 0x32a610f5884e6c0cull ||
+        chlorium::native::mathBodyHash(game + 0x229720 + 32, 0x662 - 32) != 0x6680410ab39143d4ull ||
         hash(cocos + 0xe0564, 12) != 0x829282b09b619ee7ull) return false;
     const auto constant = [cocos](std::size_t rva) {
         std::uint32_t value; std::memcpy(&value, cocos + rva, 4); return value;

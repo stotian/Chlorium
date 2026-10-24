@@ -23,12 +23,43 @@ def summarize(rows):
     if not times:
         return {'samples': 0}
     slow = [v for v in times if v > 1000 / 60]
-    return dict(samples=len(times), fps=1000 / statistics.mean(times),
+    result = dict(samples=len(times), fps=1000 / statistics.mean(times),
                 p95_ms=percentile(times, .95), p99_ms=percentile(times, .99), worst_ms=max(times),
                 slow_frames=len(slow), slow_frame_percent=100 * len(slow) / len(times),
                 slow_time_percent=100 * sum(slow) / sum(times),
                 update_mean_ms=statistics.mean(float(row['update_ms']) for row in rows),
                 visibility_mean_ms=statistics.mean(float(row['visibility_ms']) for row in rows))
+    for stage in ('cpu', 'scene', 'commands', 'move', 'rotation', 'transform', 'area', 'follow', 'collisions', 'particles'):
+        key = stage + '_ms'
+        if all(key in row for row in rows):
+            result[stage + '_mean_ms'] = statistics.mean(float(row[key]) for row in rows)
+    return result
+
+
+def resource_summary(events, provenance):
+    samples = [e for e in events if e.get('event') == 'resources' and
+               provenance.get('target_from_percent', 0) <= e.get('percent', -1) <= provenance.get('target_to_percent', 100)]
+    memory = [e for e in samples if e.get('system_memory_valid')]
+    process = [e for e in samples if e.get('process_memory_valid')]
+    return dict(samples=len(samples),
+                available_physical_mib_min=min((e['available_physical_bytes'] / 1048576 for e in memory), default=None),
+                private_mib_max=max((e['private_bytes'] / 1048576 for e in process), default=None),
+                working_set_mib_max=max((e['working_set_bytes'] / 1048576 for e in process), default=None),
+                page_fault_count_delta=process[-1]['page_faults'] - process[0]['page_faults'] if len(process) > 1 else None)
+
+
+def work_summary(rows):
+    # Adjacent accepted frames only: never bridge a capture, pause, loss of
+    # focus, reset or missing frame. Game time is a workload proxy, not a
+    # direct counter of physics steps or proof of causation.
+    pairs = [(a, b) for a, b in zip(rows, rows[1:]) if int(b['frame']) == int(a['frame']) + 1
+             and float(b['game_time']) > float(a['game_time'])]
+    simulated_ms = sum(float(b['game_time']) - float(a['game_time']) for a, b in pairs) * 1000
+    result = dict(adjacent_samples=len(pairs), simulated_ms=simulated_ms)
+    for key in ('cpu_ms', 'update_ms', 'move_ms', 'rotation_ms', 'transform_ms', 'area_ms'):
+        if all(key in b for a, b in pairs):
+            result[key + '_per_sim_ms'] = sum(float(b[key]) for a, b in pairs) / simulated_ms if simulated_ms else None
+    return result
 
 
 def read(report, expected_loaded):
@@ -58,6 +89,10 @@ def compare(baseline, candidate, destination):
                 'mod_profile', 'mod_profile_sha256', 'profile_settings_sha256'):
         if ap.get(key) != bp.get(key):
             raise ValueError(f'Different comparison conditions: {key}')
+    for key in ('exact_transform_math_verification', 'math_verification_stride_requested',
+                'math_diagnostics_requested', 'area_math_trace_requested'):
+        if (key in ap) != (key in bp) or ap.get(key) != bp.get(key):
+            raise ValueError(f'Different or incomplete math diagnostic condition: {key}')
     coverage = []
     for events in (a, b):
         items = [e for e in events if e.get('event') == 'coverage']
@@ -77,6 +112,8 @@ def compare(baseline, candidate, destination):
                                       if left['samples'] and right['samples'] else None)
         comparisons.append(item)
     result = dict(level=ap['level'], sans=summarize(ar), avec=summarize(br),
+                  resources_sans=resource_summary(a, ap), resources_avec=resource_summary(b, bp),
+                  work_sans=work_summary(ar), work_avec=work_summary(br),
                   coverage_sans=coverage[0], coverage_avec=coverage[1],
                   production_sha256=bp['production_sha256'], measurement_sha256=ap['measurement_sha256'],
                   percent_bins=comparisons, limitation='One paired run; small differences require repeat runs.')
@@ -102,6 +139,15 @@ def compare(baseline, candidate, destination):
     for row in sorted((r for r in comparisons if r.get('avec_p95_ms') is not None), key=lambda r: r['avec_p95_ms'], reverse=True)[:12]:
         before = f"{row['sans_p95_ms']:.2f}" if row.get('sans_p95_ms') is not None else 'non mesuré'
         lines.append(f"| {row['percent']} % | {before} | {row['avec_p95_ms']:.2f} | {row['sans_samples']}/{row['avec_samples']} |")
+    lines += ['', '## Ressources pendant la section', '',
+              '| Mode | RAM disponible minimale (Mio) | Mémoire privée maximale (Mio) | Défauts de page (tous types) |',
+              '|---|---:|---:|---:|']
+    for mode in ('sans', 'avec'):
+        resources = result['resources_' + mode]
+        fields = [resources[key] for key in ('available_physical_mib_min', 'private_mib_max', 'page_fault_count_delta')]
+        values = [f'{value:.1f}' if value is not None else 'non mesuré' for value in fields]
+        lines.append('| ' + mode + ' | ' + ' | '.join(values) + ' |')
+    lines += ['', 'Les défauts de page incluent les défauts sans lecture disque ; ce compteur seul ne prouve pas des accès au fichier d’échange.']
     destination.with_suffix('.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
     print(json.dumps({k: result[k] for k in ('level', 'sans', 'avec')}, ensure_ascii=False))
 

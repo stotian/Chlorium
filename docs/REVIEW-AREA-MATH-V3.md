@@ -1,5 +1,8 @@
 # Relecture des sources Area V3 — 24 octobre 2026
 
+Cette note de relecture precede la reprise des tests. Les verifications
+effectivement realisees ensuite figurent dans MATH-PIPELINE-20261024.md.
+
 Statut : code prepare et relu, sans compilation, test CPU ou lancement du jeu,
 conformement a la consigne utilisateur. Cette note ne vaut pas validation.
 Le paquet installe et la prerelease alpha.6 ne sont pas remplaces.

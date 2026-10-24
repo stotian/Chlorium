@@ -40,6 +40,7 @@ try {
         !$binary.Contains('CHLORIUM_RUNTIME_AUDIT_BINARY_V1')) { throw 'Only the collision-preserving auto-level harness is authorized' }
     $measurementOnly = $binary.Contains('CHLORIUM_MEASUREMENT_ONLY_V1')
     $supportsTargetedMath = $binary.Contains('CHLORIUM_TARGETED_MATH_TELEMETRY_V1')
+    $supportsMathPipeline = $binary.Contains('CHLORIUM_MATH_PIPELINE_AUDIT_V1')
     if ($VisualWatch -and !$binary.Contains('CHLORIUM_VISUAL_READBACK_V2')) {
         throw 'New visual diagnostics require readback V2: validated reads, partial frames and complete coverage'
     }
@@ -62,6 +63,7 @@ if (Get-Process GeometryDash -ErrorAction SilentlyContinue) { throw 'A game sess
 if (Test-Path -LiteralPath $destination) { throw 'An audit package already exists in mods' }
 if ($measurementOnly -and (Test-Path -LiteralPath $productionDestination)) { throw 'The fixture already contains Chlorium; refusing to replace it' }
 $requireTargetedMath = $false
+$requireMathPipeline = $false
 if ($measurementOnly -and !$Native) {
     if (!$ProductionPackage) { $ProductionPackage = Join-Path $root 'dist\local.chlorium.geode' }
     Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -79,6 +81,10 @@ if ($measurementOnly -and !$Native) {
             if (!$binary.Contains('CHLORIUM_AREA_MATH_TARGETED_CALLS_V3')) { throw 'The Area math candidate predates targeted calls; rebuild it before a new audit' }
             if (!$supportsTargetedMath) { throw 'Rebuild the independent measurement module to report optional math counters and preserve CPU summaries' }
             $requireTargetedMath = $true
+        }
+        if ($binary.Contains('CHLORIUM_EXPERIMENTAL_MATH_PIPELINE_V1')) {
+            if (!$supportsMathPipeline) { throw 'Rebuild the measurement module to require both active math pipeline components' }
+            $requireMathPipeline = $true
         }
         $binary = $null
     } finally { $productionZip.Dispose() }
@@ -203,6 +209,7 @@ try {
         math_diagnostics_requested = $null -ne $env:CHLORIUM_MATH_DIAGNOSTICS
         area_math_trace_requested = $null -ne $env:CHLORIUM_AREA_MATH_TRACE
         targeted_math_v3_required = $requireTargetedMath
+        combined_math_pipeline_required = $requireMathPipeline
         target_from_percent = $FromPercent; target_to_percent = $ToPercent
         low_detail_requested = $false; disable_shake_requested = $true
         debug_overlays_disabled_requested = [bool]$WithUserMods
@@ -225,7 +232,7 @@ try {
     $env:CHLORIUM_TARGET_FROM = $FromPercent.ToString([Globalization.CultureInfo]::InvariantCulture)
     $env:CHLORIUM_TARGET_TO = $ToPercent.ToString([Globalization.CultureInfo]::InvariantCulture)
     $env:CHLORIUM_STREAM_MODE = $StreamMode
-    $env:CHLORIUM_REQUIRE_TARGETED_MATH_V3 = if ($requireTargetedMath) { '1' } else { $null }
+    $env:CHLORIUM_REQUIRE_TARGETED_MATH_V3 = if ($requireMathPipeline) { 'pipeline' } elseif ($requireTargetedMath) { '1' } else { $null }
     # This is the visible interactive game being tested, not a background
     # helper. Let GD manage its own normal focused rendering/timing.
     $testProcess = Start-Process -FilePath (Join-Path $game 'GeometryDash.exe') -WorkingDirectory $game -PassThru

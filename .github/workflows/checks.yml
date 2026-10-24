@@ -30,4 +30,18 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Python syntax
         run: python -m compileall -q tools
+      - name: Native call bridge ABI and protection
+        shell: cmd
+        run: |
+          cl /nologo /std:c++20 /O2 /fp:strict /EHsc /I src tests\native_call_thunk_checks.cpp /Fobuild-tests/call-thunk.obj /Febuild-tests/call-thunk.exe
+          if errorlevel 1 exit /b %errorlevel%
+          build-tests\call-thunk.exe
+          if errorlevel 1 exit /b %errorlevel%
+      - name: Heap cache release preserves live allocations
+        shell: cmd
+        run: |
+          cl /nologo /std:c++20 /O2 /EHsc /I src tests\native_heap_release_checks.cpp /Fobuild-tests/heap-release.obj /Febuild-tests/heap-release.exe /link psapi.lib
+          if errorlevel 1 exit /b %errorlevel%
+          build-tests\heap-release.exe
+          if errorlevel 1 exit /b %errorlevel%
 

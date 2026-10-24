@@ -18,9 +18,11 @@ Le manifeste Geode n'accepte qu'un suffixe de prerelease reconnu et numerique.
 | `v0.2.0-alpha.602` | Experience Area v2 | Reutilisation de divisions natives ; comparaisons numeriques passees |
 | `v0.2.0-alpha.603` | Experience matrices v3 | Appels actifs sur Orbit ; deux morts vers 89.88 %, cible 96-100 % non atteinte ; aucun appel eligible sur Grief 22-40 % |
 | `v0.2.0-alpha.604` | Experience affine v2 | Comparaisons numeriques passees ; aucun gain FPS convaincant sur trois essais Grief |
-| `v0.2.0-alpha.605` | Experience de decomposition Area | Prototype initial : crash de pause avant toute phase ; V3 ciblee en sources, non compilee/non testee |
+| `v0.2.0-alpha.605` | Experience de decomposition Area | V3b verifiee numeriquement dans Orbit ; pics pires dans une paire de performances |
+| `v0.2.0-alpha.606` | Pipeline mathematique combine | Deux composants actifs ; regression mesuree dans Orbit 83-88.5 % |
+| `v0.2.0-alpha.607` | Liberation de caches heap | Essai de chargement Orbit : 13.316 Mio rendus en 1.8037 ms ; gain FPS non etabli |
 
-Les numeros 601-605 identifient des experiences, pas une progression validee
+Les numeros 601-607 identifient des experiences, pas une progression validee
 de performances. Ne pas remplacer automatiquement la candidate normale par une experience.
 Un seul paquet partageant l'identifiant `local.chlorium` peut etre charge.
 L'alpha.6 a remplace l'installation locale apres ces essais ; l'alpha.5 est sauvegardee.

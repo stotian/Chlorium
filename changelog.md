@@ -1,3 +1,30 @@
+# 24 October 2026 - Measured math experiments and unused heap caches
+
+Resume authorized testing. Compile targeted math V3/V3b and normal mode;
+pass native-cache cases, 576 executable call-bridge ABI/result/FP checks and
+853560 matrix bit/state comparisons (FP status remains outside equivalence).
+Move owner checks after native bypass branches. Sampled Orbit verification
+finds no numeric mismatch. Preserve targeted CPU averages and record memory
+and simulated-time workload summaries in comparison reports.
+
+Add an isolated alpha.606 combining matrix and angle reuse. Normalize only
+live matching patches owned by this mod at six known calls when checking
+native fingerprints; require both active components in the audit module.
+The Orbit pair regresses from 12.45 to 8.68 FPS, with worse tails. Area-only
+V3b also has worse tails despite a better average in its own volatile pair.
+Neither prototype is installed. Heliopolis 74-80% has no full-black episode;
+one unmatched partial-left alert remains open. See MATH-PIPELINE-20261024.md.
+Include the detached-PlayLayer pause guard in future normal source builds,
+with a binary identity; the installed alpha.6 is not replaced and no new
+forced-crash reproduction is claimed.
+
+Add isolated alpha.607: one queued Windows HeapOptimizeResources operation
+after level construction. Keep active allocations and assets; no working-set
+purge. 2048 retained test blocks are unchanged. The Orbit startup probe
+releases 13.316 MiB of private memory in 1.8037 ms, without death/crash to 1%.
+This modest saving does not establish a frame-time gain. Installed alpha.6
+and its release remain unchanged. See HEAP-RELEASE-20261024.md.
+
 # 24 October 2026 - Targeted math revision 3 (source work, unvalidated)
 
 Replace the experimental global atan2f import interception with four verified

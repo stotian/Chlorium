@@ -45,6 +45,8 @@ extern "C" __declspec(dllexport) const char chloriumVisualProbeIdentity[] =
     "CHLORIUM_VISUAL_PROBES_V1";
 extern "C" __declspec(dllexport) const char chloriumTargetedMathTelemetryIdentity[] =
     "CHLORIUM_TARGETED_MATH_TELEMETRY_V1";
+extern "C" __declspec(dllexport) const char chloriumMathPipelineAuditIdentity[] =
+    "CHLORIUM_MATH_PIPELINE_AUDIT_V1";
 bool chloriumAuditUseNative() { return std::getenv("CHLORIUM_AUDIT_NATIVE") != nullptr; }
 #ifdef CHLORIUM_MEASUREMENT_ONLY
 extern "C" __declspec(dllexport) extern const char chloriumPassiveTransformTimingIdentity[] =
@@ -132,9 +134,12 @@ size_t gapFrames = 0;
 std::string gapReason;
 
 void line(const std::string& text) { if (report) { report << text << '\n'; report.flush(); } }
+bool matrixSnapshot(chlorium::matrix::Snapshot& result);
 bool recordMathPatchState(float percent) {
     using namespace chlorium::native;
-    static const bool required = std::getenv("CHLORIUM_REQUIRE_TARGETED_MATH_V3") != nullptr;
+    static const auto requirement = std::getenv("CHLORIUM_REQUIRE_TARGETED_MATH_V3");
+    static const bool required = requirement != nullptr;
+    static const bool requireMatrix = required && std::strcmp(requirement, "pipeline") == 0;
     static const auto read = [] {
         auto module = GetModuleHandleW(L"local.chlorium.dll");
         return module ? reinterpret_cast<ReadMathPatchStateV1>(
@@ -145,8 +150,10 @@ bool recordMathPatchState(float percent) {
     line(fmt::format("{{\"event\":\"native_math_patch_state\",\"percent\":{},\"revision\":{},\"requested_sites\":{},\"active_sites\":{},\"cache_enabled\":{},\"per_call_counters\":{},\"verification_stride\":{},\"ownership_lost\":{}}}",
         percent, state.revision, state.requestedSites, state.activeSites, state.cacheEnabled != 0,
         state.perCallCounters != 0, state.verificationStride, state.ownershipLost != 0));
-    return !required || (state.revision == 3 && state.requestedSites == 4 &&
-        state.activeSites == 4 && state.cacheEnabled && !state.ownershipLost);
+    if (required && (state.revision != 3 || state.requestedSites != 4 ||
+        state.activeSites != 4 || !state.cacheEnabled || state.ownershipLost)) return false;
+    chlorium::matrix::Snapshot matrix;
+    return !requireMatrix || (matrixSnapshot(matrix) && matrix.enabled && matrix.rotations.installedSites == 2);
 }
 void recordAffineStats(float percent) {
     using Stats = chlorium::affine::Stats;

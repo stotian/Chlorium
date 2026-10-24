@@ -11,6 +11,7 @@
 #include <intrin.h>
 #include <float.h>
 #include <cstdlib>
+#include "OwnedMathBodyHash.hpp"
 
 using namespace geode::prelude;
 
@@ -135,17 +136,11 @@ bool supportedExecutable() {
     // Exclude Geode's entry detour, but require the complete remaining native
     // transform body and its two exact atan2f call sites. Unknown game versions
     // keep their original import; no guessed structure layout is used here.
-    uint64_t hash = 14695981039346656037ull;
-    for (size_t i = 0x20; i < 0xf30; ++i) {
-        hash ^= bytes[0x22c680 + i]; hash *= 1099511628211ull;
-    }
+    const auto hash = mathBodyHash(bytes + 0x22c680 + 32, 0xf30 - 32);
     const unsigned char thunk[]{0xff, 0x25, 0x4a, 0x3b, 0x04, 0x00};
     std::size_t requiredCalls = 2;
 #ifdef CHLORIUM_EXPERIMENTAL_AREA_MATH
-    uint64_t areaHash = 14695981039346656037ull;
-    for (size_t i = 0x20; i < 0x662; ++i) {
-        areaHash ^= bytes[0x229720 + i]; areaHash *= 1099511628211ull;
-    }
+    const auto areaHash = mathBodyHash(bytes + 0x229720 + 32, 0x662 - 32);
     if (areaHash != 0x6680410ab39143d4ull) return false;
     requiredCalls = decompositionCalls.size();
 #endif
@@ -163,16 +158,13 @@ __declspec(noinline) float cachedNativeAtan(float y, float x) {
 #ifdef CHLORIUM_EXPERIMENTAL_AREA_MATH
     const auto native = nativeAtanRoute();
     if (!cacheInstalled() || !transformPhase) return native(y, x);
-    if (!nativeRouteMatches()) {
-        ownershipLost();
-        return native(y, x);
-    }
 #else
+    const auto native = originalAtan;
     // Historical normal build: filter the two callers of the shared import.
     if (!transformPhase) return originalAtan(y, x);
 #endif
 #ifdef CHLORIUM_EXPERIMENTAL_AREA_MATH
-    if (!isDecompositionCaller(caller - gameBase, areaPhase)) return originalAtan(y, x);
+    if (!isDecompositionCaller(caller - gameBase, areaPhase)) return native(y, x);
     auto& selectedStats = areaPhase ? areaMathStats : mathStats;
     auto& selectedPolicy = areaPhase ? areaReusePolicy : reusePolicy;
     auto& selectedCache = areaPhase ? areaAtanCache : atanCache;
@@ -186,7 +178,7 @@ __declspec(noinline) float cachedNativeAtan(float y, float x) {
     if constexpr (CollectStats) ++selectedStats.calls;
     if (selectedPolicy.disabled()) {
         if constexpr (CollectStats) ++selectedStats.bypassed;
-        return originalAtan(y, x);
+        return native(y, x);
     }
     if (fpControlPending) {
         unsigned fpControl = 0;
@@ -196,13 +188,19 @@ __declspec(noinline) float cachedNativeAtan(float y, float x) {
     }
     if (!fpControlSupported) {
         if constexpr (CollectStats) ++selectedStats.bypassed;
-        return originalAtan(y, x);
+        return native(y, x);
     }
     const unsigned csr = _mm_getcsr();
     if ((csr & 0x1f80u) != 0x1f80u) {
         if constexpr (CollectStats) ++selectedStats.bypassed;
-        return originalAtan(y, x);
+        return native(y, x);
     }
+#ifdef CHLORIUM_EXPERIMENTAL_AREA_MATH
+    // Owner checks protect elided native calls. A disabled/unsupported cache
+    // above already follows the current native thunk, so these checks would
+    // only add cost to a path that cannot reuse anything (24M calls in Orbit).
+    if (!nativeRouteMatches()) { ownershipLost(); return native(y, x); }
+#endif
     bool hit = false;
     const auto result = selectedCache.evaluate(y, x, csr & 0xffc0u, originalAtan, &hit);
     if constexpr (CollectStats) {
