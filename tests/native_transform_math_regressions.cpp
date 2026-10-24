@@ -1,4 +1,5 @@
 #include "renderer/NativeTransformMath.hpp"
+#include "renderer/NativeDecompositionSites.hpp"
 #include <bit>
 #include <cmath>
 #include <cstdint>
@@ -6,6 +7,11 @@
 #include <limits>
 
 int main() {
+    using chlorium::native::isDecompositionCaller;
+    static_assert(isDecompositionCaller(0x22d179, false) && isDecompositionCaller(0x22d1a1, false));
+    static_assert(isDecompositionCaller(0x229b2b, true) && isDecompositionCaller(0x229b51, true));
+    static_assert(!isDecompositionCaller(0x229b2b, false) && !isDecompositionCaller(0x22d179, true));
+    static_assert(!isDecompositionCaller(0x229b26, true) && !isDecompositionCaller(0x229b50, true));
     chlorium::native::TransformAtanCache<> cache;
     unsigned calls = 0;
     auto original = [&](float y, float x) { ++calls; return std::atan2(y, x); };

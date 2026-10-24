@@ -13,6 +13,10 @@ __declspec(dllexport) extern const char chloriumStreamingIdentity[] = "CHLORIUM_
 __declspec(dllexport) extern const char chloriumAffineIdentity[] = "CHLORIUM_EXPERIMENTAL_AFFINE_POINT_V1";
 __declspec(dllexport) extern const char chloriumAffineRevision[] = "CHLORIUM_AFFINE_POINT_REVISION_V2";
 #endif
+#ifdef CHLORIUM_EXPERIMENTAL_AREA_MATH
+__declspec(dllexport) extern const char chloriumAreaMathIdentity[] = "CHLORIUM_EXPERIMENTAL_AREA_MATH_V1";
+__declspec(dllexport) extern const char chloriumAreaMathRevision[] = "CHLORIUM_AREA_MATH_REVISION_V2";
+#endif
 #ifdef CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS
 __declspec(dllexport) extern const char chloriumAreaIdentity[] = "CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS_V1";
 #endif

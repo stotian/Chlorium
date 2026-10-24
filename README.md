@@ -69,6 +69,7 @@ les autres plateformes et binaires ne sont pas validés.
 | Arithmétique Area v2 | `v0.2.0-alpha.602` | Équivalence numérique vérifiée ; intérêt variable selon les données |
 | Matrices v3 | `v0.2.0-alpha.603` | Aucun appel éligible sur Grief 22–40 %, donc aucune accélération possible de ce passage |
 | Points affines v2 | `v0.2.0-alpha.604` | Expérience SSE2 exacte isolée ; aucun gain FPS convaincant dans le court essai Grief |
+| Décomposition Area | `v0.2.0-alpha.605` | Prototype isolé ; protection de transition préparée, validation arrêtée à la demande utilisateur |
 
 Les anciennes alpha.1 à alpha.4 sont des étapes du développement local,
 décrites dans [l'historique](changelog.md). Le dépôt ne leur attribue pas de
@@ -184,3 +185,5 @@ native de rotation. Le premier prototype avec compteurs ne montre pas de
 gain FPS convaincant ; il n'est pas installe. La revision sans compteurs n'etablit pas non plus de gain FPS ; elle reste
 une experience distincte, avec equivalence numerique testee sur 192 000 cas.
 L'alpha.6 normale installee n'est pas remplacee par un prototype.
+
+[Reprise des effets de zone : code, crash de transition et limites](docs/AREA-MATH-20261024.md). Aucun test apres la consigne d'arret ; alpha.6 installee conservee.

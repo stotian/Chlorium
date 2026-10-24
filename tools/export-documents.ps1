@@ -13,7 +13,7 @@ try {
     $dllStream = $zip.GetEntry('local.chlorium.dll').Open()
     try { $dllStream.CopyTo($dllReader); $binary = [Text.Encoding]::ASCII.GetString($dllReader.ToArray()) }
     finally { $dllStream.Dispose(); $dllReader.Dispose() }
-    if ($binary.Contains('CHLORIUM_EXPERIMENTAL_AFFINE_POINT_V1') -or $binary.Contains('CHLORIUM_EXPERIMENTAL_NATIVE_STREAMING_V1') -or $binary.Contains('CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS_V1') -or $binary.Contains('CHLORIUM_EXPERIMENTAL_MATRIX_REUSE_V1')) { throw 'Experiments must remain separate from the installed normal package' }
+    if ($binary.Contains('CHLORIUM_EXPERIMENTAL_AREA_MATH_V1') -or $binary.Contains('CHLORIUM_EXPERIMENTAL_AFFINE_POINT_V1') -or $binary.Contains('CHLORIUM_EXPERIMENTAL_NATIVE_STREAMING_V1') -or $binary.Contains('CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS_V1') -or $binary.Contains('CHLORIUM_EXPERIMENTAL_MATRIX_REUSE_V1')) { throw 'Experiments must remain separate from the installed normal package' }
     $sourceManifest = Get-Content -LiteralPath (Join-Path $root 'mod.json') -Raw | ConvertFrom-Json
     if ($manifest.version -ne $sourceManifest.version) { throw 'Source and package versions must match before export' }
     if (!$binary.Contains('CHLORIUM_NATIVE_GPU_TRANSFERS_ONLY_V1') -or $binary.Contains('CHLORIUM_NATIVE_ATLAS_CACHE_IMPLEMENTATION_V1')) {

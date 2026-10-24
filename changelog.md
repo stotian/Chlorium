@@ -1,3 +1,15 @@
+# 24 October 2026 - Isolated Area decomposition reuse (unvalidated)
+
+Extend exact atan2f reuse to two verified Area decomposition call sites, with
+separate phase caches/policies, combined failure shutdown and optional sampled
+verification. Keep native updates, rendering and collisions. Require an isolated
+alpha.605 package and a new revision marker after the source-only pause guard.
+The attempted runtime verification crashed before any cache phase, in a pause
+request from Click Assist on a detached PlayLayer. Add an experimental guard
+against the null parent dereference. This guard is not compiled or executed
+after the user's test-stop request. No FPS gain or visual fix is claimed;
+installed alpha.6 remains unchanged. See docs/AREA-MATH-20261024.md.
+
 # 24 October 2026 - Isolated exact affine point experiment
 
 Add an SSE2 two-component native affine helper at one verified rotation call

@@ -1,0 +1,149 @@
+{
+  "date": "2026-10-24",
+  "tests_stopped_on_user_request": true,
+  "matrix_probe": {
+    "coverage": {
+      "event": "coverage",
+      "completed": false,
+      "targeted": true,
+      "target_completed": false,
+      "target_from": 96,
+      "target_to": 100,
+      "deaths": 2,
+      "observed_frames": 0,
+      "excluded_frames": 0,
+      "gpu_pending": 0,
+      "renderer_inactive_frames": 0,
+      "cpu_profile": ""
+    },
+    "finished": {
+      "event": "finished",
+      "success": false,
+      "reason": "Two deaths with normal collisions; full level not reached"
+    },
+    "last_counters": {
+      "event": "matrix_reuse",
+      "available": true,
+      "elapsed": 249.204702,
+      "percent": 89.7721,
+      "enabled": true,
+      "installed_sites": 2,
+      "phases": 72008,
+      "eligible": 43662189,
+      "matrix_hits": 21245980,
+      "matrix_misses": 22416209,
+      "unsupported": 0,
+      "transform_phases": 56562,
+      "area_phases": 15446,
+      "rotation_hits": 18533324,
+      "rotation_misses": 17651656,
+      "zero_rotations": 240603,
+      "native_calls": 4963273,
+      "cooldown_windows": 80,
+      "recent_matrix_hits": 5783891,
+      "recent_rotation_hits": 819662,
+      "invalidations": 2,
+      "skipped_transform_phases": 2888,
+      "skipped_area_phases": 0
+    },
+    "deaths": [
+      {
+        "event": "death",
+        "attempt_deaths": 1,
+        "elapsed": 124.6016784,
+        "game_time": 127.52083597086383,
+        "percent": 89.884834,
+        "player_x": 58892.125,
+        "player_y": 3538.4155
+      },
+      {
+        "event": "death",
+        "attempt_deaths": 2,
+        "elapsed": 249.4815957,
+        "game_time": 252.32500713313507,
+        "percent": 89.88178,
+        "player_x": 58889.727,
+        "player_y": 3542.5483
+      }
+    ]
+  },
+  "native_reference": {
+    "coverage": {
+      "event": "coverage",
+      "completed": false,
+      "targeted": true,
+      "target_completed": true,
+      "target_from": 83,
+      "target_to": 89.5,
+      "deaths": 0,
+      "observed_frames": 123,
+      "excluded_frames": 2,
+      "gpu_pending": 0,
+      "renderer_inactive_frames": 0,
+      "cpu_profile": ""
+    },
+    "finished": {
+      "event": "finished",
+      "success": true,
+      "reason": "Requested percentage section reached; full level completion is not claimed"
+    },
+    "included_samples": 121,
+    "fps": 14.010551033351087,
+    "mean_ms": {
+      "cpu_ms": 71.29910082644628,
+      "update_ms": 65.10852644628099,
+      "visibility_ms": 6.6883917355371905,
+      "scene_ms": 71.19697768595042,
+      "rotation_ms": 8.357835537190082,
+      "move_ms": 11.812378512396695,
+      "transform_ms": 15.478519008264463,
+      "area_ms": 13.810727272727272
+    },
+    "conditions": {
+      "event": "test_quality",
+      "low_detail_requested": false,
+      "disable_shake_requested": true,
+      "low_detail_effective": false,
+      "skip_camera_shake_effective": true
+    }
+  },
+  "area_verification_probe": {
+    "complete": false,
+    "finished": null,
+    "last_progress": {
+      "event": "progress",
+      "elapsed": 1.0149423,
+      "game_time": 0,
+      "percent": 0,
+      "player_x": 0,
+      "player_y": 4459,
+      "gpu_active": false,
+      "cpu_optimizations": false
+    },
+    "last_math_stats": {
+      "event": "native_transform_math",
+      "elapsed": 1.0149423,
+      "percent": 0,
+      "installed": true,
+      "phases": 0,
+      "calls": 0,
+      "hits": 0,
+      "misses": 0,
+      "bypassed": 0,
+      "low_reuse_phases": 0,
+      "verified": 0,
+      "failures": 0
+    },
+    "exit_code": "0xc0000005",
+    "crash_rva": "GeometryDash+0x3ba38a",
+    "call_path": "ClickAssistPopup -> PlayLayer::pauseGame -> null parent",
+    "requested_verification_stride": 1024,
+    "area_trace_requested": true
+  },
+  "post_stop_source": {
+    "pause_guard_prepared": true,
+    "compiled": false,
+    "runtime_validated": false,
+    "normal_mod_replaced": false
+  }
+}

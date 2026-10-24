@@ -16,10 +16,11 @@ $streaming = $cacheText -match '(?m)^CHLORIUM_EXPERIMENTAL_NATIVE_STREAMING:BOOL
 $area = $cacheText -match '(?m)^CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS:BOOL=ON\r?$'
 $matrix = $cacheText -match '(?m)^CHLORIUM_EXPERIMENTAL_MATRIX_REUSE:BOOL=ON\r?$'
 $affine = $cacheText -match '(?m)^CHLORIUM_EXPERIMENTAL_AFFINE_POINT:BOOL=ON\r?$'
+$areaMath = $cacheText -match '(?m)^CHLORIUM_EXPERIMENTAL_AREA_MATH:BOOL=ON\r?$'
 $retiredAtlas = $cacheText -match '(?m)^CHLORIUM_NATIVE_ATLAS_CACHE:BOOL=ON\r?$'
 if (!$Audit -and $retiredAtlas) { throw 'The retired GPU atlas cache cannot be packaged as a normal mod' }
-if (($streaming -or $area -or $matrix -or $affine) -and !$Experimental) { throw 'Use -Experimental with a separate output directory for experimental builds' }
-if ($Experimental -and ((!$streaming -and !$area -and !$matrix -and !$affine) -or $Audit -or
+if (($streaming -or $area -or $matrix -or $affine -or $areaMath) -and !$Experimental) { throw 'Use -Experimental with a separate output directory for experimental builds' }
+if ($Experimental -and ((!$streaming -and !$area -and !$matrix -and !$affine -and !$areaMath) -or $Audit -or
     [IO.Path]::GetFullPath((Join-Path $root $OutputDirectory)) -eq (Join-Path $root 'dist'))) {
     throw 'An experimental package requires an isolated experimental build and output directory'
 }
@@ -40,10 +41,10 @@ $id = if ($Audit) { 'local.chlorium.audit' } else { $manifest.id }
 $manifest.id = $id
 if ($Audit) { $manifest.name = 'Chlorium runtime audit' }
 elseif ($Experimental) {
-    $manifest.name = if ($affine) { 'Chlorium affine point experiment' } elseif ($matrix) { 'Chlorium matrix reuse experiment' } elseif ($area) { 'Chlorium Area arithmetic experiment' } else { 'Chlorium streaming experiment' }
+    $manifest.name = if ($areaMath) { 'Chlorium Area decomposition experiment' } elseif ($affine) { 'Chlorium affine point experiment' } elseif ($matrix) { 'Chlorium matrix reuse experiment' } elseif ($area) { 'Chlorium Area arithmetic experiment' } else { 'Chlorium streaming experiment' }
     # Geode accepts a known prerelease tag and one numeric suffix only.
     # Keep the experiment name in `name`; extra suffixes prevent loading.
-    $manifest.version = if ($affine) { 'v0.2.0-alpha.604' } elseif ($matrix) { 'v0.2.0-alpha.603' } elseif ($area) { 'v0.2.0-alpha.602' } else { 'v0.2.0-alpha.601' }
+    $manifest.version = if ($areaMath) { 'v0.2.0-alpha.605' } elseif ($affine) { 'v0.2.0-alpha.604' } elseif ($matrix) { 'v0.2.0-alpha.603' } elseif ($area) { 'v0.2.0-alpha.602' } else { 'v0.2.0-alpha.601' }
 }
 else {
     # Native packages expose only controls used by their active implementation.
@@ -79,6 +80,8 @@ if ($matrix -ne $binaryText.Contains('CHLORIUM_EXPERIMENTAL_MATRIX_REUSE_V1')) {
 if ($matrix -and !$binaryText.Contains('CHLORIUM_MATRIX_PERSISTENT_REUSE_V3')) { throw 'Matrix revision mismatch: rebuild matrix.3 before packaging' }
 if ($affine -ne $binaryText.Contains('CHLORIUM_EXPERIMENTAL_AFFINE_POINT_V1')) { throw 'Affine point build identity mismatch: rebuild before packaging' }
 if ($affine -and !$binaryText.Contains('CHLORIUM_AFFINE_POINT_REVISION_V2')) { throw 'Affine point revision mismatch: rebuild before packaging' }
+if ($areaMath -ne $binaryText.Contains('CHLORIUM_EXPERIMENTAL_AREA_MATH_V1')) { throw 'Area math build identity mismatch: rebuild before packaging' }
+if ($areaMath -and !$binaryText.Contains('CHLORIUM_AREA_MATH_REVISION_V2')) { throw 'Area math revision mismatch: rebuild before packaging' }
 $binaryText = $null
 $package = Join-Path $out "$id.geode"
 if (Test-Path -LiteralPath $package) { Remove-Item -LiteralPath $package }
