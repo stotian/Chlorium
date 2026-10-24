@@ -1,3 +1,23 @@
+# 24 October 2026 - Targeted math revision 3 (source work, unvalidated)
+
+Replace the experimental global atan2f import interception with four verified
+direct-call redirects through an immutable nearby leaf thunk. Keep native
+fallback routing through the game's current import thunk, guard ownership
+before reactivation/rollback, and retain bridge storage if a call still refers
+to it. Make per-call telemetry optional through separate template instantiations;
+report its mode and actual patched sites through a versioned diagnostic API.
+Do not interpret disabled counters as an unused optimization.
+Invalidate a requested V3 run if its API or four active cache redirects are
+unavailable, including at finish; native bypass must not appear as a V3 gain.
+
+Fix the source-level cause of empty targeted CPU summaries: frame gating no
+longer clears session averages; aggregate only CSV-eligible frames before a
+possible harness exit. Record diagnostic options and reject mismatched pairs.
+Require fresh V3 candidate and measurement identities for future audits.
+No compilation, tests, game launches or new FPS/visual claims during this pass.
+The installed alpha.6 and its release remain unchanged.
+See docs/REVIEW-AREA-MATH-V3.md and docs/AREA-MATH-20261024.md.
+
 # 24 October 2026 - Isolated Area decomposition reuse (unvalidated)
 
 Extend exact atan2f reuse to two verified Area decomposition call sites, with

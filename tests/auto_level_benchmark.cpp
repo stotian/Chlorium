@@ -43,6 +43,8 @@ extern "C" __declspec(dllexport) const char chloriumVisualReadbackIdentity[] =
     "CHLORIUM_VISUAL_READBACK_V2";
 extern "C" __declspec(dllexport) const char chloriumVisualProbeIdentity[] =
     "CHLORIUM_VISUAL_PROBES_V1";
+extern "C" __declspec(dllexport) const char chloriumTargetedMathTelemetryIdentity[] =
+    "CHLORIUM_TARGETED_MATH_TELEMETRY_V1";
 bool chloriumAuditUseNative() { return std::getenv("CHLORIUM_AUDIT_NATIVE") != nullptr; }
 #ifdef CHLORIUM_MEASUREMENT_ONLY
 extern "C" __declspec(dllexport) extern const char chloriumPassiveTransformTimingIdentity[] =
@@ -130,6 +132,22 @@ size_t gapFrames = 0;
 std::string gapReason;
 
 void line(const std::string& text) { if (report) { report << text << '\n'; report.flush(); } }
+bool recordMathPatchState(float percent) {
+    using namespace chlorium::native;
+    static const bool required = std::getenv("CHLORIUM_REQUIRE_TARGETED_MATH_V3") != nullptr;
+    static const auto read = [] {
+        auto module = GetModuleHandleW(L"local.chlorium.dll");
+        return module ? reinterpret_cast<ReadMathPatchStateV1>(
+            GetProcAddress(module, "ChloriumReadMathPatchStateV1")) : nullptr;
+    }();
+    MathPatchStateV1 state;
+    if (!read || !read(&state, sizeof(state)) || state.version != 1) return !required;
+    line(fmt::format("{{\"event\":\"native_math_patch_state\",\"percent\":{},\"revision\":{},\"requested_sites\":{},\"active_sites\":{},\"cache_enabled\":{},\"per_call_counters\":{},\"verification_stride\":{},\"ownership_lost\":{}}}",
+        percent, state.revision, state.requestedSites, state.activeSites, state.cacheEnabled != 0,
+        state.perCallCounters != 0, state.verificationStride, state.ownershipLost != 0));
+    return !required || (state.revision == 3 && state.requestedSites == 4 &&
+        state.activeSites == 4 && state.cacheEnabled && !state.ownershipLost);
+}
 void recordAffineStats(float percent) {
     using Stats = chlorium::affine::Stats;
     using Read = bool (*)(Stats*, std::size_t);
@@ -280,7 +298,7 @@ void flushTelemetry(bool final) {
         batch += fmt::format("{},{:.6f},{:.6f},{},{:.6f}\n", sample.frame, sample.elapsed, sample.percent, sample.second, sample.ms);
     gpuTrace.write(batch.data(), batch.size()); gpuTrace.flush(); pendingGpu.clear();
 }
-void recordFrame(PlayLayer* play, Clock::time_point before, Clock::time_point after) {
+bool recordFrame(PlayLayer* play, Clock::time_point before, Clock::time_point after) {
     const double time = elapsed();
     const double work = std::chrono::duration<double,std::milli>(after - before).count();
     const double rawInterval = std::chrono::duration<double,std::milli>(after - lastEnd).count();
@@ -296,7 +314,7 @@ void recordFrame(PlayLayer* play, Clock::time_point before, Clock::time_point af
     }
     // Reach the section through normal gameplay so prior trigger state is
     // preserved. Outside it, skip telemetry, queries and synchronous captures.
-    if (!inTarget(play)) { previousFrameEligible = false; return; }
+    if (!inTarget(play)) { previousFrameEligible = false; return false; }
     if (targeted && !targetEntered) {
         targetEntered = true;
         line(fmt::format("{{\"event\":\"target_enter\",\"elapsed\":{},\"percent\":{},\"from\":{},\"to\":{}}}",
@@ -354,6 +372,7 @@ void recordFrame(PlayLayer* play, Clock::time_point before, Clock::time_point af
          BProfiler::currentMilliseconds("rotation"), BProfiler::currentMilliseconds("transform"),
          BProfiler::currentMilliseconds("area"), BProfiler::currentMilliseconds("follow"),
          BProfiler::currentMilliseconds("collisions"), BProfiler::currentMilliseconds("particles")}});
+    return included;
 }
 void finish(bool fullLevel, const char* reason) {
     if (finishing) return;
@@ -369,9 +388,11 @@ void finish(bool fullLevel, const char* reason) {
         fullLevel, targeted, targetCompleted, targetFrom, targetTo, deaths, observed, excluded, pending, rendererInactiveFrames, matjson::Value(BProfiler::toString()).dump()));
     const bool graphicsVerified = atlasUploadStats().verificationFailures == 0;
     const bool mathVerified = transformMathStats().failures == 0;
+    const bool targetedMathActive = recordMathPatchState(PlayLayer::get() ? PlayLayer::get()->getCurrentPercent() : -1.f);
     recordAffineStats(PlayLayer::get() ? PlayLayer::get()->getCurrentPercent() : -1.f);
     const bool visualVerified = frameWatch.coverageComplete();
-    stop((fullLevel || targetCompleted) && deaths == 0 && graphicsVerified && mathVerified && visualVerified,
+    stop((fullLevel || targetCompleted) && deaths == 0 && graphicsVerified && mathVerified && visualVerified && targetedMathActive,
+        !targetedMathActive ? "Required targeted math V3 is unavailable, inactive or changed owner; no candidate performance verdict is valid" :
         !visualVerified ? "Visual readback failed or coverage is incomplete; no black-screen verdict is valid" :
         !mathVerified ? "Exact native transform math verification failed" :
         graphicsVerified ? reason : "GPU byte verification failed; native upload repaired the frame");
@@ -715,6 +736,9 @@ void tick() {
                 time, play->getCurrentPercent()));
         }
         const auto math = transformMathStats();
+        if (!recordMathPatchState(play->getCurrentPercent())) {
+            finish(false, "Required targeted math V3 stopped being active"); return;
+        }
         recordAffineStats(play->getCurrentPercent());
         line(fmt::format("{{\"event\":\"native_transform_math\",\"elapsed\":{},\"percent\":{},\"installed\":{},\"phases\":{},\"calls\":{},\"hits\":{},\"misses\":{},\"bypassed\":{},\"low_reuse_phases\":{},\"verified\":{},\"failures\":{}}}",
             time, play->getCurrentPercent(), math.installed, math.phases, math.calls, math.hits,
@@ -865,15 +889,19 @@ class $modify(AutoBenchmarkDirector, CCDisplayLinkDirector) {
         mathVerifiedThisFrame = false;
         frameHadContext = false; issuedQuery = -1; ++frameSequence;
         foregroundBeforeFrame = foregroundIsGame();
-        if (running && targeted) BProfiler::setEnabled(inTarget(PlayLayer::get()));
+        if (running) BProfiler::beginFrameSampling(!targeted || inTarget(PlayLayer::get()));
         CCDisplayLinkDirector::mainLoop();
         const auto after = Clock::now();
         verifiedThisFrame = verifyUploads && atlasUploadStats().verifiedUploads != verifiedBefore;
         mathVerifiedThisFrame = verifyMath && transformMathStats().verified != mathBefore;
-        if (running && timingStarted && PlayLayer::get()) recordFrame(PlayLayer::get(), before, after);
+        bool includeProfileFrame = false;
+        if (running && timingStarted && PlayLayer::get())
+            includeProfileFrame = recordFrame(PlayLayer::get(), before, after);
+        // Accumulate before tick(), which may finish and terminate this process.
+        // Use exactly the same eligibility decision as the per-frame CSV.
+        if (running) BProfiler::frameEnd(includeProfileFrame);
         lastEnd = after;
         tick();
-        if (running) BProfiler::frameEnd();
         previousHarnessMs = std::chrono::duration<double,std::milli>(Clock::now() - after).count();
     }
 };

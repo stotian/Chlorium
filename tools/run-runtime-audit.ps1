@@ -39,6 +39,7 @@ try {
     if (!$binary.Contains('CHLORIUM_AUTO_COLLISIONS_ALLOWLIST_V4') -or
         !$binary.Contains('CHLORIUM_RUNTIME_AUDIT_BINARY_V1')) { throw 'Only the collision-preserving auto-level harness is authorized' }
     $measurementOnly = $binary.Contains('CHLORIUM_MEASUREMENT_ONLY_V1')
+    $supportsTargetedMath = $binary.Contains('CHLORIUM_TARGETED_MATH_TELEMETRY_V1')
     if ($VisualWatch -and !$binary.Contains('CHLORIUM_VISUAL_READBACK_V2')) {
         throw 'New visual diagnostics require readback V2: validated reads, partial frames and complete coverage'
     }
@@ -60,6 +61,7 @@ $output = Join-Path $reportRoot "auto-$Level-$mode.jsonl"
 if (Get-Process GeometryDash -ErrorAction SilentlyContinue) { throw 'A game session is already running; refusing to interfere' }
 if (Test-Path -LiteralPath $destination) { throw 'An audit package already exists in mods' }
 if ($measurementOnly -and (Test-Path -LiteralPath $productionDestination)) { throw 'The fixture already contains Chlorium; refusing to replace it' }
+$requireTargetedMath = $false
 if ($measurementOnly -and !$Native) {
     if (!$ProductionPackage) { $ProductionPackage = Join-Path $root 'dist\local.chlorium.geode' }
     Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -73,6 +75,11 @@ if ($measurementOnly -and !$Native) {
         try { $stream.CopyTo($memory); $binary = [Text.Encoding]::ASCII.GetString($memory.ToArray()) }
         finally { $stream.Dispose(); $memory.Dispose() }
         if (!$binary.Contains('CHLORIUM_NORMAL_BINARY_V1') -or $binary.Contains('CHLORIUM_RUNTIME_AUDIT_BINARY_V1')) { throw 'Refusing an experimental production package' }
+        if ($binary.Contains('CHLORIUM_EXPERIMENTAL_AREA_MATH_V1')) {
+            if (!$binary.Contains('CHLORIUM_AREA_MATH_TARGETED_CALLS_V3')) { throw 'The Area math candidate predates targeted calls; rebuild it before a new audit' }
+            if (!$supportsTargetedMath) { throw 'Rebuild the independent measurement module to report optional math counters and preserve CPU summaries' }
+            $requireTargetedMath = $true
+        }
         $binary = $null
     } finally { $productionZip.Dispose() }
 }
@@ -90,6 +97,7 @@ $previousTo = $env:CHLORIUM_TARGET_TO
 $previousStreamMode = $env:CHLORIUM_STREAM_MODE
 $previousExpectedMods = $env:CHLORIUM_EXPECTED_USER_MODS
 $previousProbes = $env:CHLORIUM_VISUAL_PROBES
+$previousTargetedMath = $env:CHLORIUM_REQUIRE_TARGETED_MATH_V3
 $testProcess = $null
 $resourceTrace = $null
 $stagedProduction = $false
@@ -190,7 +198,11 @@ try {
         started_utc = [DateTime]::UtcNow.ToString('o')
         visual_diagnostic = [bool]$VisualWatch
         atlas_storage_regression = [bool]$AtlasStorageRegression
-        exact_transform_math_verification = [bool]$env:CHLORIUM_TRANSFORM_VERIFY
+        exact_transform_math_verification = $null -ne $env:CHLORIUM_TRANSFORM_VERIFY
+        math_verification_stride_requested = $env:CHLORIUM_TRANSFORM_VERIFY_STRIDE
+        math_diagnostics_requested = $null -ne $env:CHLORIUM_MATH_DIAGNOSTICS
+        area_math_trace_requested = $null -ne $env:CHLORIUM_AREA_MATH_TRACE
+        targeted_math_v3_required = $requireTargetedMath
         target_from_percent = $FromPercent; target_to_percent = $ToPercent
         low_detail_requested = $false; disable_shake_requested = $true
         debug_overlays_disabled_requested = [bool]$WithUserMods
@@ -213,6 +225,7 @@ try {
     $env:CHLORIUM_TARGET_FROM = $FromPercent.ToString([Globalization.CultureInfo]::InvariantCulture)
     $env:CHLORIUM_TARGET_TO = $ToPercent.ToString([Globalization.CultureInfo]::InvariantCulture)
     $env:CHLORIUM_STREAM_MODE = $StreamMode
+    $env:CHLORIUM_REQUIRE_TARGETED_MATH_V3 = if ($requireTargetedMath) { '1' } else { $null }
     # This is the visible interactive game being tested, not a background
     # helper. Let GD manage its own normal focused rendering/timing.
     $testProcess = Start-Process -FilePath (Join-Path $game 'GeometryDash.exe') -WorkingDirectory $game -PassThru
@@ -254,6 +267,7 @@ try {
     $env:CHLORIUM_STREAM_MODE = $previousStreamMode
     $env:CHLORIUM_EXPECTED_USER_MODS = $previousExpectedMods
     $env:CHLORIUM_VISUAL_PROBES = $previousProbes
+    $env:CHLORIUM_REQUIRE_TARGETED_MATH_V3 = $previousTargetedMath
     if ($resourceTrace) { $resourceTrace.Dispose() }
     if ($testProcess -and !$testProcess.HasExited) { Stop-Process -Id $testProcess.Id -ErrorAction SilentlyContinue }
     if ($testProcess) { $testProcess.WaitForExit(5000) | Out-Null; $testProcess.Dispose() }

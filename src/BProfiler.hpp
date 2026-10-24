@@ -11,6 +11,8 @@ public:
     static Timer start(std::string_view name);
     static bool isEnabled();
     static void setEnabled(bool enabled);
+    // Gate one frame without deleting the accumulated session results.
+    static void beginFrameSampling(bool enabled);
 
     static bool isUsingAverages();
 
@@ -19,7 +21,7 @@ public:
     static std::string toString();
     static double currentMilliseconds(std::string_view name);
 
-    static void frameEnd();
+    static void frameEnd(bool includeFrame = true);
 
 private:
     static void end(std::string name, u64 time);

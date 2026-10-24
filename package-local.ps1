@@ -81,7 +81,7 @@ if ($matrix -and !$binaryText.Contains('CHLORIUM_MATRIX_PERSISTENT_REUSE_V3')) {
 if ($affine -ne $binaryText.Contains('CHLORIUM_EXPERIMENTAL_AFFINE_POINT_V1')) { throw 'Affine point build identity mismatch: rebuild before packaging' }
 if ($affine -and !$binaryText.Contains('CHLORIUM_AFFINE_POINT_REVISION_V2')) { throw 'Affine point revision mismatch: rebuild before packaging' }
 if ($areaMath -ne $binaryText.Contains('CHLORIUM_EXPERIMENTAL_AREA_MATH_V1')) { throw 'Area math build identity mismatch: rebuild before packaging' }
-if ($areaMath -and !$binaryText.Contains('CHLORIUM_AREA_MATH_REVISION_V2')) { throw 'Area math revision mismatch: rebuild before packaging' }
+if ($areaMath -and !$binaryText.Contains('CHLORIUM_AREA_MATH_TARGETED_CALLS_V3')) { throw 'Area math revision mismatch: rebuild before packaging' }
 $binaryText = $null
 $package = Join-Path $out "$id.geode"
 if (Test-Path -LiteralPath $package) { Remove-Item -LiteralPath $package }

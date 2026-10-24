@@ -28,6 +28,11 @@ void BProfiler::setEnabled(bool enabled) {
     divideNumber = 0;
 }
 
+void BProfiler::beginFrameSampling(bool enabled) {
+    profilingEnabled = enabled;
+    currentTimes.clear();
+}
+
 static inline void addToMap(std::map<std::string, u64>& map, std::string name, u64 num) {
     auto it = map.find(name);
     if (it != map.end())
@@ -57,8 +62,11 @@ std::string BProfiler::toString() {
     return ret;
 }
 
-void BProfiler::frameEnd() {
-    if (!profilingEnabled) return;
+void BProfiler::frameEnd(bool includeFrame) {
+    if (!profilingEnabled || !includeFrame) {
+        currentTimes.clear();
+        return;
+    }
     if (!shouldUseAverages) {
         savedTimes = currentTimes;
         divideNumber = 1;

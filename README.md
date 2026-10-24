@@ -69,7 +69,7 @@ les autres plateformes et binaires ne sont pas validés.
 | Arithmétique Area v2 | `v0.2.0-alpha.602` | Équivalence numérique vérifiée ; intérêt variable selon les données |
 | Matrices v3 | `v0.2.0-alpha.603` | Aucun appel éligible sur Grief 22–40 %, donc aucune accélération possible de ce passage |
 | Points affines v2 | `v0.2.0-alpha.604` | Expérience SSE2 exacte isolée ; aucun gain FPS convaincant dans le court essai Grief |
-| Décomposition Area | `v0.2.0-alpha.605` | Prototype isolé ; protection de transition préparée, validation arrêtée à la demande utilisateur |
+| Décomposition Area | `v0.2.0-alpha.605` | V3 en sources : quatre appels ciblés, diagnostic facultatif, protection de transition ; compilation et tests suspendus |
 
 Les anciennes alpha.1 à alpha.4 sont des étapes du développement local,
 décrites dans [l'historique](changelog.md). Le dépôt ne leur attribue pas de

@@ -142,7 +142,16 @@
   },
   "post_stop_source": {
     "pause_guard_prepared": true,
+    "targeted_math_revision": 3,
+    "targeted_call_sites": 4,
+    "shared_atan_import_modified": false,
+    "optional_per_call_telemetry": true,
+    "ownership_aware_reactivation_and_rollback": true,
+    "targeted_profiler_accumulation_change_prepared": true,
+    "diagnostic_provenance_guards_prepared": true,
+    "inactive_candidate_audit_rejection_prepared": true,
     "compiled": false,
+    "tests_run": false,
     "runtime_validated": false,
     "normal_mod_replaced": false
   }

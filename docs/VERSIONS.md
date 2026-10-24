@@ -16,10 +16,12 @@ Le manifeste Geode n'accepte qu'un suffixe de prerelease reconnu et numerique.
 | `v0.2.0-alpha.1` | Historique local | Premiere adaptation Chlorium |
 | `v0.2.0-alpha.601` | Experience streaming | Transferts GPU ; non combinee a la candidate normale |
 | `v0.2.0-alpha.602` | Experience Area v2 | Reutilisation de divisions natives ; comparaisons numeriques passees |
-| `v0.2.0-alpha.603` | Experience matrices v3 | Comparaisons numeriques passees ; aucun appel eligible sur Grief 22-40 % |
+| `v0.2.0-alpha.603` | Experience matrices v3 | Appels actifs sur Orbit ; deux morts vers 89.88 %, cible 96-100 % non atteinte ; aucun appel eligible sur Grief 22-40 % |
+| `v0.2.0-alpha.604` | Experience affine v2 | Comparaisons numeriques passees ; aucun gain FPS convaincant sur trois essais Grief |
+| `v0.2.0-alpha.605` | Experience de decomposition Area | Prototype initial : crash de pause avant toute phase ; V3 ciblee en sources, non compilee/non testee |
 
-Les numeros 601-603 identifient des experiences, pas une progression validee
-de performances. Ne pas remplacer automatiquement l'alpha.5 par une experience.
+Les numeros 601-605 identifient des experiences, pas une progression validee
+de performances. Ne pas remplacer automatiquement la candidate normale par une experience.
 Un seul paquet partageant l'identifiant `local.chlorium` peut etre charge.
 L'alpha.6 a remplace l'installation locale apres ces essais ; l'alpha.5 est sauvegardee.
 

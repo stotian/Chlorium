@@ -167,6 +167,13 @@ def compare(native,candidate,destination):
         av,bv=a['provenance'].get(key),b['provenance'].get(key)
         if av is None or av!=bv:
             raise ValueError(f'Missing or different comparison condition: {key}')
+    # Old V2 traces predate these fields. Preserve their comparability only
+    # when both sides lack a field; never silently equate missing and present.
+    for key in ('exact_transform_math_verification','math_verification_stride_requested',
+                'math_diagnostics_requested','area_math_trace_requested'):
+        ap,bp=a['provenance'],b['provenance']
+        if (key in ap)!=(key in bp) or ap.get(key)!=bp.get(key):
+            raise ValueError(f'Different or incomplete math diagnostic condition: {key}')
     if a['mods']!=b['mods'] or a['watch']!=b['watch']:
         raise ValueError('Different loaded mod state or visual settings')
     if a['provenance'].get('visual_probe_percents',[])!=b['provenance'].get('visual_probe_percents',[]):
