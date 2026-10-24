@@ -1,0 +1,3084 @@
+{
+  "complete_runs": {
+    "88952972": {
+      "level": 88952972,
+      "conditions_verified": true,
+      "production_sha256": "7939B0339E33C2F0F8B8E2A9FEDA9B1793A5C36D6F2558BDC4BC4C2877533AEA",
+      "measurement_sha256": "A25D4A886DEF30B18CAEC0F0C685056D051ACC4C53502A4F7CDCA28026DE4BD2",
+      "sample_counts": {
+        "sans": 5965,
+        "avec": 5985
+      },
+      "excluded_visual_frames": {
+        "sans": 0,
+        "avec": 0
+      },
+      "coverage": {
+        "sans": {
+          "event": "coverage",
+          "completed": false,
+          "targeted": true,
+          "target_completed": true,
+          "target_from": 0,
+          "target_to": 40,
+          "deaths": 0,
+          "observed_frames": 5965,
+          "excluded_frames": 5965,
+          "gpu_pending": 0,
+          "renderer_inactive_frames": 0,
+          "cpu_profile": ""
+        },
+        "avec": {
+          "event": "coverage",
+          "completed": false,
+          "targeted": true,
+          "target_completed": true,
+          "target_from": 0,
+          "target_to": 40,
+          "deaths": 0,
+          "observed_frames": 5985,
+          "excluded_frames": 5985,
+          "gpu_pending": 0,
+          "renderer_inactive_frames": 0,
+          "cpu_profile": ""
+        }
+      },
+      "matching_tolerance_percent": 0.03,
+      "classes": {
+        "full": {
+          "sans": [
+            {
+              "start_percent": 8.5354,
+              "start_elapsed": 16.2307,
+              "start_game_time": 16.7583,
+              "start_frame": 3001,
+              "frames": 9,
+              "end_percent": 8.60546,
+              "end_elapsed": 16.3426,
+              "end_frame": 3009,
+              "duration_s": 0.12040000000000006,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 9.36867,
+              "start_elapsed": 17.6146,
+              "start_game_time": 18.1458,
+              "start_frame": 3146,
+              "frames": 9,
+              "end_percent": 9.42372,
+              "end_elapsed": 17.7045,
+              "end_frame": 3154,
+              "duration_s": 0.10040000000000049,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 9.70648,
+              "start_elapsed": 18.175,
+              "start_game_time": 18.7083,
+              "start_frame": 3210,
+              "frames": 6,
+              "end_percent": 9.73901,
+              "end_elapsed": 18.2349,
+              "end_frame": 3215,
+              "duration_s": 0.07229999999999848,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 9.85161,
+              "start_elapsed": 18.4163,
+              "start_game_time": 18.95,
+              "start_frame": 3237,
+              "frames": 5,
+              "end_percent": 9.87163,
+              "end_elapsed": 18.4504,
+              "end_frame": 3241,
+              "duration_s": 0.05999999999999872,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 9.92418,
+              "start_elapsed": 18.5369,
+              "start_game_time": 19.0708,
+              "start_frame": 3250,
+              "frames": 5,
+              "end_percent": 9.9417,
+              "end_elapsed": 18.567,
+              "end_frame": 3254,
+              "duration_s": 0.05489999999999995,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 10.1394,
+              "start_elapsed": 18.8941,
+              "start_game_time": 19.4292,
+              "start_frame": 3290,
+              "frames": 4,
+              "end_percent": 10.1544,
+              "end_elapsed": 18.919,
+              "end_frame": 3293,
+              "duration_s": 0.03469999999999729,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 11.916,
+              "start_elapsed": 21.8572,
+              "start_game_time": 22.3875,
+              "start_frame": 3627,
+              "frames": 5,
+              "end_percent": 11.9511,
+              "end_elapsed": 21.9189,
+              "end_frame": 3631,
+              "duration_s": 0.08249999999999957,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.1087,
+              "start_elapsed": 22.1783,
+              "start_game_time": 22.7083,
+              "start_frame": 3654,
+              "frames": 4,
+              "end_percent": 12.1362,
+              "end_elapsed": 22.2262,
+              "end_frame": 3657,
+              "duration_s": 0.060900000000000176,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.2688,
+              "start_elapsed": 22.4421,
+              "start_game_time": 22.975,
+              "start_frame": 3680,
+              "frames": 4,
+              "end_percent": 12.2839,
+              "end_elapsed": 22.4703,
+              "end_frame": 3683,
+              "duration_s": 0.060600000000000875,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.384,
+              "start_elapsed": 22.6348,
+              "start_game_time": 23.1667,
+              "start_frame": 3697,
+              "frames": 4,
+              "end_percent": 12.4015,
+              "end_elapsed": 22.6645,
+              "end_frame": 3700,
+              "duration_s": 0.058900000000001285,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.5316,
+              "start_elapsed": 22.8848,
+              "start_game_time": 23.4125,
+              "start_frame": 3718,
+              "frames": 5,
+              "end_percent": 12.5691,
+              "end_elapsed": 22.9483,
+              "end_frame": 3722,
+              "duration_s": 0.07880000000000109,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.6292,
+              "start_elapsed": 23.047,
+              "start_game_time": 23.575,
+              "start_frame": 3730,
+              "frames": 5,
+              "end_percent": 12.6642,
+              "end_elapsed": 23.104,
+              "end_frame": 3734,
+              "duration_s": 0.07219999999999871,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.7768,
+              "start_elapsed": 23.293,
+              "start_game_time": 23.8208,
+              "start_frame": 3749,
+              "frames": 16,
+              "end_percent": 12.922,
+              "end_elapsed": 23.5307,
+              "end_frame": 3764,
+              "duration_s": 0.2576999999999998,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.9895,
+              "start_elapsed": 23.6409,
+              "start_game_time": 24.175,
+              "start_frame": 3770,
+              "frames": 7,
+              "end_percent": 13.0521,
+              "end_elapsed": 23.7444,
+              "end_frame": 3776,
+              "duration_s": 0.12180000000000035,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 13.6351,
+              "start_elapsed": 24.7184,
+              "start_game_time": 25.25,
+              "start_frame": 3835,
+              "frames": 18,
+              "end_percent": 13.7903,
+              "end_elapsed": 24.9745,
+              "end_frame": 3852,
+              "duration_s": 0.2674000000000021,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 30.4056,
+              "start_elapsed": 52.6493,
+              "start_game_time": 53.175,
+              "start_frame": 6288,
+              "frames": 1,
+              "end_percent": 30.4056,
+              "end_elapsed": 52.6493,
+              "end_frame": 6288,
+              "duration_s": 0.017300000000005866,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 30.4332,
+              "start_elapsed": 52.695,
+              "start_game_time": 53.2208,
+              "start_frame": 6291,
+              "frames": 5,
+              "end_percent": 30.4857,
+              "end_elapsed": 52.7892,
+              "end_frame": 6295,
+              "duration_s": 0.11560000000000059,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 30.5132,
+              "start_elapsed": 52.8319,
+              "start_game_time": 53.3542,
+              "start_frame": 6297,
+              "frames": 1,
+              "end_percent": 30.5132,
+              "end_elapsed": 52.8319,
+              "end_frame": 6297,
+              "duration_s": 0.019300000000001205,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "avec": [
+            {
+              "start_percent": 8.53039,
+              "start_elapsed": 16.2198,
+              "start_game_time": 16.6042,
+              "start_frame": 2702,
+              "frames": 11,
+              "end_percent": 8.60546,
+              "end_elapsed": 16.3457,
+              "end_frame": 2712,
+              "duration_s": 0.13480000000000203,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 9.36867,
+              "start_elapsed": 17.6169,
+              "start_game_time": 18.0,
+              "start_frame": 2843,
+              "frames": 8,
+              "end_percent": 9.42121,
+              "end_elapsed": 17.7057,
+              "end_frame": 2850,
+              "duration_s": 0.09999999999999787,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 9.71148,
+              "start_elapsed": 18.1875,
+              "start_game_time": 18.5708,
+              "start_frame": 2905,
+              "frames": 4,
+              "end_percent": 9.73651,
+              "end_elapsed": 18.2317,
+              "end_frame": 2908,
+              "duration_s": 0.057099999999998374,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 9.85161,
+              "start_elapsed": 18.4192,
+              "start_game_time": 18.8042,
+              "start_frame": 2931,
+              "frames": 5,
+              "end_percent": 9.87163,
+              "end_elapsed": 18.4534,
+              "end_frame": 2935,
+              "duration_s": 0.061599999999998545,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 9.92168,
+              "start_elapsed": 18.5356,
+              "start_game_time": 18.9208,
+              "start_frame": 2943,
+              "frames": 5,
+              "end_percent": 9.9492,
+              "end_elapsed": 18.5848,
+              "end_frame": 2947,
+              "duration_s": 0.06010000000000204,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 10.1394,
+              "start_elapsed": 18.8997,
+              "start_game_time": 19.2833,
+              "start_frame": 2983,
+              "frames": 3,
+              "end_percent": 10.1519,
+              "end_elapsed": 18.9181,
+              "end_frame": 2985,
+              "duration_s": 0.028100000000002012,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 11.916,
+              "start_elapsed": 21.8592,
+              "start_game_time": 22.2417,
+              "start_frame": 3320,
+              "frames": 6,
+              "end_percent": 11.9536,
+              "end_elapsed": 21.9267,
+              "end_frame": 3325,
+              "duration_s": 0.08530000000000015,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.1087,
+              "start_elapsed": 22.1807,
+              "start_game_time": 22.5625,
+              "start_frame": 3351,
+              "frames": 5,
+              "end_percent": 12.1387,
+              "end_elapsed": 22.2352,
+              "end_frame": 3355,
+              "duration_s": 0.07169999999999987,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.2663,
+              "start_elapsed": 22.4433,
+              "start_game_time": 22.825,
+              "start_frame": 3377,
+              "frames": 5,
+              "end_percent": 12.2939,
+              "end_elapsed": 22.4865,
+              "end_frame": 3381,
+              "duration_s": 0.07049999999999912,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.3815,
+              "start_elapsed": 22.6304,
+              "start_game_time": 23.0167,
+              "start_frame": 3395,
+              "frames": 5,
+              "end_percent": 12.404,
+              "end_elapsed": 22.6696,
+              "end_frame": 3399,
+              "duration_s": 0.0625,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.5316,
+              "start_elapsed": 22.8842,
+              "start_game_time": 23.2667,
+              "start_frame": 3420,
+              "frames": 6,
+              "end_percent": 12.5666,
+              "end_elapsed": 22.9443,
+              "end_frame": 3425,
+              "duration_s": 0.06810000000000116,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.6317,
+              "start_elapsed": 23.0506,
+              "start_game_time": 23.4333,
+              "start_frame": 3435,
+              "frames": 4,
+              "end_percent": 12.6617,
+              "end_elapsed": 23.1033,
+              "end_frame": 3438,
+              "duration_s": 0.06610000000000227,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.7793,
+              "start_elapsed": 23.2997,
+              "start_game_time": 23.6792,
+              "start_frame": 3456,
+              "frames": 16,
+              "end_percent": 12.9245,
+              "end_elapsed": 23.5418,
+              "end_frame": 3471,
+              "duration_s": 0.2627999999999986,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.9895,
+              "start_elapsed": 23.6452,
+              "start_game_time": 24.0292,
+              "start_frame": 3477,
+              "frames": 7,
+              "end_percent": 13.0546,
+              "end_elapsed": 23.7529,
+              "end_frame": 3483,
+              "duration_s": 0.12780000000000058,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 13.6376,
+              "start_elapsed": 24.7291,
+              "start_game_time": 25.1083,
+              "start_frame": 3541,
+              "frames": 18,
+              "end_percent": 13.7928,
+              "end_elapsed": 24.9832,
+              "end_frame": 3558,
+              "duration_s": 0.2638999999999996,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 30.3981,
+              "start_elapsed": 52.6356,
+              "start_game_time": 53.0167,
+              "start_frame": 6116,
+              "frames": 2,
+              "end_percent": 30.4056,
+              "end_elapsed": 52.648,
+              "end_frame": 6117,
+              "duration_s": 0.02740000000000009,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 30.4206,
+              "start_elapsed": 52.6765,
+              "start_game_time": 53.0542,
+              "start_frame": 6119,
+              "frames": 3,
+              "end_percent": 30.4432,
+              "end_elapsed": 52.7163,
+              "end_frame": 6121,
+              "duration_s": 0.05590000000000117,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 30.4707,
+              "start_elapsed": 52.7634,
+              "start_game_time": 53.1375,
+              "start_frame": 6123,
+              "frames": 5,
+              "end_percent": 30.5132,
+              "end_elapsed": 52.8309,
+              "end_frame": 6127,
+              "duration_s": 0.08250000000000313,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "matches": [
+            {
+              "avec": {
+                "start_percent": 8.53039,
+                "start_elapsed": 16.2198,
+                "start_game_time": 16.6042,
+                "start_frame": 2702,
+                "frames": 11,
+                "end_percent": 8.60546,
+                "end_elapsed": 16.3457,
+                "end_frame": 2712,
+                "duration_s": 0.13480000000000203,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 8.5354,
+                "start_elapsed": 16.2307,
+                "start_game_time": 16.7583,
+                "start_frame": 3001,
+                "frames": 9,
+                "end_percent": 8.60546,
+                "end_elapsed": 16.3426,
+                "end_frame": 3009,
+                "duration_s": 0.12040000000000006,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 0,
+              "native_reference_reused": false,
+              "start_delta_percent": -0.005009999999998627,
+              "end_delta_percent": 0.0,
+              "duration_delta_s": 0.014400000000001967
+            },
+            {
+              "avec": {
+                "start_percent": 9.36867,
+                "start_elapsed": 17.6169,
+                "start_game_time": 18.0,
+                "start_frame": 2843,
+                "frames": 8,
+                "end_percent": 9.42121,
+                "end_elapsed": 17.7057,
+                "end_frame": 2850,
+                "duration_s": 0.09999999999999787,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 9.36867,
+                "start_elapsed": 17.6146,
+                "start_game_time": 18.1458,
+                "start_frame": 3146,
+                "frames": 9,
+                "end_percent": 9.42372,
+                "end_elapsed": 17.7045,
+                "end_frame": 3154,
+                "duration_s": 0.10040000000000049,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 1,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.0,
+              "end_delta_percent": -0.002509999999999124,
+              "duration_delta_s": -0.0004000000000026205
+            },
+            {
+              "avec": {
+                "start_percent": 9.71148,
+                "start_elapsed": 18.1875,
+                "start_game_time": 18.5708,
+                "start_frame": 2905,
+                "frames": 4,
+                "end_percent": 9.73651,
+                "end_elapsed": 18.2317,
+                "end_frame": 2908,
+                "duration_s": 0.057099999999998374,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 9.70648,
+                "start_elapsed": 18.175,
+                "start_game_time": 18.7083,
+                "start_frame": 3210,
+                "frames": 6,
+                "end_percent": 9.73901,
+                "end_elapsed": 18.2349,
+                "end_frame": 3215,
+                "duration_s": 0.07229999999999848,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 2,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.004999999999999005,
+              "end_delta_percent": -0.0024999999999995026,
+              "duration_delta_s": -0.015200000000000102
+            },
+            {
+              "avec": {
+                "start_percent": 9.85161,
+                "start_elapsed": 18.4192,
+                "start_game_time": 18.8042,
+                "start_frame": 2931,
+                "frames": 5,
+                "end_percent": 9.87163,
+                "end_elapsed": 18.4534,
+                "end_frame": 2935,
+                "duration_s": 0.061599999999998545,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 9.85161,
+                "start_elapsed": 18.4163,
+                "start_game_time": 18.95,
+                "start_frame": 3237,
+                "frames": 5,
+                "end_percent": 9.87163,
+                "end_elapsed": 18.4504,
+                "end_frame": 3241,
+                "duration_s": 0.05999999999999872,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 3,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.0,
+              "end_delta_percent": 0.0,
+              "duration_delta_s": 0.0015999999999998238
+            },
+            {
+              "avec": {
+                "start_percent": 9.92168,
+                "start_elapsed": 18.5356,
+                "start_game_time": 18.9208,
+                "start_frame": 2943,
+                "frames": 5,
+                "end_percent": 9.9492,
+                "end_elapsed": 18.5848,
+                "end_frame": 2947,
+                "duration_s": 0.06010000000000204,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 9.92418,
+                "start_elapsed": 18.5369,
+                "start_game_time": 19.0708,
+                "start_frame": 3250,
+                "frames": 5,
+                "end_percent": 9.9417,
+                "end_elapsed": 18.567,
+                "end_frame": 3254,
+                "duration_s": 0.05489999999999995,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 4,
+              "native_reference_reused": false,
+              "start_delta_percent": -0.0024999999999995026,
+              "end_delta_percent": 0.007499999999998508,
+              "duration_delta_s": 0.005200000000002092
+            },
+            {
+              "avec": {
+                "start_percent": 10.1394,
+                "start_elapsed": 18.8997,
+                "start_game_time": 19.2833,
+                "start_frame": 2983,
+                "frames": 3,
+                "end_percent": 10.1519,
+                "end_elapsed": 18.9181,
+                "end_frame": 2985,
+                "duration_s": 0.028100000000002012,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 10.1394,
+                "start_elapsed": 18.8941,
+                "start_game_time": 19.4292,
+                "start_frame": 3290,
+                "frames": 4,
+                "end_percent": 10.1544,
+                "end_elapsed": 18.919,
+                "end_frame": 3293,
+                "duration_s": 0.03469999999999729,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 5,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.0,
+              "end_delta_percent": -0.002500000000001279,
+              "duration_delta_s": -0.006599999999995276
+            },
+            {
+              "avec": {
+                "start_percent": 11.916,
+                "start_elapsed": 21.8592,
+                "start_game_time": 22.2417,
+                "start_frame": 3320,
+                "frames": 6,
+                "end_percent": 11.9536,
+                "end_elapsed": 21.9267,
+                "end_frame": 3325,
+                "duration_s": 0.08530000000000015,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 11.916,
+                "start_elapsed": 21.8572,
+                "start_game_time": 22.3875,
+                "start_frame": 3627,
+                "frames": 5,
+                "end_percent": 11.9511,
+                "end_elapsed": 21.9189,
+                "end_frame": 3631,
+                "duration_s": 0.08249999999999957,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 6,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.0,
+              "end_delta_percent": 0.0024999999999995026,
+              "duration_delta_s": 0.00280000000000058
+            },
+            {
+              "avec": {
+                "start_percent": 12.1087,
+                "start_elapsed": 22.1807,
+                "start_game_time": 22.5625,
+                "start_frame": 3351,
+                "frames": 5,
+                "end_percent": 12.1387,
+                "end_elapsed": 22.2352,
+                "end_frame": 3355,
+                "duration_s": 0.07169999999999987,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 12.1087,
+                "start_elapsed": 22.1783,
+                "start_game_time": 22.7083,
+                "start_frame": 3654,
+                "frames": 4,
+                "end_percent": 12.1362,
+                "end_elapsed": 22.2262,
+                "end_frame": 3657,
+                "duration_s": 0.060900000000000176,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 7,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.0,
+              "end_delta_percent": 0.0024999999999995026,
+              "duration_delta_s": 0.010799999999999699
+            },
+            {
+              "avec": {
+                "start_percent": 12.2663,
+                "start_elapsed": 22.4433,
+                "start_game_time": 22.825,
+                "start_frame": 3377,
+                "frames": 5,
+                "end_percent": 12.2939,
+                "end_elapsed": 22.4865,
+                "end_frame": 3381,
+                "duration_s": 0.07049999999999912,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 12.2688,
+                "start_elapsed": 22.4421,
+                "start_game_time": 22.975,
+                "start_frame": 3680,
+                "frames": 4,
+                "end_percent": 12.2839,
+                "end_elapsed": 22.4703,
+                "end_frame": 3683,
+                "duration_s": 0.060600000000000875,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 8,
+              "native_reference_reused": false,
+              "start_delta_percent": -0.002500000000001279,
+              "end_delta_percent": 0.010000000000001563,
+              "duration_delta_s": 0.009899999999998244
+            },
+            {
+              "avec": {
+                "start_percent": 12.3815,
+                "start_elapsed": 22.6304,
+                "start_game_time": 23.0167,
+                "start_frame": 3395,
+                "frames": 5,
+                "end_percent": 12.404,
+                "end_elapsed": 22.6696,
+                "end_frame": 3399,
+                "duration_s": 0.0625,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 12.384,
+                "start_elapsed": 22.6348,
+                "start_game_time": 23.1667,
+                "start_frame": 3697,
+                "frames": 4,
+                "end_percent": 12.4015,
+                "end_elapsed": 22.6645,
+                "end_frame": 3700,
+                "duration_s": 0.058900000000001285,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 9,
+              "native_reference_reused": false,
+              "start_delta_percent": -0.0024999999999995026,
+              "end_delta_percent": 0.0024999999999995026,
+              "duration_delta_s": 0.0035999999999987153
+            },
+            {
+              "avec": {
+                "start_percent": 12.5316,
+                "start_elapsed": 22.8842,
+                "start_game_time": 23.2667,
+                "start_frame": 3420,
+                "frames": 6,
+                "end_percent": 12.5666,
+                "end_elapsed": 22.9443,
+                "end_frame": 3425,
+                "duration_s": 0.06810000000000116,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 12.5316,
+                "start_elapsed": 22.8848,
+                "start_game_time": 23.4125,
+                "start_frame": 3718,
+                "frames": 5,
+                "end_percent": 12.5691,
+                "end_elapsed": 22.9483,
+                "end_frame": 3722,
+                "duration_s": 0.07880000000000109,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 10,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.0,
+              "end_delta_percent": -0.002500000000001279,
+              "duration_delta_s": -0.010699999999999932
+            },
+            {
+              "avec": {
+                "start_percent": 12.6317,
+                "start_elapsed": 23.0506,
+                "start_game_time": 23.4333,
+                "start_frame": 3435,
+                "frames": 4,
+                "end_percent": 12.6617,
+                "end_elapsed": 23.1033,
+                "end_frame": 3438,
+                "duration_s": 0.06610000000000227,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 12.6292,
+                "start_elapsed": 23.047,
+                "start_game_time": 23.575,
+                "start_frame": 3730,
+                "frames": 5,
+                "end_percent": 12.6642,
+                "end_elapsed": 23.104,
+                "end_frame": 3734,
+                "duration_s": 0.07219999999999871,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 11,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.0024999999999995026,
+              "end_delta_percent": -0.0024999999999995026,
+              "duration_delta_s": -0.006099999999996442
+            },
+            {
+              "avec": {
+                "start_percent": 12.7793,
+                "start_elapsed": 23.2997,
+                "start_game_time": 23.6792,
+                "start_frame": 3456,
+                "frames": 16,
+                "end_percent": 12.9245,
+                "end_elapsed": 23.5418,
+                "end_frame": 3471,
+                "duration_s": 0.2627999999999986,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 12.7768,
+                "start_elapsed": 23.293,
+                "start_game_time": 23.8208,
+                "start_frame": 3749,
+                "frames": 16,
+                "end_percent": 12.922,
+                "end_elapsed": 23.5307,
+                "end_frame": 3764,
+                "duration_s": 0.2576999999999998,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 12,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.0024999999999995026,
+              "end_delta_percent": 0.0024999999999995026,
+              "duration_delta_s": 0.005099999999998772
+            },
+            {
+              "avec": {
+                "start_percent": 12.9895,
+                "start_elapsed": 23.6452,
+                "start_game_time": 24.0292,
+                "start_frame": 3477,
+                "frames": 7,
+                "end_percent": 13.0546,
+                "end_elapsed": 23.7529,
+                "end_frame": 3483,
+                "duration_s": 0.12780000000000058,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 12.9895,
+                "start_elapsed": 23.6409,
+                "start_game_time": 24.175,
+                "start_frame": 3770,
+                "frames": 7,
+                "end_percent": 13.0521,
+                "end_elapsed": 23.7444,
+                "end_frame": 3776,
+                "duration_s": 0.12180000000000035,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 13,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.0,
+              "end_delta_percent": 0.002500000000001279,
+              "duration_delta_s": 0.006000000000000227
+            },
+            {
+              "avec": {
+                "start_percent": 13.6376,
+                "start_elapsed": 24.7291,
+                "start_game_time": 25.1083,
+                "start_frame": 3541,
+                "frames": 18,
+                "end_percent": 13.7928,
+                "end_elapsed": 24.9832,
+                "end_frame": 3558,
+                "duration_s": 0.2638999999999996,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 13.6351,
+                "start_elapsed": 24.7184,
+                "start_game_time": 25.25,
+                "start_frame": 3835,
+                "frames": 18,
+                "end_percent": 13.7903,
+                "end_elapsed": 24.9745,
+                "end_frame": 3852,
+                "duration_s": 0.2674000000000021,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 14,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.002500000000001279,
+              "end_delta_percent": 0.0024999999999995026,
+              "duration_delta_s": -0.003500000000002501
+            },
+            {
+              "avec": {
+                "start_percent": 30.3981,
+                "start_elapsed": 52.6356,
+                "start_game_time": 53.0167,
+                "start_frame": 6116,
+                "frames": 2,
+                "end_percent": 30.4056,
+                "end_elapsed": 52.648,
+                "end_frame": 6117,
+                "duration_s": 0.02740000000000009,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 30.4056,
+                "start_elapsed": 52.6493,
+                "start_game_time": 53.175,
+                "start_frame": 6288,
+                "frames": 1,
+                "end_percent": 30.4056,
+                "end_elapsed": 52.6493,
+                "end_frame": 6288,
+                "duration_s": 0.017300000000005866,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 15,
+              "native_reference_reused": false,
+              "start_delta_percent": -0.007500000000000284,
+              "end_delta_percent": 0.0,
+              "duration_delta_s": 0.010099999999994225
+            },
+            {
+              "avec": {
+                "start_percent": 30.4206,
+                "start_elapsed": 52.6765,
+                "start_game_time": 53.0542,
+                "start_frame": 6119,
+                "frames": 3,
+                "end_percent": 30.4432,
+                "end_elapsed": 52.7163,
+                "end_frame": 6121,
+                "duration_s": 0.05590000000000117,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 30.4332,
+                "start_elapsed": 52.695,
+                "start_game_time": 53.2208,
+                "start_frame": 6291,
+                "frames": 5,
+                "end_percent": 30.4857,
+                "end_elapsed": 52.7892,
+                "end_frame": 6295,
+                "duration_s": 0.11560000000000059,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 16,
+              "native_reference_reused": false,
+              "start_delta_percent": -0.012599999999999056,
+              "end_delta_percent": -0.042500000000000426,
+              "duration_delta_s": -0.05969999999999942
+            },
+            {
+              "avec": {
+                "start_percent": 30.4707,
+                "start_elapsed": 52.7634,
+                "start_game_time": 53.1375,
+                "start_frame": 6123,
+                "frames": 5,
+                "end_percent": 30.5132,
+                "end_elapsed": 52.8309,
+                "end_frame": 6127,
+                "duration_s": 0.08250000000000313,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 30.4332,
+                "start_elapsed": 52.695,
+                "start_game_time": 53.2208,
+                "start_frame": 6291,
+                "frames": 5,
+                "end_percent": 30.4857,
+                "end_elapsed": 52.7892,
+                "end_frame": 6295,
+                "duration_s": 0.11560000000000059,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 16,
+              "native_reference_reused": true,
+              "start_delta_percent": 0.03750000000000142,
+              "end_delta_percent": 0.027499999999999858,
+              "duration_delta_s": -0.033099999999997465
+            }
+          ],
+          "unmatched_with": 0
+        },
+        "left": {
+          "sans": [
+            {
+              "start_percent": 29.2996,
+              "start_elapsed": 50.804,
+              "start_game_time": 51.3333,
+              "start_frame": 6158,
+              "frames": 1,
+              "end_percent": 29.2996,
+              "end_elapsed": 50.804,
+              "end_frame": 6158,
+              "duration_s": 0.010599999999996612,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 29.3196,
+              "start_elapsed": 50.8365,
+              "start_game_time": 51.3667,
+              "start_frame": 6161,
+              "frames": 6,
+              "end_percent": 29.3647,
+              "end_elapsed": 50.9099,
+              "end_frame": 6166,
+              "duration_s": 0.08359999999999701,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 29.3747,
+              "start_elapsed": 50.9306,
+              "start_game_time": 51.4583,
+              "start_frame": 6168,
+              "frames": 1,
+              "end_percent": 29.3747,
+              "end_elapsed": 50.9306,
+              "end_frame": 6168,
+              "duration_s": 0.009700000000002262,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 29.3872,
+              "start_elapsed": 50.9508,
+              "start_game_time": 51.4792,
+              "start_frame": 6170,
+              "frames": 1,
+              "end_percent": 29.3872,
+              "end_elapsed": 50.9508,
+              "end_frame": 6170,
+              "duration_s": 0.022500000000000853,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "avec": [
+            {
+              "start_percent": 29.3021,
+              "start_elapsed": 50.8081,
+              "start_game_time": 51.1917,
+              "start_frame": 5968,
+              "frames": 1,
+              "end_percent": 29.3021,
+              "end_elapsed": 50.8081,
+              "end_frame": 5968,
+              "duration_s": 0.008899999999997021,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 29.3146,
+              "start_elapsed": 50.8273,
+              "start_game_time": 51.2125,
+              "start_frame": 5970,
+              "frames": 8,
+              "end_percent": 29.3622,
+              "end_elapsed": 50.9101,
+              "end_frame": 5977,
+              "duration_s": 0.08959999999999724,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 29.3722,
+              "start_elapsed": 50.9251,
+              "start_game_time": 51.3083,
+              "start_frame": 5979,
+              "frames": 2,
+              "end_percent": 29.3772,
+              "end_elapsed": 50.932,
+              "end_frame": 5980,
+              "duration_s": 0.014200000000002433,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 29.3847,
+              "start_elapsed": 50.9463,
+              "start_game_time": 51.3292,
+              "start_frame": 5982,
+              "frames": 1,
+              "end_percent": 29.3847,
+              "end_elapsed": 50.9463,
+              "end_frame": 5982,
+              "duration_s": 0.007199999999997431,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "matches": [
+            {
+              "avec": {
+                "start_percent": 29.3021,
+                "start_elapsed": 50.8081,
+                "start_game_time": 51.1917,
+                "start_frame": 5968,
+                "frames": 1,
+                "end_percent": 29.3021,
+                "end_elapsed": 50.8081,
+                "end_frame": 5968,
+                "duration_s": 0.008899999999997021,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 29.2996,
+                "start_elapsed": 50.804,
+                "start_game_time": 51.3333,
+                "start_frame": 6158,
+                "frames": 1,
+                "end_percent": 29.2996,
+                "end_elapsed": 50.804,
+                "end_frame": 6158,
+                "duration_s": 0.010599999999996612,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 0,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.0024999999999977263,
+              "end_delta_percent": 0.0024999999999977263,
+              "duration_delta_s": -0.0016999999999995907
+            },
+            {
+              "avec": {
+                "start_percent": 29.3146,
+                "start_elapsed": 50.8273,
+                "start_game_time": 51.2125,
+                "start_frame": 5970,
+                "frames": 8,
+                "end_percent": 29.3622,
+                "end_elapsed": 50.9101,
+                "end_frame": 5977,
+                "duration_s": 0.08959999999999724,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 29.3196,
+                "start_elapsed": 50.8365,
+                "start_game_time": 51.3667,
+                "start_frame": 6161,
+                "frames": 6,
+                "end_percent": 29.3647,
+                "end_elapsed": 50.9099,
+                "end_frame": 6166,
+                "duration_s": 0.08359999999999701,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 1,
+              "native_reference_reused": false,
+              "start_delta_percent": -0.005000000000002558,
+              "end_delta_percent": -0.0024999999999977263,
+              "duration_delta_s": 0.006000000000000227
+            },
+            {
+              "avec": {
+                "start_percent": 29.3722,
+                "start_elapsed": 50.9251,
+                "start_game_time": 51.3083,
+                "start_frame": 5979,
+                "frames": 2,
+                "end_percent": 29.3772,
+                "end_elapsed": 50.932,
+                "end_frame": 5980,
+                "duration_s": 0.014200000000002433,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 29.3747,
+                "start_elapsed": 50.9306,
+                "start_game_time": 51.4583,
+                "start_frame": 6168,
+                "frames": 1,
+                "end_percent": 29.3747,
+                "end_elapsed": 50.9306,
+                "end_frame": 6168,
+                "duration_s": 0.009700000000002262,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 2,
+              "native_reference_reused": false,
+              "start_delta_percent": -0.002500000000001279,
+              "end_delta_percent": 0.0024999999999977263,
+              "duration_delta_s": 0.0045000000000001705
+            },
+            {
+              "avec": {
+                "start_percent": 29.3847,
+                "start_elapsed": 50.9463,
+                "start_game_time": 51.3292,
+                "start_frame": 5982,
+                "frames": 1,
+                "end_percent": 29.3847,
+                "end_elapsed": 50.9463,
+                "end_frame": 5982,
+                "duration_s": 0.007199999999997431,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 29.3872,
+                "start_elapsed": 50.9508,
+                "start_game_time": 51.4792,
+                "start_frame": 6170,
+                "frames": 1,
+                "end_percent": 29.3872,
+                "end_elapsed": 50.9508,
+                "end_frame": 6170,
+                "duration_s": 0.022500000000000853,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 3,
+              "native_reference_reused": false,
+              "start_delta_percent": -0.002500000000001279,
+              "end_delta_percent": -0.002500000000001279,
+              "duration_delta_s": -0.015300000000003422
+            }
+          ],
+          "unmatched_with": 0
+        },
+        "right": {
+          "sans": [],
+          "avec": [
+            {
+              "start_percent": 12.7143,
+              "start_elapsed": 23.1897,
+              "start_game_time": 23.5708,
+              "start_frame": 3446,
+              "frames": 1,
+              "end_percent": 12.7143,
+              "end_elapsed": 23.1897,
+              "end_frame": 3446,
+              "duration_s": 0.009300000000003195,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "matches": [
+            {
+              "avec": {
+                "start_percent": 12.7143,
+                "start_elapsed": 23.1897,
+                "start_game_time": 23.5708,
+                "start_frame": 3446,
+                "frames": 1,
+                "end_percent": 12.7143,
+                "end_elapsed": 23.1897,
+                "end_frame": 3446,
+                "duration_s": 0.009300000000003195,
+                "coverage_gap_at_end": false
+              },
+              "sans": null,
+              "native_reference_reused": false
+            }
+          ],
+          "unmatched_with": 1
+        },
+        "bottom": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        },
+        "top": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        },
+        "repeated_signature": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        }
+      },
+      "probes": []
+    },
+    "129598490": {
+      "level": 129598490,
+      "conditions_verified": true,
+      "production_sha256": "7939B0339E33C2F0F8B8E2A9FEDA9B1793A5C36D6F2558BDC4BC4C2877533AEA",
+      "measurement_sha256": "A25D4A886DEF30B18CAEC0F0C685056D051ACC4C53502A4F7CDCA28026DE4BD2",
+      "sample_counts": {
+        "sans": 9691,
+        "avec": 9572
+      },
+      "excluded_visual_frames": {
+        "sans": 0,
+        "avec": 0
+      },
+      "coverage": {
+        "sans": {
+          "event": "coverage",
+          "completed": true,
+          "targeted": false,
+          "target_completed": false,
+          "target_from": 0,
+          "target_to": 100,
+          "deaths": 0,
+          "observed_frames": 9691,
+          "excluded_frames": 9691,
+          "gpu_pending": 0,
+          "renderer_inactive_frames": 0,
+          "cpu_profile": "CCDirector::drawScene: 14.31304ms\nGJBaseGameLayer::update: 8.22846ms\nPlayLayer::updateVisibility: 3.81195ms\narea: 0.00504ms\ncollisions: 0.21915ms\ncommands: 0.02001ms\nfollow: 0.07272ms\nmove: 2.25191ms\nparticles: 0.18569ms\nrotation: 0.75302ms\ntransform: 0.00490ms\n"
+        },
+        "avec": {
+          "event": "coverage",
+          "completed": true,
+          "targeted": false,
+          "target_completed": false,
+          "target_from": 0,
+          "target_to": 100,
+          "deaths": 0,
+          "observed_frames": 9572,
+          "excluded_frames": 9572,
+          "gpu_pending": 0,
+          "renderer_inactive_frames": 0,
+          "cpu_profile": "CCDirector::drawScene: 14.49244ms\nGJBaseGameLayer::update: 8.48205ms\nPlayLayer::updateVisibility: 3.90064ms\narea: 0.00552ms\ncollisions: 0.22950ms\ncommands: 0.02050ms\nfollow: 0.07633ms\nmove: 2.31684ms\nparticles: 0.18794ms\nrotation: 0.76737ms\ntransform: 0.00613ms\n"
+        }
+      },
+      "matching_tolerance_percent": 0.03,
+      "classes": {
+        "full": {
+          "sans": [
+            {
+              "start_percent": 99.0664,
+              "start_elapsed": 139.438,
+              "start_game_time": 139.775,
+              "start_frame": 10543,
+              "frames": 96,
+              "end_percent": 100.0,
+              "end_elapsed": 140.749,
+              "end_frame": 10638,
+              "duration_s": 1.311000000000007,
+              "coverage_gap_at_end": true
+            }
+          ],
+          "avec": [
+            {
+              "start_percent": 99.0723,
+              "start_elapsed": 139.448,
+              "start_game_time": 139.796,
+              "start_frame": 10675,
+              "frames": 81,
+              "end_percent": 99.994,
+              "end_elapsed": 140.735,
+              "end_frame": 10755,
+              "duration_s": 1.2870000000000061,
+              "coverage_gap_at_end": true
+            }
+          ],
+          "matches": [
+            {
+              "avec": {
+                "start_percent": 99.0723,
+                "start_elapsed": 139.448,
+                "start_game_time": 139.796,
+                "start_frame": 10675,
+                "frames": 81,
+                "end_percent": 99.994,
+                "end_elapsed": 140.735,
+                "end_frame": 10755,
+                "duration_s": 1.2870000000000061,
+                "coverage_gap_at_end": true
+              },
+              "sans": {
+                "start_percent": 99.0664,
+                "start_elapsed": 139.438,
+                "start_game_time": 139.775,
+                "start_frame": 10543,
+                "frames": 96,
+                "end_percent": 100.0,
+                "end_elapsed": 140.749,
+                "end_frame": 10638,
+                "duration_s": 1.311000000000007,
+                "coverage_gap_at_end": true
+              },
+              "native_episode_index": 0,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.005899999999996908,
+              "end_delta_percent": -0.006000000000000227,
+              "duration_delta_s": -0.02400000000000091
+            }
+          ],
+          "unmatched_with": 0
+        },
+        "left": {
+          "sans": [
+            {
+              "start_percent": 77.1633,
+              "start_elapsed": 108.84,
+              "start_game_time": 109.179,
+              "start_frame": 8732,
+              "frames": 3,
+              "end_percent": 77.1872,
+              "end_elapsed": 108.873,
+              "end_frame": 8734,
+              "duration_s": 0.06099999999999284,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "avec": [
+            {
+              "start_percent": 77.1454,
+              "start_elapsed": 108.819,
+              "start_game_time": 109.167,
+              "start_frame": 8933,
+              "frames": 4,
+              "end_percent": 77.1842,
+              "end_elapsed": 108.876,
+              "end_frame": 8936,
+              "duration_s": 0.07500000000000284,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "matches": [
+            {
+              "avec": {
+                "start_percent": 77.1454,
+                "start_elapsed": 108.819,
+                "start_game_time": 109.167,
+                "start_frame": 8933,
+                "frames": 4,
+                "end_percent": 77.1842,
+                "end_elapsed": 108.876,
+                "end_frame": 8936,
+                "duration_s": 0.07500000000000284,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 77.1633,
+                "start_elapsed": 108.84,
+                "start_game_time": 109.179,
+                "start_frame": 8732,
+                "frames": 3,
+                "end_percent": 77.1872,
+                "end_elapsed": 108.873,
+                "end_frame": 8734,
+                "duration_s": 0.06099999999999284,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 0,
+              "native_reference_reused": false,
+              "start_delta_percent": -0.017900000000011573,
+              "end_delta_percent": -0.0030000000000001137,
+              "duration_delta_s": 0.014000000000010004
+            }
+          ],
+          "unmatched_with": 0
+        },
+        "right": {
+          "sans": [],
+          "avec": [
+            {
+              "start_percent": 76.9814,
+              "start_elapsed": 108.594,
+              "start_game_time": 108.938,
+              "start_frame": 8922,
+              "frames": 2,
+              "end_percent": 76.9963,
+              "end_elapsed": 108.615,
+              "end_frame": 8923,
+              "duration_s": 0.056000000000011596,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "matches": [
+            {
+              "avec": {
+                "start_percent": 76.9814,
+                "start_elapsed": 108.594,
+                "start_game_time": 108.938,
+                "start_frame": 8922,
+                "frames": 2,
+                "end_percent": 76.9963,
+                "end_elapsed": 108.615,
+                "end_frame": 8923,
+                "duration_s": 0.056000000000011596,
+                "coverage_gap_at_end": false
+              },
+              "sans": null,
+              "native_reference_reused": false
+            }
+          ],
+          "unmatched_with": 1
+        },
+        "bottom": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        },
+        "top": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        },
+        "repeated_signature": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        }
+      },
+      "probes": []
+    }
+  },
+  "targeted_probes": {
+    "88952972": {
+      "level": 88952972,
+      "conditions_verified": true,
+      "production_sha256": "7939B0339E33C2F0F8B8E2A9FEDA9B1793A5C36D6F2558BDC4BC4C2877533AEA",
+      "measurement_sha256": "D589FBEE2F69FEF39685EE1B8AC9BFECB4FEDBDCBE14DBFCE216B9EB2CF13F86",
+      "sample_counts": {
+        "sans": 3636,
+        "avec": 3687
+      },
+      "excluded_visual_frames": {
+        "sans": 0,
+        "avec": 0
+      },
+      "coverage": {
+        "sans": {
+          "event": "coverage",
+          "completed": false,
+          "targeted": true,
+          "target_completed": true,
+          "target_from": 12.6,
+          "target_to": 40,
+          "deaths": 0,
+          "observed_frames": 3636,
+          "excluded_frames": 3636,
+          "gpu_pending": 0,
+          "renderer_inactive_frames": 0,
+          "cpu_profile": ""
+        },
+        "avec": {
+          "event": "coverage",
+          "completed": false,
+          "targeted": true,
+          "target_completed": true,
+          "target_from": 12.6,
+          "target_to": 40,
+          "deaths": 0,
+          "observed_frames": 3687,
+          "excluded_frames": 3687,
+          "gpu_pending": 0,
+          "renderer_inactive_frames": 0,
+          "cpu_profile": ""
+        }
+      },
+      "matching_tolerance_percent": 0.03,
+      "classes": {
+        "full": {
+          "sans": [
+            {
+              "start_percent": 12.6317,
+              "start_elapsed": 23.0479,
+              "start_game_time": 23.4542,
+              "start_frame": 4923,
+              "frames": 4,
+              "end_percent": 12.6642,
+              "end_elapsed": 23.1017,
+              "end_frame": 4926,
+              "duration_s": 0.08020000000000138,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.7768,
+              "start_elapsed": 23.2939,
+              "start_game_time": 23.6958,
+              "start_frame": 4936,
+              "frames": 17,
+              "end_percent": 12.9245,
+              "end_elapsed": 23.5339,
+              "end_frame": 4952,
+              "duration_s": 0.25730000000000075,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.9895,
+              "start_elapsed": 23.6403,
+              "start_game_time": 24.05,
+              "start_frame": 4958,
+              "frames": 7,
+              "end_percent": 13.0546,
+              "end_elapsed": 23.7448,
+              "end_frame": 4964,
+              "duration_s": 0.12249999999999872,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 13.6401,
+              "start_elapsed": 24.7267,
+              "start_game_time": 25.1333,
+              "start_frame": 5022,
+              "frames": 16,
+              "end_percent": 13.7853,
+              "end_elapsed": 24.9619,
+              "end_frame": 5037,
+              "duration_s": 0.24690000000000012,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 30.4006,
+              "start_elapsed": 52.635,
+              "start_game_time": 53.0417,
+              "start_frame": 7613,
+              "frames": 4,
+              "end_percent": 30.4281,
+              "end_elapsed": 52.6816,
+              "end_frame": 7616,
+              "duration_s": 0.06030000000000513,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 30.4532,
+              "start_elapsed": 52.7255,
+              "start_game_time": 53.1292,
+              "start_frame": 7618,
+              "frames": 5,
+              "end_percent": 30.5007,
+              "end_elapsed": 52.8081,
+              "end_frame": 7622,
+              "duration_s": 0.10310000000000485,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "avec": [
+            {
+              "start_percent": 12.6317,
+              "start_elapsed": 23.0536,
+              "start_game_time": 23.5333,
+              "start_frame": 3614,
+              "frames": 4,
+              "end_percent": 12.6592,
+              "end_elapsed": 23.0981,
+              "end_frame": 3617,
+              "duration_s": 0.06700000000000017,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.7768,
+              "start_elapsed": 23.2972,
+              "start_game_time": 23.775,
+              "start_frame": 3631,
+              "frames": 19,
+              "end_percent": 12.9194,
+              "end_elapsed": 23.5318,
+              "end_frame": 3649,
+              "duration_s": 0.2519999999999989,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 12.9895,
+              "start_elapsed": 23.649,
+              "start_game_time": 24.1292,
+              "start_frame": 3656,
+              "frames": 8,
+              "end_percent": 13.0596,
+              "end_elapsed": 23.7608,
+              "end_frame": 3663,
+              "duration_s": 0.12790000000000035,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 13.6351,
+              "start_elapsed": 24.7219,
+              "start_game_time": 25.2042,
+              "start_frame": 3723,
+              "frames": 18,
+              "end_percent": 13.7903,
+              "end_elapsed": 24.9779,
+              "end_frame": 3740,
+              "duration_s": 0.26729999999999876,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 30.4031,
+              "start_elapsed": 52.6448,
+              "start_game_time": 53.125,
+              "start_frame": 6364,
+              "frames": 3,
+              "end_percent": 30.4181,
+              "end_elapsed": 52.6714,
+              "end_frame": 6366,
+              "duration_s": 0.03930000000000433,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 30.4432,
+              "start_elapsed": 52.712,
+              "start_game_time": 53.1917,
+              "start_frame": 6368,
+              "frames": 4,
+              "end_percent": 30.4807,
+              "end_elapsed": 52.7769,
+              "end_frame": 6371,
+              "duration_s": 0.08169999999999789,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 30.5107,
+              "start_elapsed": 52.828,
+              "start_game_time": 53.3042,
+              "start_frame": 6374,
+              "frames": 1,
+              "end_percent": 30.5107,
+              "end_elapsed": 52.828,
+              "end_frame": 6374,
+              "duration_s": 0.012999999999998124,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "matches": [
+            {
+              "avec": {
+                "start_percent": 12.6317,
+                "start_elapsed": 23.0536,
+                "start_game_time": 23.5333,
+                "start_frame": 3614,
+                "frames": 4,
+                "end_percent": 12.6592,
+                "end_elapsed": 23.0981,
+                "end_frame": 3617,
+                "duration_s": 0.06700000000000017,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 12.6317,
+                "start_elapsed": 23.0479,
+                "start_game_time": 23.4542,
+                "start_frame": 4923,
+                "frames": 4,
+                "end_percent": 12.6642,
+                "end_elapsed": 23.1017,
+                "end_frame": 4926,
+                "duration_s": 0.08020000000000138,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 0,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.0,
+              "end_delta_percent": -0.004999999999999005,
+              "duration_delta_s": -0.01320000000000121
+            },
+            {
+              "avec": {
+                "start_percent": 12.7768,
+                "start_elapsed": 23.2972,
+                "start_game_time": 23.775,
+                "start_frame": 3631,
+                "frames": 19,
+                "end_percent": 12.9194,
+                "end_elapsed": 23.5318,
+                "end_frame": 3649,
+                "duration_s": 0.2519999999999989,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 12.7768,
+                "start_elapsed": 23.2939,
+                "start_game_time": 23.6958,
+                "start_frame": 4936,
+                "frames": 17,
+                "end_percent": 12.9245,
+                "end_elapsed": 23.5339,
+                "end_frame": 4952,
+                "duration_s": 0.25730000000000075,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 1,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.0,
+              "end_delta_percent": -0.0051000000000005485,
+              "duration_delta_s": -0.005300000000001859
+            },
+            {
+              "avec": {
+                "start_percent": 12.9895,
+                "start_elapsed": 23.649,
+                "start_game_time": 24.1292,
+                "start_frame": 3656,
+                "frames": 8,
+                "end_percent": 13.0596,
+                "end_elapsed": 23.7608,
+                "end_frame": 3663,
+                "duration_s": 0.12790000000000035,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 12.9895,
+                "start_elapsed": 23.6403,
+                "start_game_time": 24.05,
+                "start_frame": 4958,
+                "frames": 7,
+                "end_percent": 13.0546,
+                "end_elapsed": 23.7448,
+                "end_frame": 4964,
+                "duration_s": 0.12249999999999872,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 2,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.0,
+              "end_delta_percent": 0.004999999999999005,
+              "duration_delta_s": 0.005400000000001626
+            },
+            {
+              "avec": {
+                "start_percent": 13.6351,
+                "start_elapsed": 24.7219,
+                "start_game_time": 25.2042,
+                "start_frame": 3723,
+                "frames": 18,
+                "end_percent": 13.7903,
+                "end_elapsed": 24.9779,
+                "end_frame": 3740,
+                "duration_s": 0.26729999999999876,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 13.6401,
+                "start_elapsed": 24.7267,
+                "start_game_time": 25.1333,
+                "start_frame": 5022,
+                "frames": 16,
+                "end_percent": 13.7853,
+                "end_elapsed": 24.9619,
+                "end_frame": 5037,
+                "duration_s": 0.24690000000000012,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 3,
+              "native_reference_reused": false,
+              "start_delta_percent": -0.005000000000000782,
+              "end_delta_percent": 0.005000000000000782,
+              "duration_delta_s": 0.02039999999999864
+            },
+            {
+              "avec": {
+                "start_percent": 30.4031,
+                "start_elapsed": 52.6448,
+                "start_game_time": 53.125,
+                "start_frame": 6364,
+                "frames": 3,
+                "end_percent": 30.4181,
+                "end_elapsed": 52.6714,
+                "end_frame": 6366,
+                "duration_s": 0.03930000000000433,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 30.4006,
+                "start_elapsed": 52.635,
+                "start_game_time": 53.0417,
+                "start_frame": 7613,
+                "frames": 4,
+                "end_percent": 30.4281,
+                "end_elapsed": 52.6816,
+                "end_frame": 7616,
+                "duration_s": 0.06030000000000513,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 4,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.0024999999999977263,
+              "end_delta_percent": -0.010000000000001563,
+              "duration_delta_s": -0.021000000000000796
+            },
+            {
+              "avec": {
+                "start_percent": 30.4432,
+                "start_elapsed": 52.712,
+                "start_game_time": 53.1917,
+                "start_frame": 6368,
+                "frames": 4,
+                "end_percent": 30.4807,
+                "end_elapsed": 52.7769,
+                "end_frame": 6371,
+                "duration_s": 0.08169999999999789,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 30.4532,
+                "start_elapsed": 52.7255,
+                "start_game_time": 53.1292,
+                "start_frame": 7618,
+                "frames": 5,
+                "end_percent": 30.5007,
+                "end_elapsed": 52.8081,
+                "end_frame": 7622,
+                "duration_s": 0.10310000000000485,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 5,
+              "native_reference_reused": false,
+              "start_delta_percent": -0.00999999999999801,
+              "end_delta_percent": -0.019999999999999574,
+              "duration_delta_s": -0.02140000000000697
+            },
+            {
+              "avec": {
+                "start_percent": 30.5107,
+                "start_elapsed": 52.828,
+                "start_game_time": 53.3042,
+                "start_frame": 6374,
+                "frames": 1,
+                "end_percent": 30.5107,
+                "end_elapsed": 52.828,
+                "end_frame": 6374,
+                "duration_s": 0.012999999999998124,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 30.4532,
+                "start_elapsed": 52.7255,
+                "start_game_time": 53.1292,
+                "start_frame": 7618,
+                "frames": 5,
+                "end_percent": 30.5007,
+                "end_elapsed": 52.8081,
+                "end_frame": 7622,
+                "duration_s": 0.10310000000000485,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 5,
+              "native_reference_reused": true,
+              "start_delta_percent": 0.057500000000000995,
+              "end_delta_percent": 0.010000000000001563,
+              "duration_delta_s": -0.09010000000000673
+            }
+          ],
+          "unmatched_with": 0
+        },
+        "left": {
+          "sans": [
+            {
+              "start_percent": 29.3021,
+              "start_elapsed": 50.8049,
+              "start_game_time": 51.2125,
+              "start_frame": 7485,
+              "frames": 1,
+              "end_percent": 29.3021,
+              "end_elapsed": 50.8049,
+              "end_frame": 7485,
+              "duration_s": 0.009699999999995157,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 29.3146,
+              "start_elapsed": 50.8254,
+              "start_game_time": 51.2333,
+              "start_frame": 7487,
+              "frames": 6,
+              "end_percent": 29.3622,
+              "end_elapsed": 50.9053,
+              "end_frame": 7492,
+              "duration_s": 0.09100000000000108,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 29.3772,
+              "start_elapsed": 50.9315,
+              "start_game_time": 51.3375,
+              "start_frame": 7494,
+              "frames": 2,
+              "end_percent": 29.3847,
+              "end_elapsed": 50.9448,
+              "end_frame": 7495,
+              "duration_s": 0.03350000000000364,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "avec": [
+            {
+              "start_percent": 29.3021,
+              "start_elapsed": 50.8076,
+              "start_game_time": 51.2917,
+              "start_frame": 6216,
+              "frames": 11,
+              "end_percent": 29.3647,
+              "end_elapsed": 50.9106,
+              "end_frame": 6226,
+              "duration_s": 0.11169999999999902,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 29.3747,
+              "start_elapsed": 50.9286,
+              "start_game_time": 51.4125,
+              "start_frame": 6228,
+              "frames": 1,
+              "end_percent": 29.3747,
+              "end_elapsed": 50.9286,
+              "end_frame": 6228,
+              "duration_s": 0.008499999999997954,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 29.3847,
+              "start_elapsed": 50.9464,
+              "start_game_time": 51.4292,
+              "start_frame": 6230,
+              "frames": 1,
+              "end_percent": 29.3847,
+              "end_elapsed": 50.9464,
+              "end_frame": 6230,
+              "duration_s": 0.007000000000005002,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "matches": [
+            {
+              "avec": {
+                "start_percent": 29.3021,
+                "start_elapsed": 50.8076,
+                "start_game_time": 51.2917,
+                "start_frame": 6216,
+                "frames": 11,
+                "end_percent": 29.3647,
+                "end_elapsed": 50.9106,
+                "end_frame": 6226,
+                "duration_s": 0.11169999999999902,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 29.3021,
+                "start_elapsed": 50.8049,
+                "start_game_time": 51.2125,
+                "start_frame": 7485,
+                "frames": 1,
+                "end_percent": 29.3021,
+                "end_elapsed": 50.8049,
+                "end_frame": 7485,
+                "duration_s": 0.009699999999995157,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 0,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.0,
+              "end_delta_percent": 0.06259999999999977,
+              "duration_delta_s": 0.10200000000000387
+            },
+            {
+              "avec": {
+                "start_percent": 29.3747,
+                "start_elapsed": 50.9286,
+                "start_game_time": 51.4125,
+                "start_frame": 6228,
+                "frames": 1,
+                "end_percent": 29.3747,
+                "end_elapsed": 50.9286,
+                "end_frame": 6228,
+                "duration_s": 0.008499999999997954,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 29.3772,
+                "start_elapsed": 50.9315,
+                "start_game_time": 51.3375,
+                "start_frame": 7494,
+                "frames": 2,
+                "end_percent": 29.3847,
+                "end_elapsed": 50.9448,
+                "end_frame": 7495,
+                "duration_s": 0.03350000000000364,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 2,
+              "native_reference_reused": false,
+              "start_delta_percent": -0.0024999999999977263,
+              "end_delta_percent": -0.00999999999999801,
+              "duration_delta_s": -0.025000000000005684
+            },
+            {
+              "avec": {
+                "start_percent": 29.3847,
+                "start_elapsed": 50.9464,
+                "start_game_time": 51.4292,
+                "start_frame": 6230,
+                "frames": 1,
+                "end_percent": 29.3847,
+                "end_elapsed": 50.9464,
+                "end_frame": 6230,
+                "duration_s": 0.007000000000005002,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 29.3772,
+                "start_elapsed": 50.9315,
+                "start_game_time": 51.3375,
+                "start_frame": 7494,
+                "frames": 2,
+                "end_percent": 29.3847,
+                "end_elapsed": 50.9448,
+                "end_frame": 7495,
+                "duration_s": 0.03350000000000364,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 2,
+              "native_reference_reused": true,
+              "start_delta_percent": 0.007500000000000284,
+              "end_delta_percent": 0.0,
+              "duration_delta_s": -0.026499999999998636
+            }
+          ],
+          "unmatched_with": 0
+        },
+        "right": {
+          "sans": [
+            {
+              "start_percent": 27.2677,
+              "start_elapsed": 47.411,
+              "start_game_time": 47.825,
+              "start_frame": 6992,
+              "frames": 1,
+              "end_percent": 27.2677,
+              "end_elapsed": 47.411,
+              "end_frame": 6992,
+              "duration_s": 0.008899999999997021,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "avec": [
+            {
+              "start_percent": 27.2527,
+              "start_elapsed": 47.3969,
+              "start_game_time": 47.8792,
+              "start_frame": 5663,
+              "frames": 1,
+              "end_percent": 27.2527,
+              "end_elapsed": 47.3969,
+              "end_frame": 5663,
+              "duration_s": 0.005699999999997374,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "matches": [
+            {
+              "avec": {
+                "start_percent": 27.2527,
+                "start_elapsed": 47.3969,
+                "start_game_time": 47.8792,
+                "start_frame": 5663,
+                "frames": 1,
+                "end_percent": 27.2527,
+                "end_elapsed": 47.3969,
+                "end_frame": 5663,
+                "duration_s": 0.005699999999997374,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 27.2677,
+                "start_elapsed": 47.411,
+                "start_game_time": 47.825,
+                "start_frame": 6992,
+                "frames": 1,
+                "end_percent": 27.2677,
+                "end_elapsed": 47.411,
+                "end_frame": 6992,
+                "duration_s": 0.008899999999997021,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 0,
+              "native_reference_reused": false,
+              "start_delta_percent": -0.015000000000000568,
+              "end_delta_percent": -0.015000000000000568,
+              "duration_delta_s": -0.0031999999999996476
+            }
+          ],
+          "unmatched_with": 0
+        },
+        "bottom": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        },
+        "top": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        },
+        "repeated_signature": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        }
+      },
+      "probes": [
+        {
+          "requested_percent": 12.65,
+          "sans": {
+            "frame": 4925,
+            "percent": 12.656707763671875,
+            "game_time": 23.49583448749034,
+            "offset_percent": 0.006707763671874645,
+            "image": "images/probe-sondes-88952972-sans-4925.png"
+          },
+          "avec": {
+            "frame": 3616,
+            "percent": 12.651702880859375,
+            "game_time": 23.566667700652033,
+            "offset_percent": 0.0017028808593746447,
+            "image": "images/probe-sondes-88952972-avec-3616.png"
+          }
+        },
+        {
+          "requested_percent": 12.68,
+          "sans": {
+            "frame": 4928,
+            "percent": 12.689237594604492,
+            "game_time": 23.550001155585026,
+            "offset_percent": 0.009237594604492472,
+            "image": "images/probe-sondes-88952972-sans-4928.png"
+          },
+          "avec": {
+            "frame": 3620,
+            "percent": 12.686735153198242,
+            "game_time": 23.625001035165038,
+            "offset_percent": 0.006735153198242472,
+            "image": "images/probe-sondes-88952972-avec-3620.png"
+          }
+        },
+        {
+          "requested_percent": 12.7,
+          "sans": {
+            "frame": 4930,
+            "percent": 12.70925521850586,
+            "game_time": 23.58333448972551,
+            "offset_percent": 0.009255218505860086,
+            "image": "images/probe-sondes-88952972-sans-4930.png"
+          },
+          "avec": {
+            "frame": 3622,
+            "percent": 12.701749801635742,
+            "game_time": 23.65000103646889,
+            "offset_percent": 0.001749801635742898,
+            "image": "images/probe-sondes-88952972-avec-3622.png"
+          }
+        },
+        {
+          "requested_percent": 12.72,
+          "sans": {
+            "frame": 4932,
+            "percent": 12.73177719116211,
+            "game_time": 23.62083449028429,
+            "offset_percent": 0.011777191162108736,
+            "image": "images/probe-sondes-88952972-sans-4932.png"
+          },
+          "avec": {
+            "frame": 3624,
+            "percent": 12.721768379211426,
+            "game_time": 23.683334370609373,
+            "offset_percent": 0.0017683792114251418,
+            "image": "images/probe-sondes-88952972-avec-3624.png"
+          }
+        },
+        {
+          "requested_percent": 12.74,
+          "sans": {
+            "frame": 4934,
+            "percent": 12.754297256469727,
+            "game_time": 23.658334490843075,
+            "offset_percent": 0.01429725646972635,
+            "image": "images/probe-sondes-88952972-sans-4934.png"
+          },
+          "avec": {
+            "frame": 3627,
+            "percent": 12.746789932250977,
+            "game_time": 23.725001038517796,
+            "offset_percent": 0.006789932250976349,
+            "image": "images/probe-sondes-88952972-avec-3627.png"
+          }
+        },
+        {
+          "requested_percent": 12.76,
+          "sans": {
+            "frame": 4935,
+            "percent": 12.76430606842041,
+            "game_time": 23.675001158378976,
+            "offset_percent": 0.004306068420410369,
+            "image": "images/probe-sondes-88952972-sans-4935.png"
+          },
+          "avec": {
+            "frame": 3629,
+            "percent": 12.761804580688477,
+            "game_time": 23.750001039821647,
+            "offset_percent": 0.0018045806884767757,
+            "image": "images/probe-sondes-88952972-avec-3629.png"
+          }
+        },
+        {
+          "requested_percent": 12.8,
+          "sans": {
+            "frame": 4938,
+            "percent": 12.809348106384277,
+            "game_time": 23.750001159496556,
+            "offset_percent": 0.009348106384276633,
+            "image": "images/probe-sondes-88952972-sans-4938.png"
+          },
+          "avec": {
+            "frame": 3634,
+            "percent": 12.804344177246094,
+            "game_time": 23.820834375452243,
+            "offset_percent": 0.0043441772460930395,
+            "image": "images/probe-sondes-88952972-avec-3634.png"
+          }
+        }
+      ]
+    },
+    "129598490": {
+      "level": 129598490,
+      "conditions_verified": true,
+      "production_sha256": "7939B0339E33C2F0F8B8E2A9FEDA9B1793A5C36D6F2558BDC4BC4C2877533AEA",
+      "measurement_sha256": "D589FBEE2F69FEF39685EE1B8AC9BFECB4FEDBDCBE14DBFCE216B9EB2CF13F86",
+      "sample_counts": {
+        "sans": 70,
+        "avec": 74
+      },
+      "excluded_visual_frames": {
+        "sans": 0,
+        "avec": 0
+      },
+      "coverage": {
+        "sans": {
+          "event": "coverage",
+          "completed": false,
+          "targeted": true,
+          "target_completed": true,
+          "target_from": 76.8,
+          "target_to": 78,
+          "deaths": 0,
+          "observed_frames": 70,
+          "excluded_frames": 70,
+          "gpu_pending": 0,
+          "renderer_inactive_frames": 0,
+          "cpu_profile": ""
+        },
+        "avec": {
+          "event": "coverage",
+          "completed": false,
+          "targeted": true,
+          "target_completed": true,
+          "target_from": 76.8,
+          "target_to": 78,
+          "deaths": 0,
+          "observed_frames": 74,
+          "excluded_frames": 74,
+          "gpu_pending": 0,
+          "renderer_inactive_frames": 0,
+          "cpu_profile": ""
+        }
+      },
+      "matching_tolerance_percent": 0.03,
+      "classes": {
+        "full": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        },
+        "left": {
+          "sans": [
+            {
+              "start_percent": 77.1603,
+              "start_elapsed": 108.819,
+              "start_game_time": 109.238,
+              "start_frame": 9172,
+              "frames": 2,
+              "end_percent": 77.1812,
+              "end_elapsed": 108.843,
+              "end_frame": 9173,
+              "duration_s": 0.06099999999999284,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "avec": [
+            {
+              "start_percent": 77.1723,
+              "start_elapsed": 108.827,
+              "start_game_time": 109.154,
+              "start_frame": 9137,
+              "frames": 2,
+              "end_percent": 77.1931,
+              "end_elapsed": 108.858,
+              "end_frame": 9138,
+              "duration_s": 0.0589999999999975,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "matches": [
+            {
+              "avec": {
+                "start_percent": 77.1723,
+                "start_elapsed": 108.827,
+                "start_game_time": 109.154,
+                "start_frame": 9137,
+                "frames": 2,
+                "end_percent": 77.1931,
+                "end_elapsed": 108.858,
+                "end_frame": 9138,
+                "duration_s": 0.0589999999999975,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 77.1603,
+                "start_elapsed": 108.819,
+                "start_game_time": 109.238,
+                "start_frame": 9172,
+                "frames": 2,
+                "end_percent": 77.1812,
+                "end_elapsed": 108.843,
+                "end_frame": 9173,
+                "duration_s": 0.06099999999999284,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 0,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.012000000000000455,
+              "end_delta_percent": 0.011899999999997135,
+              "duration_delta_s": -0.001999999999995339
+            }
+          ],
+          "unmatched_with": 0
+        },
+        "right": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        },
+        "bottom": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        },
+        "top": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        },
+        "repeated_signature": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        }
+      },
+      "probes": [
+        {
+          "requested_percent": 76.9,
+          "sans": {
+            "frame": 9163,
+            "percent": 76.91871643066406,
+            "game_time": 108.90000393798839,
+            "offset_percent": 0.018716430664056816,
+            "image": "images/probe-sondes-129598490-sans-9163.png"
+          },
+          "avec": {
+            "frame": 9126,
+            "percent": 76.91573333740234,
+            "game_time": 108.79583725750588,
+            "offset_percent": 0.015733337402338066,
+            "image": "images/probe-sondes-129598490-avec-9126.png"
+          }
+        },
+        {
+          "requested_percent": 76.93,
+          "sans": {
+            "frame": 9164,
+            "percent": 76.9395980834961,
+            "game_time": 108.92917060477927,
+            "offset_percent": 0.009598083496086929,
+            "image": "images/probe-sondes-129598490-sans-9164.png"
+          },
+          "avec": {
+            "frame": 9127,
+            "percent": 76.93363189697266,
+            "game_time": 108.82083725787838,
+            "offset_percent": 0.003631896972649429,
+            "image": "images/probe-sondes-129598490-avec-9127.png"
+          }
+        },
+        {
+          "requested_percent": 76.95,
+          "sans": {
+            "frame": 9165,
+            "percent": 76.96346282958984,
+            "game_time": 108.96250393985108,
+            "offset_percent": 0.013462829589840908,
+            "image": "images/probe-sondes-129598490-sans-9165.png"
+          },
+          "avec": {
+            "frame": 9128,
+            "percent": 76.96047973632812,
+            "game_time": 108.85833725936848,
+            "offset_percent": 0.010479736328122158,
+            "image": "images/probe-sondes-129598490-avec-9128.png"
+          }
+        },
+        {
+          "requested_percent": 76.97,
+          "sans": {
+            "frame": 9166,
+            "percent": 76.98731994628906,
+            "game_time": 108.99583727492288,
+            "offset_percent": 0.017319946289063637,
+            "image": "images/probe-sondes-129598490-sans-9166.png"
+          },
+          "avec": {
+            "frame": 9129,
+            "percent": 76.99030303955078,
+            "game_time": 108.90000392727686,
+            "offset_percent": 0.020303039550782387,
+            "image": "images/probe-sondes-129598490-avec-9129.png"
+          }
+        },
+        {
+          "requested_percent": 76.99,
+          "sans": {
+            "frame": 9167,
+            "percent": 77.01416778564453,
+            "game_time": 109.03333727641298,
+            "offset_percent": 0.024167785644536366,
+            "image": "images/probe-sondes-129598490-sans-9167.png"
+          },
+          "avec": {
+            "frame": 9129,
+            "percent": 76.99030303955078,
+            "game_time": 108.90000392727686,
+            "offset_percent": 0.0003030395507863659,
+            "image": "images/probe-sondes-129598490-avec-9129.png"
+          }
+        },
+        {
+          "requested_percent": 77.01,
+          "sans": {
+            "frame": 9167,
+            "percent": 77.01416778564453,
+            "game_time": 109.03333727641298,
+            "offset_percent": 0.004167785644526134,
+            "image": "images/probe-sondes-129598490-sans-9167.png"
+          },
+          "avec": {
+            "frame": 9130,
+            "percent": 77.01416778564453,
+            "game_time": 108.93333726234866,
+            "offset_percent": 0.004167785644526134,
+            "image": "images/probe-sondes-129598490-avec-9130.png"
+          }
+        },
+        {
+          "requested_percent": 77.03,
+          "sans": {
+            "frame": 9168,
+            "percent": 77.041015625,
+            "game_time": 109.07083727790308,
+            "offset_percent": 0.011015624999998863,
+            "image": "images/probe-sondes-129598490-sans-9168.png"
+          },
+          "avec": {
+            "frame": 9131,
+            "percent": 77.041015625,
+            "game_time": 108.97083726383876,
+            "offset_percent": 0.011015624999998863,
+            "image": "images/probe-sondes-129598490-avec-9131.png"
+          }
+        },
+        {
+          "requested_percent": 77.05,
+          "sans": {
+            "frame": 9169,
+            "percent": 77.07084655761719,
+            "game_time": 109.11250394581145,
+            "offset_percent": 0.020846557617190342,
+            "image": "images/probe-sondes-129598490-sans-9169.png"
+          },
+          "avec": {
+            "frame": 9132,
+            "percent": 77.06488037109375,
+            "game_time": 109.00417059891056,
+            "offset_percent": 0.014880371093752842,
+            "image": "images/probe-sondes-129598490-avec-9132.png"
+          }
+        },
+        {
+          "requested_percent": 77.1,
+          "sans": {
+            "frame": 9170,
+            "percent": 77.10365295410156,
+            "game_time": 109.15833728013816,
+            "offset_percent": 0.0036529541015681843,
+            "image": "images/probe-sondes-129598490-sans-9170.png"
+          },
+          "avec": {
+            "frame": 9134,
+            "percent": 77.1245346069336,
+            "game_time": 109.08750393472737,
+            "offset_percent": 0.024534606933599434,
+            "image": "images/probe-sondes-129598490-avec-9134.png"
+          }
+        },
+        {
+          "requested_percent": 77.15,
+          "sans": {
+            "frame": 9172,
+            "percent": 77.16033172607422,
+            "game_time": 109.23750394953666,
+            "offset_percent": 0.010331726074213066,
+            "image": "images/probe-sondes-129598490-sans-9172.png"
+          },
+          "avec": {
+            "frame": 9136,
+            "percent": 77.15734100341797,
+            "game_time": 109.13333726905405,
+            "offset_percent": 0.007341003417963066,
+            "image": "images/probe-sondes-129598490-avec-9136.png"
+          }
+        },
+        {
+          "requested_percent": 77.2,
+          "sans": {
+            "frame": 9174,
+            "percent": 77.20507049560547,
+            "game_time": 109.30000395139935,
+            "offset_percent": 0.005070495605465908,
+            "image": "images/probe-sondes-129598490-sans-9174.png"
+          },
+          "avec": {
+            "frame": 9139,
+            "percent": 77.21401977539062,
+            "game_time": 109.21250393659001,
+            "offset_percent": 0.014019775390622158,
+            "image": "images/probe-sondes-129598490-avec-9139.png"
+          }
+        }
+      ]
+    }
+  },
+  "grief305_target": {
+    "88952972": {
+      "level": 88952972,
+      "conditions_verified": true,
+      "production_sha256": "7939B0339E33C2F0F8B8E2A9FEDA9B1793A5C36D6F2558BDC4BC4C2877533AEA",
+      "measurement_sha256": "D589FBEE2F69FEF39685EE1B8AC9BFECB4FEDBDCBE14DBFCE216B9EB2CF13F86",
+      "sample_counts": {
+        "sans": 918,
+        "avec": 953
+      },
+      "excluded_visual_frames": {
+        "sans": 0,
+        "avec": 0
+      },
+      "coverage": {
+        "sans": {
+          "event": "coverage",
+          "completed": false,
+          "targeted": true,
+          "target_completed": true,
+          "target_from": 30.3,
+          "target_to": 40,
+          "deaths": 0,
+          "observed_frames": 918,
+          "excluded_frames": 918,
+          "gpu_pending": 0,
+          "renderer_inactive_frames": 0,
+          "cpu_profile": ""
+        },
+        "avec": {
+          "event": "coverage",
+          "completed": false,
+          "targeted": true,
+          "target_completed": true,
+          "target_from": 30.3,
+          "target_to": 40,
+          "deaths": 0,
+          "observed_frames": 953,
+          "excluded_frames": 953,
+          "gpu_pending": 0,
+          "renderer_inactive_frames": 0,
+          "cpu_profile": ""
+        }
+      },
+      "matching_tolerance_percent": 0.03,
+      "classes": {
+        "full": {
+          "sans": [
+            {
+              "start_percent": 30.3981,
+              "start_elapsed": 52.63,
+              "start_game_time": 53.2,
+              "start_frame": 7603,
+              "frames": 2,
+              "end_percent": 30.4106,
+              "end_elapsed": 52.6535,
+              "end_frame": 7604,
+              "duration_s": 0.051399999999993895,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 30.4432,
+              "start_elapsed": 52.7092,
+              "start_game_time": 53.275,
+              "start_frame": 7606,
+              "frames": 1,
+              "end_percent": 30.4432,
+              "end_elapsed": 52.7092,
+              "end_frame": 7606,
+              "duration_s": 0.026899999999997704,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 30.4782,
+              "start_elapsed": 52.7686,
+              "start_game_time": 53.3333,
+              "start_frame": 7608,
+              "frames": 3,
+              "end_percent": 30.5082,
+              "end_elapsed": 52.821,
+              "end_frame": 7610,
+              "duration_s": 0.07200000000000273,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "avec": [
+            {
+              "start_percent": 30.4106,
+              "start_elapsed": 52.6581,
+              "start_game_time": 53.1458,
+              "start_frame": 6908,
+              "frames": 6,
+              "end_percent": 30.4732,
+              "end_elapsed": 52.7564,
+              "end_frame": 6913,
+              "duration_s": 0.13739999999999952,
+              "coverage_gap_at_end": false
+            },
+            {
+              "start_percent": 30.5032,
+              "start_elapsed": 52.8089,
+              "start_game_time": 53.3,
+              "start_frame": 6915,
+              "frames": 3,
+              "end_percent": 30.5207,
+              "end_elapsed": 52.8423,
+              "end_frame": 6917,
+              "duration_s": 0.07169999999999987,
+              "coverage_gap_at_end": false
+            }
+          ],
+          "matches": [
+            {
+              "avec": {
+                "start_percent": 30.4106,
+                "start_elapsed": 52.6581,
+                "start_game_time": 53.1458,
+                "start_frame": 6908,
+                "frames": 6,
+                "end_percent": 30.4732,
+                "end_elapsed": 52.7564,
+                "end_frame": 6913,
+                "duration_s": 0.13739999999999952,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 30.3981,
+                "start_elapsed": 52.63,
+                "start_game_time": 53.2,
+                "start_frame": 7603,
+                "frames": 2,
+                "end_percent": 30.4106,
+                "end_elapsed": 52.6535,
+                "end_frame": 7604,
+                "duration_s": 0.051399999999993895,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 0,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.01249999999999929,
+              "end_delta_percent": 0.06259999999999977,
+              "duration_delta_s": 0.08600000000000563
+            },
+            {
+              "avec": {
+                "start_percent": 30.5032,
+                "start_elapsed": 52.8089,
+                "start_game_time": 53.3,
+                "start_frame": 6915,
+                "frames": 3,
+                "end_percent": 30.5207,
+                "end_elapsed": 52.8423,
+                "end_frame": 6917,
+                "duration_s": 0.07169999999999987,
+                "coverage_gap_at_end": false
+              },
+              "sans": {
+                "start_percent": 30.4782,
+                "start_elapsed": 52.7686,
+                "start_game_time": 53.3333,
+                "start_frame": 7608,
+                "frames": 3,
+                "end_percent": 30.5082,
+                "end_elapsed": 52.821,
+                "end_frame": 7610,
+                "duration_s": 0.07200000000000273,
+                "coverage_gap_at_end": false
+              },
+              "native_episode_index": 2,
+              "native_reference_reused": false,
+              "start_delta_percent": 0.02499999999999858,
+              "end_delta_percent": 0.012500000000002842,
+              "duration_delta_s": -0.00030000000000285354
+            }
+          ],
+          "unmatched_with": 0
+        },
+        "left": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        },
+        "right": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        },
+        "bottom": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        },
+        "top": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        },
+        "repeated_signature": {
+          "sans": [],
+          "avec": [],
+          "matches": [],
+          "unmatched_with": 0
+        }
+      },
+      "probes": [
+        {
+          "requested_percent": 30.38,
+          "sans": {
+            "frame": 7601,
+            "percent": 30.38310432434082,
+            "game_time": 53.175002230334805,
+            "offset_percent": 0.0031043243408213073,
+            "image": "images/probe-sondes-88952972-305-sans-7601.png"
+          },
+          "avec": {
+            "frame": 6905,
+            "percent": 30.380599975585938,
+            "game_time": 53.09583539842218,
+            "offset_percent": 0.0005999755859384948,
+            "image": "images/probe-sondes-88952972-305-avec-6905.png"
+          }
+        },
+        {
+          "requested_percent": 30.4,
+          "sans": {
+            "frame": 7604,
+            "percent": 30.410629272460938,
+            "game_time": 53.22083556466157,
+            "offset_percent": 0.010629272460938921,
+            "image": "images/probe-sondes-88952972-305-sans-7604.png"
+          },
+          "avec": {
+            "frame": 6908,
+            "percent": 30.410629272460938,
+            "game_time": 53.14583539916727,
+            "offset_percent": 0.010629272460938921,
+            "image": "images/probe-sondes-88952972-305-avec-6908.png"
+          }
+        },
+        {
+          "requested_percent": 30.42,
+          "sans": {
+            "frame": 7605,
+            "percent": 30.425643920898438,
+            "game_time": 53.24583556503411,
+            "offset_percent": 0.005643920898435795,
+            "image": "images/probe-sondes-88952972-305-sans-7605.png"
+          },
+          "avec": {
+            "frame": 6909,
+            "percent": 30.42064094543457,
+            "game_time": 53.16250206670317,
+            "offset_percent": 0.0006409454345686072,
+            "image": "images/probe-sondes-88952972-305-avec-6909.png"
+          }
+        },
+        {
+          "requested_percent": 30.44,
+          "sans": {
+            "frame": 7606,
+            "percent": 30.443159103393555,
+            "game_time": 53.27500223182495,
+            "offset_percent": 0.0031591033935534085,
+            "image": "images/probe-sondes-88952972-305-sans-7606.png"
+          },
+          "avec": {
+            "frame": 6911,
+            "percent": 30.453168869018555,
+            "game_time": 53.216668734797885,
+            "offset_percent": 0.013168869018553409,
+            "image": "images/probe-sondes-88952972-305-avec-6911.png"
+          }
+        },
+        {
+          "requested_percent": 30.46,
+          "sans": {
+            "frame": 7608,
+            "percent": 30.478191375732422,
+            "game_time": 53.333335567269295,
+            "offset_percent": 0.018191375732421022,
+            "image": "images/probe-sondes-88952972-305-sans-7608.png"
+          },
+          "avec": {
+            "frame": 6912,
+            "percent": 30.465681076049805,
+            "game_time": 53.23750206875211,
+            "offset_percent": 0.005681076049803835,
+            "image": "images/probe-sondes-88952972-305-avec-6912.png"
+          }
+        },
+        {
+          "requested_percent": 30.48,
+          "sans": {
+            "frame": 7609,
+            "percent": 30.488201141357422,
+            "game_time": 53.350002234805196,
+            "offset_percent": 0.008201141357421449,
+            "image": "images/probe-sondes-88952972-305-sans-7609.png"
+          },
+          "avec": {
+            "frame": 6914,
+            "percent": 30.493206024169922,
+            "game_time": 53.28333540401018,
+            "offset_percent": 0.013206024169921449,
+            "image": "images/probe-sondes-88952972-305-avec-6914.png"
+          }
+        },
+        {
+          "requested_percent": 30.5,
+          "sans": {
+            "frame": 7610,
+            "percent": 30.508220672607422,
+            "game_time": 53.383335569877,
+            "offset_percent": 0.008220672607421875,
+            "image": "images/probe-sondes-88952972-305-sans-7610.png"
+          },
+          "avec": {
+            "frame": 6915,
+            "percent": 30.503215789794922,
+            "game_time": 53.30000207154608,
+            "offset_percent": 0.003215789794921875,
+            "image": "images/probe-sondes-88952972-305-avec-6915.png"
+          }
+        },
+        {
+          "requested_percent": 30.52,
+          "sans": {
+            "frame": 7611,
+            "percent": 30.52073097229004,
+            "game_time": 53.40416890383122,
+            "offset_percent": 0.0007309722900394888,
+            "image": "images/probe-sondes-88952972-305-sans-7611.png"
+          },
+          "avec": {
+            "frame": 6917,
+            "percent": 30.52073097229004,
+            "game_time": 53.329168739268255,
+            "offset_percent": 0.0007309722900394888,
+            "image": "images/probe-sondes-88952972-305-avec-6917.png"
+          }
+        },
+        {
+          "requested_percent": 30.54,
+          "sans": {
+            "frame": 7612,
+            "percent": 30.54575538635254,
+            "game_time": 53.445835571739664,
+            "offset_percent": 0.005755386352539915,
+            "image": "images/probe-sondes-88952972-305-sans-7612.png"
+          },
+          "avec": {
+            "frame": 6918,
+            "percent": 30.540748596191406,
+            "game_time": 53.36250207434006,
+            "offset_percent": 0.0007485961914071027,
+            "image": "images/probe-sondes-88952972-305-avec-6918.png"
+          }
+        },
+        {
+          "requested_percent": 30.56,
+          "sans": {
+            "frame": 7613,
+            "percent": 30.56577491760254,
+            "game_time": 53.479168906811466,
+            "offset_percent": 0.0057749176025403415,
+            "image": "images/probe-sondes-88952972-305-sans-7613.png"
+          },
+          "avec": {
+            "frame": 6920,
+            "percent": 30.56577491760254,
+            "game_time": 53.404168741317164,
+            "offset_percent": 0.0057749176025403415,
+            "image": "images/probe-sondes-88952972-305-avec-6920.png"
+          }
+        }
+      ]
+    }
+  }
+}

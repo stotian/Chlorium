@@ -17,6 +17,14 @@ option(CHLORIUM_MEASUREMENT_ONLY "Measure an absent or separately packaged produ
 option(CHLORIUM_EXPERIMENTAL_NATIVE_STREAMING "Experimental native VBO streaming backend" OFF)
 option(CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS "Experimental exact Area quotient reuse" OFF)
 option(CHLORIUM_EXPERIMENTAL_MATRIX_REUSE "Experimental helper matrix linear-part reuse" OFF)
+option(CHLORIUM_EXPERIMENTAL_AFFINE_POINT "Experimental exact packed affine point helper" OFF)
+if(CHLORIUM_EXPERIMENTAL_AFFINE_POINT AND (CHLORIUM_EXPERIMENTAL_MATRIX_REUSE OR
+   CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS OR CHLORIUM_EXPERIMENTAL_NATIVE_STREAMING OR
+   CHLORIUM_EXPERIMENTAL_STATIC_RENDERER OR CHLORIUM_ENABLE_PROFILER OR
+   CHLORIUM_MEASUREMENT_ONLY OR CHLORIUM_EXPERIMENTAL_NATIVE_MOVES OR
+   CHLORIUM_AUDIT_HARNESS_ONLY OR CHLORIUM_NATIVE_ATLAS_CACHE))
+    message(FATAL_ERROR "Affine point experiment must be isolated")
+endif()
 option(CHLORIUM_NATIVE_ATLAS_CACHE "Retired atlas upload cache, audit builds only" OFF)
 if(CHLORIUM_NATIVE_ATLAS_CACHE AND NOT CHLORIUM_RUNTIME_AUDIT)
     message(FATAL_ERROR "The retired GPU atlas cache is restricted to audit builds")
@@ -103,12 +111,25 @@ if(CHLORIUM_EXPERIMENTAL_MATRIX_REUSE)
         list(APPEND SOURCES src/BProfiler.cpp)
     endif()
 endif()
+if(CHLORIUM_EXPERIMENTAL_AFFINE_POINT)
+    set(SOURCES src/renderer/NativeAffinePoint.cpp src/renderer/NativeAtlasStatsEmpty.cpp src/BuildIdentity.cpp)
+    if(CHLORIUM_RUNTIME_AUDIT)
+        list(APPEND SOURCES src/BProfiler.cpp)
+    endif()
+endif()
 add_library(Chlorium SHARED ${SOURCES})
 if(NOT CHLORIUM_EXPERIMENTAL_STATIC_RENDERER AND NOT CHLORIUM_ENABLE_PROFILER AND
    NOT CHLORIUM_NATIVE_ATLAS_CACHE AND NOT CHLORIUM_MEASUREMENT_ONLY AND
    NOT CHLORIUM_AUDIT_HARNESS_ONLY AND NOT CHLORIUM_EXPERIMENTAL_NATIVE_STREAMING AND
-   NOT CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS AND NOT CHLORIUM_EXPERIMENTAL_MATRIX_REUSE)
+   NOT CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS AND NOT CHLORIUM_EXPERIMENTAL_MATRIX_REUSE AND
+   NOT CHLORIUM_EXPERIMENTAL_AFFINE_POINT)
     target_compile_definitions(Chlorium PRIVATE CHLORIUM_NATIVE_GPU_TRANSFERS_ONLY=1)
+endif()
+if(CHLORIUM_EXPERIMENTAL_AFFINE_POINT)
+    target_compile_definitions(Chlorium PRIVATE CHLORIUM_EXPERIMENTAL_AFFINE_POINT=1)
+    if(MSVC)
+        target_compile_options(Chlorium PRIVATE /fp:strict)
+    endif()
 endif()
 if(CHLORIUM_EXPERIMENTAL_MATRIX_REUSE)
     target_compile_definitions(Chlorium PRIVATE CHLORIUM_EXPERIMENTAL_MATRIX_REUSE=1)
@@ -188,3 +209,10 @@ target_include_directories(chlorium_streaming_checks PRIVATE src
 target_link_libraries(chlorium_streaming_checks PRIVATE opengl32 user32 gdi32
     "${GEODE_SDK}/loader/include/link/win64/glew32.lib")
 target_compile_options(chlorium_streaming_checks PRIVATE /EHsc /utf-8)
+
+add_executable(chlorium_visual_checks tests/visual_gpu_checks.cpp)
+target_include_directories(chlorium_visual_checks PRIVATE tests
+    "${GEODE_SDK}/loader/include/Geode/cocos/platform/third_party/win32/OGLES")
+target_link_libraries(chlorium_visual_checks PRIVATE fmt::fmt opengl32 user32 gdi32
+    "${GEODE_SDK}/loader/include/link/win64/glew32.lib")
+target_compile_options(chlorium_visual_checks PRIVATE /EHsc /utf-8)

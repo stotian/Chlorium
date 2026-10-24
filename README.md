@@ -37,6 +37,9 @@ Voir [la modification de l'alpha.6](docs/BLACKSCREENS-ALPHA6.md).
 Les tests ont repris après autorisation. L'alpha.6 est installée sur le PC de
 développement après ces quatre parcours ; l'alpha.5 reste sauvegardée.
 Voir [le bilan de l'alpha.6](docs/VALIDATION-ALPHA6-20261023.md).
+Le [diagnostic visuel V2](docs/VALIDATION-VISUELLE-V2-20261023.md) approfondit
+les zones noires partielles avec controles de lecture et captures appairees.
+Il conserve les alertes et leurs limites ; il ne demontre pas une identite pixel a pixel.
 
 Le remplacement complet du rendu hérité de Bismuth reste dans les sources,
 **désactivé dans les paquets normaux** : sa couverture des effets GD 2.2 est
@@ -65,6 +68,7 @@ les autres plateformes et binaires ne sont pas validés.
 | Streaming GPU | `v0.2.0-alpha.601` | Expérience isolée ; gain synthétique, pas de gain général prouvé |
 | Arithmétique Area v2 | `v0.2.0-alpha.602` | Équivalence numérique vérifiée ; intérêt variable selon les données |
 | Matrices v3 | `v0.2.0-alpha.603` | Aucun appel éligible sur Grief 22–40 %, donc aucune accélération possible de ce passage |
+| Points affines v2 | `v0.2.0-alpha.604` | Expérience SSE2 exacte isolée ; aucun gain FPS convaincant dans le court essai Grief |
 
 Les anciennes alpha.1 à alpha.4 sont des étapes du développement local,
 décrites dans [l'historique](changelog.md). Le dépôt ne leur attribue pas de
@@ -171,3 +175,12 @@ n'est substituée aux conditions héritées.
 Ce projet n'est affilié ni à Bismuth, ni à Sodium, ni à Geode ou RobTop.
 Le logo Chlorium a été généré par IA. Les binaires du jeu, sauvegardes,
 ressources propriétaires et autres mods restent hors du dépôt.
+
+## Recherche et experience du 24 octobre
+
+[Recherche Sodium/Bismuth, choix et preuves](docs/SODIUM-RESEARCH-20261024.md).
+Une nouvelle variante calcule ensemble les coordonnees X/Y dans la boucle
+native de rotation. Le premier prototype avec compteurs ne montre pas de
+gain FPS convaincant ; il n'est pas installe. La revision sans compteurs n'etablit pas non plus de gain FPS ; elle reste
+une experience distincte, avec equivalence numerique testee sur 192 000 cas.
+L'alpha.6 normale installee n'est pas remplacee par un prototype.

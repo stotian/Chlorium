@@ -1,0 +1,11 @@
+{
+  "reviewed_at": "2026-10-24",
+  "repository": "https://github.com/obra/superpowers",
+  "commit": "2ce8aa15d05bd57213e6f746f953aafb7ded7a8b",
+  "stars_at_review": 304236,
+  "installed": [
+    "systematic-debugging",
+    "verification-before-completion"
+  ],
+  "selection": "Only two focused skill directories; no plugin hooks, agent runner or transcript reader installed. Scripts reviewed; not executed."
+}

@@ -52,9 +52,10 @@ def stats(data):
 def episodes(data):
     result = []; current = None; previous = None
     for r in data:
-        dark = r.get('confirmed_dark') == '1'
+        valid = r.get('valid','1') == '1'
+        dark = valid and r.get('confirmed_dark') == '1'
         frame, time, percent = int(r['frame']), float(r['elapsed']), float(r['percent'])
-        gap = previous is not None and frame != previous+1
+        gap = not valid or (previous is not None and frame != previous+1)
         if current and (not dark or gap):
             current['end_elapsed'] = time
             current['duration_s'] = max(0,time-current['start_elapsed'])
@@ -101,14 +102,24 @@ def load(path):
     mode = 'sans' if start['native'] else 'avec'
     verified = variant.get('production_loaded') == (mode == 'avec') and (mode == 'sans' or variant.get('production_enabled'))
     visual_rows = rows(Path(str(path)+'.visual.csv'))
+    visual_coverage=next((e for e in es if e.get('event')=='visual_coverage'),{})
+    visual_version=next((e.get('version',1) for e in es if e.get('event')=='visual_watch'),0)
+    valid_visual=[r for r in visual_rows if r.get('valid','1')=='1']
+    visual_integrity=(visual_version>=2 and visual_coverage.get('complete') is True
+                      and len(valid_visual)==len(visual_rows)==visual_coverage.get('queued')
+                      and all(int(b['frame'])>int(a['frame']) for a,b in zip(visual_rows,visual_rows[1:])))
     return dict(path=path, level=start['level'], mode=mode, visual=visual, events=es, provenance=provenance,
                 variant_verified=bool(verified), completed=completed, success=success, summary=stats(eligible),
                 bins={p:stats(rs) for p,rs in bins.items()}, excluded=dict(excluded), coverage=coverage,
                 attempt_bins={p:stats(rs) for p,rs in attempt_bins.items()},
                 attempts={a:dict(**stats(rs),max_percent=max(float(r['percent']) for r in rs)) for a,rs in attempts.items()},
                 deaths=deaths, dark=episodes(visual_rows),
-                dark_frames=sum(r.get('confirmed_dark') == '1' for r in visual_rows), visual_samples=len(visual_rows),
-                captures=[e for e in es if e.get('event') == 'dark_frame'])
+                dark_frames=sum(r.get('confirmed_dark') == '1' for r in valid_visual), visual_samples=len(valid_visual),
+                visual_version=visual_version, visual_integrity=visual_integrity,
+                captures=[e for e in es if e.get('event') == 'dark_frame'],
+                anomaly_captures=[e for e in es if e.get('event') == 'visual_anomaly'],
+                partial_frames=sum(bool(int(r.get('partial_flags',0))&30) for r in valid_visual),
+                repeated_frames=sum(bool(int(r.get('partial_flags',0))&32) for r in valid_visual))
 
 
 def f(value, digits=2): return '—' if value is None else f'{value:.{digits}f}'
@@ -163,7 +174,10 @@ def write_report(source, output, additional_sources=()):
     paths = sorted({p for folder in (source, *additional_sources) for p in folder.glob('auto-*.jsonl')})
     runs = [r for p in paths if (r:=load(p))]
     groups = defaultdict(dict)
-    for r in runs: groups[r['level']][r['mode']] = r
+    for r in runs:
+        if r['mode'] in groups[r['level']]:
+            raise ValueError(f"Ambiguous repeated run for {r['level']} / {r['mode']}: choose one explicit pair")
+        groups[r['level']][r['mode']] = r
     all_bins = []; all_dark = []
     lines = ['# Diagnostic Chlorium', '', 'Généré le '+datetime.now(timezone.utc).isoformat(timespec='seconds')+' (UTC).', '',
              'Niveaux autorisés : Orbit auto **133260800**, Heliopolis auto **129598490**, Grief auto **88952972**. ',
@@ -210,6 +224,8 @@ def write_report(source, output, additional_sources=()):
                         f"- Objets : {objects if objects is not None else 'non mesurés'}. Résolution : {graphics.get('width','—')} × {graphics.get('height','—')}.",
                         f"- Rendu : {graphics.get('renderer','non mesuré')} ; OpenGL {graphics.get('version','non mesuré')}.",
                         f"- Surveillance : {r['visual_samples']} images analysées ; {visual_coverage.get('skipped',0)} non prélevées quand la file GPU était pleine.",
+                        f"- Lecture visuelle : version {r['visual_version']}, intégrité V2 vérifiée={r['visual_integrity']}, invalides={visual_coverage.get('invalid','non comptées en V1')}, en attente à la fin={visual_coverage.get('pending_at_finish','non comptées en V1')}.",
+                        f"- Zone analysée : {'largeur complète, entre 25 % et 85 % de la hauteur depuis le bas' if r['visual_version']>=2 else 'ancien diagnostic V1, zone centrale avec présélection par la ligne médiane'}.",
                         f"- Module de mesure : `{p.get('measurement_sha256','inconnu')}`.",
                         f"- Paquet normal : `{p.get('production_sha256') or 'absent'}`.",
                         f"- Réglages effectifs : LDM={quality.get('low_detail_effective','non vérifié')}, secousses désactivées={quality.get('skip_camera_shake_effective','non vérifié')}.",
@@ -243,7 +259,8 @@ def write_report(source, output, additional_sources=()):
             quality_matched=all(k in qualities[0] and k in qualities[1] and qualities[0][k]==qualities[1][k] for k in quality_keys)
             conditions=('target_from_percent','target_to_percent','visual_diagnostic','mod_profile','mod_profile_sha256','profile_settings_sha256')
             conditions_matched=all(pair['sans']['provenance'].get(k)==pair['avec']['provenance'].get(k) for k in conditions)
-            comparison_verified=matched and quality_matched and conditions_matched and all(r['variant_verified'] for r in pair.values())
+            visual_matched=all(r['visual_version']<2 or r['visual_integrity'] for r in pair.values())
+            comparison_verified=matched and quality_matched and conditions_matched and visual_matched and all(r['variant_verified'] for r in pair.values())
             details += ['Collecte, exécutable et données du niveau : **'+('identiques' if matched else 'différents ou non vérifiés ; comparaison limitée')+'**.', '']
             details += ['Réglages LDM/secousses : **'+('identiques et vérifiés' if quality_matched else 'non vérifiés ou différents ; comparaison limitée')+'**.', '']
         details += ['## FPS par pourcentage', '', 'Un quantile avec peu d’images est incertain ; la colonne N permet de repérer ces passages. Un tiret signifie non mesuré, jamais zéro lag.', '', '| % | FPS sans | FPS avec | p99 sans (ms) | p99 avec (ms) | Pire sans (ms) | Pire avec (ms) | N sans / avec |', '|---:|---:|---:|---:|---:|---:|---:|---:|']
@@ -266,21 +283,32 @@ def write_report(source, output, additional_sources=()):
         native_dark=pair.get('sans',{}).get('dark',[])
         for mode,r in pair.items():
             for episode in r['dark']:
-                also_native=comparison_verified and any(episode['start_percent']<=n['end_percent']+.15 and episode['end_percent']>=n['start_percent']-.15 for n in native_dark)
+                tolerance=.03 if r['visual_version']>=2 else .15
+                also_native=comparison_verified and any(episode['start_percent']<=n['end_percent']+tolerance and episode['end_percent']>=n['start_percent']-tolerance for n in native_dark)
                 verdict='Référence native' if mode=='sans' else 'À vérifier : comparaison native non vérifiée' if not comparison_verified else 'Également observé sans, à proximité' if also_native else 'À vérifier : aucune correspondance native capturée'
                 details.append(f"| {mode} | {episode['start_percent']:.3f} | {episode['end_percent']:.3f} | {episode['duration_s']:.4f} | {episode['frames']} | {verdict} |")
                 all_dark.append(dict(level=level,mode=mode,**episode,native_nearby=also_native))
-        details += ['', 'Une durée peut être tronquée par une lacune de prélèvement ; le CSV conserve ce drapeau. Les captures d’apparition sont bornées à 32 par parcours.', '', '## Captures des apparitions sombres', '']
+        details += ['', 'Une durée peut être tronquée par une lacune de prélèvement ; le CSV conserve ce drapeau. Les captures d’apparition sont bornées à 32 par parcours.']
+        if any(r['visual_version']>=2 for r in pair.values()):
+            details += ['', '## Zones partielles et signatures répétées', '',
+                        'Ces indicateurs sont des candidats à examiner, jamais des défauts confirmés. Une scène naturellement fixe peut répéter sa signature ; une zone noire peut appartenir au niveau.', '',
+                        '| Mode | Images avec zone noire partielle | Images avec signature répétée |', '|---|---:|---:|']
+            for mode,r in pair.items():
+                details.append(f"| {mode} | {r['partial_frames']} | {r['repeated_frames']} |")
+            if (output/f'visuel-{level}.md').exists():
+                details += ['',f'[Comparaison visuelle V2, épisodes et écarts de durée](visuel-{level}.md).']
+        details += ['', '## Captures des apparitions sombres et candidats', '']
         for mode,r in pair.items():
-            for e in r['captures']:
-                ppm=Path(str(r['path'])+f".dark-{e['frame']}.ppm")
+            for e in r['captures']+r['anomaly_captures']:
+                kind='dark' if e['event']=='dark_frame' else 'anomaly'
+                ppm=Path(str(r['path'])+f".{kind}-{e['frame']}.ppm")
                 if not ppm.exists(): continue
                 images=output/'images'; images.mkdir(exist_ok=True)
-                target=images/f"{level}-{mode}-{e['frame']}.png"
+                target=images/f"{level}-{mode}-{kind}-{e['frame']}.png"
                 try:
                     from PIL import Image
                     with Image.open(ppm) as im: im.save(target)
-                    details.append(f"- {mode}, {e['percent']:.3f} %, image {e['frame']} : [capture](images/{target.name}).")
+                    details.append(f"- {mode}, {kind}, {e['percent']:.3f} %, image {e['frame']}, indicateurs {e.get('flags',0)} : [capture](images/{target.name}).")
                 except ImportError:
                     details.append(f"- {mode}, {e['percent']:.3f} % : fichier brut {ppm.name}.")
         file=output/f'niveau-{level}.md'; text='\n'.join(details)+'\n'; file.write_text(text,encoding='utf-8')

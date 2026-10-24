@@ -1,3 +1,31 @@
+# 24 October 2026 - Isolated exact affine point experiment
+
+Add an SSE2 two-component native affine helper at one verified rotation call
+site. Preserve double precision and native per-axis operation order; retain
+native handling for nonfinite inputs and unmasked exceptions. Validate module
+bodies/imports, preserve later import/entry owners, and isolate packaging as
+alpha.604. Revision 2 removes per-object diagnostic counters from its measured
+path; the native call site's disjoint stack ranges justify omitting alias
+checks there. General checked use retains native aliasing side effects.
+192000 result/FP comparisons, 8 overlap cases and 3 compatibility guards pass.
+Three short Grief runs, including the uncounted revision, show no convincing
+FPS gain. Neither experiment is installed as the normal mod.
+See docs/SODIUM-RESEARCH-20261024.md for final measurements and limits.
+Install only two reviewed community skills from a pinned Superpowers revision.
+
+# 23 October 2026 - Rigorous private visual diagnostics V2
+
+Reject invalid GPU reads instead of treating zero-filled samples as black.
+Inspect partial dark regions, flag repeated signatures as candidates and drain
+pending reads before judging coverage. Verify real mod inventories and reject
+ambiguous run sets. Temporarily disable masking debug overlays and restore the
+original settings. Add paired percentage probes with actual position/time and
+explicit shared references for fragmented blink episodes. 157 GPU/state checks,
+CPU signature cases and report guard checks pass. Ten valid game runs retain
+the two initial partial alerts and their targeted review; a one-frame blink
+difference remains a comparison limit. Normal alpha.6 rendering is unchanged.
+See VALIDATION-VISUELLE-V2-20261023.md. Stable 60 FPS is not achieved.
+
 # 0.2.0-alpha.6 - Native GPU transfers, black-screen mitigation candidate
 
 Remove the atlas upload cache and every one of its lifecycle/draw hooks from

@@ -5,10 +5,15 @@ param([switch]$Native, [switch]$VisualWatch, [switch]$WithUserMods, [switch]$Atl
     [int]$BenchmarkSeconds = 900,
     [ValidateRange(0,99.999)][double]$FromPercent = 0,
     [ValidateRange(0.001,100)][double]$ToPercent = 100,
-    [ValidateSet('map','orphan')][string]$StreamMode = 'orphan')
+    [ValidateSet('map','orphan')][string]$StreamMode = 'orphan',
+    [ValidateRange(0,100)][double[]]$CapturePercent = @())
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 if ($FromPercent -ge $ToPercent) { throw 'The target percentage range must increase' }
+if ($CapturePercent.Count -gt 16 -or ($CapturePercent | Where-Object { $_ -lt $FromPercent -or $_ -ge $ToPercent })) {
+    throw 'Use at most 16 capture percentages inside the measured range (end excluded)'
+}
+if ($CapturePercent.Count -and !$VisualWatch) { throw 'Capture percentages require VisualWatch' }
 $game = if ($GameDirectory) { $GameDirectory } else { Join-Path $root 'test-game' }
 $destination = Join-Path $game 'geode\mods\local.chlorium.audit.geode'
 $productionDestination = Join-Path $game 'geode\mods\local.chlorium.geode'
@@ -34,6 +39,10 @@ try {
     if (!$binary.Contains('CHLORIUM_AUTO_COLLISIONS_ALLOWLIST_V4') -or
         !$binary.Contains('CHLORIUM_RUNTIME_AUDIT_BINARY_V1')) { throw 'Only the collision-preserving auto-level harness is authorized' }
     $measurementOnly = $binary.Contains('CHLORIUM_MEASUREMENT_ONLY_V1')
+    if ($VisualWatch -and !$binary.Contains('CHLORIUM_VISUAL_READBACK_V2')) {
+        throw 'New visual diagnostics require readback V2: validated reads, partial frames and complete coverage'
+    }
+    if ($CapturePercent.Count -and !$binary.Contains('CHLORIUM_VISUAL_PROBES_V1')) { throw 'Rebuild a harness supporting visual probes' }
     if ($WithUserMods -and (!$measurementOnly -or !$binary.Contains('CHLORIUM_AUTO_USER_MOD_PROFILE_V1'))) {
         throw 'Full-stack tests require the measurement harness with verified mod inventory'
     }
@@ -80,6 +89,7 @@ $previousFrom = $env:CHLORIUM_TARGET_FROM
 $previousTo = $env:CHLORIUM_TARGET_TO
 $previousStreamMode = $env:CHLORIUM_STREAM_MODE
 $previousExpectedMods = $env:CHLORIUM_EXPECTED_USER_MODS
+$previousProbes = $env:CHLORIUM_VISUAL_PROBES
 $testProcess = $null
 $resourceTrace = $null
 $stagedProduction = $false
@@ -127,7 +137,10 @@ try {
             @{ relative='eclipse.eclipse-menu\config.json'; values=@{
                 'level.autoldm'=$false; 'player.noclip'=$false;
                 'global.speedhack.toggle'=$false; 'player.autoclick'=$false;
-                'player.autokill'=$false; 'player.framestepper'=$false
+                'player.autokill'=$false; 'player.framestepper'=$false;
+                'level.showhitboxes'=$false; 'level.showhitboxes.ondeath'=$false;
+                'player.showtrajectory'=$false; 'level.layoutmode'=$false;
+                'level.noshader'=$false
             } },
             @{ relative='local.clickassist\saved.json'; values=@{ 'stage'=4 } },
             @{ relative='geode.loader\settings.json'; values=@{ 'file-log-level'='info' } }
@@ -180,6 +193,8 @@ try {
         exact_transform_math_verification = [bool]$env:CHLORIUM_TRANSFORM_VERIFY
         target_from_percent = $FromPercent; target_to_percent = $ToPercent
         low_detail_requested = $false; disable_shake_requested = $true
+        debug_overlays_disabled_requested = [bool]$WithUserMods
+        visual_probe_percents = @($CapturePercent)
         mod_profile = if ($WithUserMods) { 'user-mods' } else { 'isolated' }
         mod_profile_sha256 = $profileHash; profile_settings_sha256 = $profileSettingsHash
         experimental_stream_mode = $StreamMode
@@ -193,6 +208,7 @@ try {
     $env:CHLORIUM_BENCHMARK_SECONDS = if ($BenchmarkSeconds -gt 0) { [string]$BenchmarkSeconds } else { $null }
     $env:CHLORIUM_BENCHMARK_LEVEL = [string]$Level
     $env:CHLORIUM_VISUAL_WATCH = if ($VisualWatch) { '1' } else { $null }
+    $env:CHLORIUM_VISUAL_PROBES = if ($CapturePercent.Count) { ($CapturePercent | ForEach-Object { $_.ToString([Globalization.CultureInfo]::InvariantCulture) }) -join ',' } else { $null }
     $env:CHLORIUM_ATLAS_STORAGE_REGRESSION = if ($AtlasStorageRegression) { '1' } else { $null }
     $env:CHLORIUM_TARGET_FROM = $FromPercent.ToString([Globalization.CultureInfo]::InvariantCulture)
     $env:CHLORIUM_TARGET_TO = $ToPercent.ToString([Globalization.CultureInfo]::InvariantCulture)
@@ -237,6 +253,7 @@ try {
     $env:CHLORIUM_TARGET_TO = $previousTo
     $env:CHLORIUM_STREAM_MODE = $previousStreamMode
     $env:CHLORIUM_EXPECTED_USER_MODS = $previousExpectedMods
+    $env:CHLORIUM_VISUAL_PROBES = $previousProbes
     if ($resourceTrace) { $resourceTrace.Dispose() }
     if ($testProcess -and !$testProcess.HasExited) { Stop-Process -Id $testProcess.Id -ErrorAction SilentlyContinue }
     if ($testProcess) { $testProcess.WaitForExit(5000) | Out-Null; $testProcess.Dispose() }

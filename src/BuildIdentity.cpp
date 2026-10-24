@@ -9,6 +9,10 @@ __declspec(dllexport) extern const char chloriumBuildIdentity[] =
 #ifdef CHLORIUM_EXPERIMENTAL_NATIVE_STREAMING
 __declspec(dllexport) extern const char chloriumStreamingIdentity[] = "CHLORIUM_EXPERIMENTAL_NATIVE_STREAMING_V1";
 #endif
+#ifdef CHLORIUM_EXPERIMENTAL_AFFINE_POINT
+__declspec(dllexport) extern const char chloriumAffineIdentity[] = "CHLORIUM_EXPERIMENTAL_AFFINE_POINT_V1";
+__declspec(dllexport) extern const char chloriumAffineRevision[] = "CHLORIUM_AFFINE_POINT_REVISION_V2";
+#endif
 #ifdef CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS
 __declspec(dllexport) extern const char chloriumAreaIdentity[] = "CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS_V1";
 #endif

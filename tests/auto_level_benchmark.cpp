@@ -15,6 +15,7 @@
 #include "renderer/NativeAtlasUploads.hpp"
 #include "renderer/NativeTransformStats.hpp"
 #include "renderer/NativeMatrixStats.hpp"
+#include "renderer/NativeAffinePoint.hpp"
 #include "BProfiler.hpp"
 #include "FrameWatch.hpp"
 #ifdef CHLORIUM_EXPERIMENTAL_NATIVE_MOVES
@@ -38,6 +39,10 @@ extern "C" __declspec(dllexport) const char chloriumAutoCollisionIdentity[] =
     "CHLORIUM_AUTO_COLLISIONS_ALLOWLIST_V4";
 extern "C" __declspec(dllexport) const char chloriumUserModProfileIdentity[] =
     "CHLORIUM_AUTO_USER_MOD_PROFILE_V1";
+extern "C" __declspec(dllexport) const char chloriumVisualReadbackIdentity[] =
+    "CHLORIUM_VISUAL_READBACK_V2";
+extern "C" __declspec(dllexport) const char chloriumVisualProbeIdentity[] =
+    "CHLORIUM_VISUAL_PROBES_V1";
 bool chloriumAuditUseNative() { return std::getenv("CHLORIUM_AUDIT_NATIVE") != nullptr; }
 #ifdef CHLORIUM_MEASUREMENT_ONLY
 extern "C" __declspec(dllexport) extern const char chloriumPassiveTransformTimingIdentity[] =
@@ -125,6 +130,18 @@ size_t gapFrames = 0;
 std::string gapReason;
 
 void line(const std::string& text) { if (report) { report << text << '\n'; report.flush(); } }
+void recordAffineStats(float percent) {
+    using Stats = chlorium::affine::Stats;
+    using Read = bool (*)(Stats*, std::size_t);
+    static const auto read = [] {
+        auto module = GetModuleHandleW(L"local.chlorium.dll");
+        return module ? reinterpret_cast<Read>(GetProcAddress(module, "ChloriumReadAffineStats")) : nullptr;
+    }();
+    Stats stats;
+    if (read && read(&stats, sizeof(stats)))
+        line(fmt::format("{{\"event\":\"affine_point_stats\",\"percent\":{},\"calls\":{},\"compatibility_fallbacks\":{},\"installed\":{}}}",
+            percent, stats.calls, stats.fallbacks, stats.installed));
+}
 bool matrixSnapshot(chlorium::matrix::Snapshot& result) {
     static const auto read = [] {
         auto module = GetModuleHandleW(L"local.chlorium.dll");
@@ -352,7 +369,10 @@ void finish(bool fullLevel, const char* reason) {
         fullLevel, targeted, targetCompleted, targetFrom, targetTo, deaths, observed, excluded, pending, rendererInactiveFrames, matjson::Value(BProfiler::toString()).dump()));
     const bool graphicsVerified = atlasUploadStats().verificationFailures == 0;
     const bool mathVerified = transformMathStats().failures == 0;
-    stop((fullLevel || targetCompleted) && deaths == 0 && graphicsVerified && mathVerified,
+    recordAffineStats(PlayLayer::get() ? PlayLayer::get()->getCurrentPercent() : -1.f);
+    const bool visualVerified = frameWatch.coverageComplete();
+    stop((fullLevel || targetCompleted) && deaths == 0 && graphicsVerified && mathVerified && visualVerified,
+        !visualVerified ? "Visual readback failed or coverage is incomplete; no black-screen verdict is valid" :
         !mathVerified ? "Exact native transform math verification failed" :
         graphicsVerified ? reason : "GPU byte verification failed; native upload repaired the frame");
 }
@@ -695,6 +715,7 @@ void tick() {
                 time, play->getCurrentPercent()));
         }
         const auto math = transformMathStats();
+        recordAffineStats(play->getCurrentPercent());
         line(fmt::format("{{\"event\":\"native_transform_math\",\"elapsed\":{},\"percent\":{},\"installed\":{},\"phases\":{},\"calls\":{},\"hits\":{},\"misses\":{},\"bypassed\":{},\"low_reuse_phases\":{},\"verified\":{},\"failures\":{}}}",
             time, play->getCurrentPercent(), math.installed, math.phases, math.calls, math.hits,
             math.misses, math.bypassed, math.lowReusePhases, math.verified, math.failures));
