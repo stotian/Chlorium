@@ -1,6 +1,7 @@
 #pragma once
 // Private diagnostic only. Read failures are coverage gaps, never black frames.
 #include "VisualSignature.hpp"
+#include "renderer/ContextEpoch.hpp"
 #include <array>
 #include <algorithm>
 #include <cstdint>
@@ -14,6 +15,55 @@
 
 namespace chlorium::test {
 class FrameWatch {
+    // These guards do not log or allocate. A failed image allocation, report
+    // formatting, or callback must never leave the game's pixel buffer mapped
+    // or its read framebuffer redirected to the diagnostic target.
+    struct PackBufferScope {
+        GLint previous = 0;
+        bool mapped = false, restored = false;
+        PackBufferScope() noexcept { glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING, &previous); }
+        PackBufferScope(const PackBufferScope&) = delete;
+        bool restore() noexcept {
+            if (restored) return true;
+            const bool intact = !mapped || glUnmapBuffer(GL_PIXEL_PACK_BUFFER) == GL_TRUE;
+            mapped = false;
+            glBindBuffer(GL_PIXEL_PACK_BUFFER, previous);
+            restored = true;
+            return intact;
+        }
+        ~PackBufferScope() noexcept { restore(); }
+    };
+    struct ReadbackScope {
+        GLint readFramebuffer = 0, defaultReadBuffer = 0, packBuffer = 0;
+        GLint alignment = 0, rowLength = 0, skipRows = 0, skipPixels = 0;
+        bool restored = false;
+        ReadbackScope() noexcept {
+            glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFramebuffer);
+            glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING, &packBuffer);
+            glGetIntegerv(GL_PACK_ALIGNMENT, &alignment);
+            glGetIntegerv(GL_PACK_ROW_LENGTH, &rowLength);
+            glGetIntegerv(GL_PACK_SKIP_ROWS, &skipRows);
+            glGetIntegerv(GL_PACK_SKIP_PIXELS, &skipPixels);
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+            // GL_READ_BUFFER belongs to its framebuffer. Preserve the default
+            // target's selector separately from the caller's read FBO.
+            glGetIntegerv(GL_READ_BUFFER, &defaultReadBuffer);
+        }
+        ReadbackScope(const ReadbackScope&) = delete;
+        void restore() noexcept {
+            if (restored) return;
+            glBindBuffer(GL_PIXEL_PACK_BUFFER, packBuffer);
+            glPixelStorei(GL_PACK_ALIGNMENT, alignment);
+            glPixelStorei(GL_PACK_ROW_LENGTH, rowLength);
+            glPixelStorei(GL_PACK_SKIP_ROWS, skipRows);
+            glPixelStorei(GL_PACK_SKIP_PIXELS, skipPixels);
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+            glReadBuffer(defaultReadBuffer);
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, readFramebuffer);
+            restored = true;
+        }
+        ~ReadbackScope() noexcept { restore(); }
+    };
     struct Pending {
         GLuint buffer = 0;
         GLsync fence = nullptr;
@@ -34,6 +84,7 @@ class FrameWatch {
     uint64_t lastFrame = 0, lastHash = 0;
     double hashStartWall = 0, hashStartGame = 0;
     HGLRC context = nullptr;
+    std::shared_ptr<chlorium::research::gl::ContextEpoch<>> contextIdentity;
 
     bool errors(const char* stage, uint64_t frame) {
         bool found = false;
@@ -51,14 +102,15 @@ class FrameWatch {
             << ",0,0,0,0,0,0,0\n";
         if (invalid <= 32) log(fmt::format("{{\"event\":\"visual_read_error\",\"stage\":\"{}\",\"frame\":{},\"percent\":{}}}", stage,p.frame,p.percent));
     }
-    void save(const Pending& p, const std::vector<unsigned char>& rgb, bool dark, unsigned flags, const VisualSignature& sample) {
+    bool save(const Pending& p, const std::vector<unsigned char>& rgb, bool dark, unsigned flags, const VisualSignature& sample) {
         const auto path=fmt::format("{}.{}-{}.ppm",prefix,dark?"dark":"anomaly",p.frame);
         std::ofstream file(path,std::ios::binary);
         file << "P6\n" << p.width << ' ' << p.height << "\n255\n";
         file.write(reinterpret_cast<const char*>(rgb.data()),rgb.size()); file.flush();
-        if(dark) ++saved; else ++anomalySaved;
+        if(file) { if(dark) ++saved; else ++anomalySaved; }
         log(fmt::format("{{\"event\":\"{}\",\"frame\":{},\"game_time\":{},\"elapsed\":{},\"percent\":{},\"mean_rgb\":{},\"black_fraction\":{},\"flags\":{},\"saved\":{}}}",
             dark?"dark_frame":"visual_anomaly",p.frame,p.gameTime,p.wallElapsed,p.percent,sample.mean,sample.blackFraction,flags,bool(file)));
+        return bool(file);
     }
     void collect(Pending& p, bool wait = false) {
         if (!p.fence) return;
@@ -68,14 +120,14 @@ class FrameWatch {
         if(status!=GL_ALREADY_SIGNALED && status!=GL_CONDITION_SATISFIED) {
             errors("fence",p.frame); reject(p,"fence"); return;
         }
-        GLint oldPack=0; glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING,&oldPack);
+        PackBufferScope state;
         glBindBuffer(GL_PIXEL_PACK_BUFFER,p.buffer);
         const auto bytes=static_cast<GLsizeiptr>(p.width)*p.height*4;
         const auto pixels=static_cast<const unsigned char*>(glMapBufferRange(GL_PIXEL_PACK_BUFFER,0,bytes,GL_MAP_READ_BIT));
+        state.mapped = pixels != nullptr;
         const bool mapError=errors("map",p.frame);
         if(!pixels || mapError) {
-            if(pixels) glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-            glBindBuffer(GL_PIXEL_PACK_BUFFER,oldPack); reject(p,"map"); return;
+            state.restore(); errors("map_cleanup",p.frame); reject(p,"map"); return;
         }
         auto sample=analyzeVisual(pixels,p.width,p.height);
         double repeatedMs=0;
@@ -94,16 +146,19 @@ class FrameWatch {
                 std::memcpy(rgb.data()+(static_cast<size_t>(p.height-1-y)*p.width+x)*3,
                     pixels+(static_cast<size_t>(y)*p.width+x)*4,3);
         }
-        const bool intact=glUnmapBuffer(GL_PIXEL_PACK_BUFFER)==GL_TRUE;
-        glBindBuffer(GL_PIXEL_PACK_BUFFER,oldPack);
+        const bool intact=state.restore();
         const bool readError=errors("unmap_restore",p.frame);
         if(!sample.valid || !intact || readError) { reject(p,"unmap_or_restore"); return; }
-        if(captureDark || captureOther) save(p,rgb,captureDark,flags,sample);
+        if((captureDark || captureOther) && !save(p,rgb,captureDark,flags,sample)) {
+            reject(p,"image_output"); return;
+        }
         if(captureProbe) {
             const auto path=fmt::format("{}.probe-{}.ppm",prefix,p.frame);
             std::ofstream file(path,std::ios::binary);
             file << "P6\n" << p.width << ' ' << p.height << "\n255\n";
-            file.write(reinterpret_cast<const char*>(rgb.data()),rgb.size()); file.flush(); ++probeSaved;
+            file.write(reinterpret_cast<const char*>(rgb.data()),rgb.size()); file.flush();
+            if(!file) { reject(p,"probe_output"); return; }
+            ++probeSaved;
             while(nextProbe<probes.size() && p.percent>=probes[nextProbe]) {
                 log(fmt::format("{{\"event\":\"visual_probe\",\"frame\":{},\"requested_percent\":{},\"percent\":{},\"game_time\":{},\"saved\":{}}}",
                     p.frame,probes[nextProbe++],p.percent,p.gameTime,bool(file)));
@@ -112,6 +167,7 @@ class FrameWatch {
         csv << p.frame << ',' << p.wallElapsed << ',' << p.gameTime << ',' << p.percent << ','
             << sample.centerMean << ',' << (sample.centerMean<2) << ',' << sample.dark << ",1,"
             << flags << ',' << sample.hash << ',' << repeatedMs << '\n';
+        if(!csv) { reject(p,"sample_output"); return; }
         ++measured; if(measured%120==0) csv.flush();
         lastDark=sample.dark; lastFlags=flags; haveHash=true; lastHash=sample.hash; lastFrame=p.frame;
     }
@@ -123,9 +179,23 @@ class FrameWatch {
         for(auto p:order) { collect(*p,wait); if(p->fence) break; }
     }
 public:
+    void observeBeforeTarget(std::uint64_t frame,double percent) {
+        if(!active || !wglGetCurrentContext()) return;
+        // Establish a real error boundary before the requested interval.
+        // Target-frame errors remain strict failures in draw(); stale loading
+        // errors are logged outside coverage, never relabelled as black pixels.
+        for(unsigned n=0;n<16;++n) {
+            const auto code=glGetError();
+            if(code==GL_NO_ERROR) break;
+            log(fmt::format("{{\"event\":\"pretarget_gl_error\",\"frame\":{},\"percent\":{},\"code\":{}}}",frame,percent,code));
+        }
+    }
     bool enabled() const { return active; }
     unsigned captureCount() const { return saved+anomalySaved+probeSaved; }
-    bool coverageComplete() const { return !active || (queued>0 && measured==queued && !invalid && !skipped && !unresolved); }
+    bool coverageComplete() const {
+        return !active || (queued>0 && measured==queued && attempted==queued &&
+            !invalid && !skipped && !unresolved && nextProbe==probes.size() && bool(csv));
+    }
     void open(std::string output,std::function<void(const std::string&)> callback) {
         active=std::getenv("CHLORIUM_VISUAL_WATCH")!=nullptr;
         if(!active) return;
@@ -149,11 +219,20 @@ public:
         ++attempted;
         Pending sample{}; sample.frame=frame; sample.percent=percent; sample.gameTime=gameTime; sample.wallElapsed=wallElapsed;
         const auto current=wglGetCurrentContext();
-        if(!current || !glFenceSync || !glClientWaitSync || !glMapBufferRange) { reject(sample,"unsupported_context_or_api"); return; }
-        if(context && context!=current) {
-            for(auto& p:pending) if(p.fence) reject(p,"context_change_pending");
-            pending={}; lastDark=false; haveHash=false; lastFlags=0;
-            log("{\"event\":\"visual_context_changed\"}");
+        if(!current || !glFenceSync || !glClientWaitSync || !glDeleteSync || !glMapBufferRange ||
+           !glUnmapBuffer || !glBindBuffer || !glGenBuffers || !glDeleteBuffers ||
+           !glBufferData || !glGetBufferParameteriv || !glBindFramebuffer) {
+            reject(sample,"unsupported_context_or_api"); return;
+        }
+        if(context && (context!=current || !contextIdentity || !contextIdentity->isCurrent())) {
+            // Buffer/sync names belong to the original context. Do not delete
+            // them in another context or orphan a fresh ring on every switch.
+            // Keep it available for a later call with the owning context.
+            reject(sample,"context_or_generation_changed"); return;
+        }
+        if(!contextIdentity) {
+            contextIdentity=chlorium::research::gl::acquireContextEpoch();
+            if(!contextIdentity) {reject(sample,"context_identity_unavailable");return;}
         }
         context=current;
         // Consuming errors is diagnostic-only. Record native errors separately
@@ -165,12 +244,8 @@ public:
         RECT client{}; const auto window=WindowFromDC(wglGetCurrentDC());
         if(!window || !GetClientRect(window,&client) || client.right<16 || client.bottom<16 ||
            static_cast<uint64_t>(client.right)*client.bottom>4*1024*1024) { reject(sample,"drawable_dimensions"); return; }
-        GLint readFB=0,oldPack=0,alignment=0,rowLength=0,skipRows=0,skipPixels=0;
-        glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING,&readFB); glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING,&oldPack);
-        glGetIntegerv(GL_PACK_ALIGNMENT,&alignment); glGetIntegerv(GL_PACK_ROW_LENGTH,&rowLength);
-        glGetIntegerv(GL_PACK_SKIP_ROWS,&skipRows); glGetIntegerv(GL_PACK_SKIP_PIXELS,&skipPixels);
-        glBindFramebuffer(GL_READ_FRAMEBUFFER,0);
-        GLint oldReadBuffer=0; glGetIntegerv(GL_READ_BUFFER,&oldReadBuffer); glReadBuffer(GL_BACK);
+        ReadbackScope state;
+        glReadBuffer(GL_BACK);
         glPixelStorei(GL_PACK_ALIGNMENT,1); glPixelStorei(GL_PACK_ROW_LENGTH,0);
         glPixelStorei(GL_PACK_SKIP_ROWS,0); glPixelStorei(GL_PACK_SKIP_PIXELS,0);
         auto& p=*it;
@@ -185,32 +260,45 @@ public:
         GLint allocated=0; glGetBufferParameteriv(GL_PIXEL_PACK_BUFFER,GL_BUFFER_SIZE,&allocated);
         const bool allocationError=errors("allocation",frame);
         bool ok=p.buffer && allocated==byteCount && !allocationError;
+        if(!ok) { p.width=0; p.height=0; } // a failed allocation must be retried
         if(ok) {
             glReadPixels(0,0,p.width,p.height,GL_RGBA,GL_UNSIGNED_BYTE,nullptr);
             ok=!errors("read_pixels",frame);
-            if(ok) { p.fence=glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE,0); ok=p.fence && !errors("create_fence",frame); }
+            if(ok) {
+                p.fence=glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE,0);
+                const bool fenceError=errors("create_fence",frame);
+                ok=p.fence && !fenceError;
+            }
         }
-        glBindBuffer(GL_PIXEL_PACK_BUFFER,oldPack);
-        glPixelStorei(GL_PACK_ALIGNMENT,alignment); glPixelStorei(GL_PACK_ROW_LENGTH,rowLength);
-        glPixelStorei(GL_PACK_SKIP_ROWS,skipRows); glPixelStorei(GL_PACK_SKIP_PIXELS,skipPixels);
-        glReadBuffer(oldReadBuffer); glBindFramebuffer(GL_READ_FRAMEBUFFER,readFB);
+        state.restore();
         const bool restoreError=errors("restore",frame);
         if(!ok || restoreError) {
             if(p.fence) {glDeleteSync(p.fence);p.fence=nullptr;}
+            errors("queue_cleanup",frame);
             reject(p,"queue_or_restore"); return;
         }
         ++queued;
     }
     void finish() {
         if(!active) return;
-        if(wglGetCurrentContext()==context) {
+        if(wglGetCurrentContext()==context && contextIdentity && contextIdentity->isCurrent()) {
+            if(context && errors("preexisting_finish",lastFrame)) {
+                Pending sample{}; sample.frame=lastFrame;
+                reject(sample,"preexisting_finish_gl_error");
+            }
             collectReady(true); // bounded drain, at most four waits of 25 ms
             for(auto& p:pending) {
                 if(p.fence) {++unresolved; glDeleteSync(p.fence);p.fence=nullptr;reject(p,"pending_at_finish");}
                 if(p.buffer) {glDeleteBuffers(1,&p.buffer);p.buffer=0;}
             }
+            if(context && errors("finish_cleanup",lastFrame)) {
+                Pending sample{}; sample.frame=lastFrame;
+                reject(sample,"finish_cleanup");
+            }
         } else for(auto& p:pending) if(p.fence) {++unresolved;reject(p,"finish_context_unavailable");}
         csv.flush();
+        if(nextProbe<probes.size()) log(fmt::format("{{\"event\":\"visual_probe_missing\",\"requested\":{},\"captured\":{},\"next_percent\":{}}}",
+            probes.size(),nextProbe,probes[nextProbe]));
         log(fmt::format("{{\"event\":\"visual_coverage\",\"version\":2,\"attempted\":{},\"queued\":{},\"measured\":{},\"skipped\":{},\"invalid\":{},\"pending_at_finish\":{},\"dark_captures\":{},\"anomaly_captures\":{},\"complete\":{}}}",
             attempted,queued,measured,skipped,invalid,unresolved,saved,anomalySaved,coverageComplete()));
     }

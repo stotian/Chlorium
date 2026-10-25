@@ -1,3 +1,13 @@
+# Branche active : v0.3.0-alpha.1
+
+Le renderer V5 est la base du projet depuis le 25 octobre 2026, à la demande
+explicite de l'utilisateur. L'alpha.6 mathématique est arrêtée et archivée sous
+`legacy-chlorium` ; les entrées ci-dessous conservent l'historique des essais.
+V5 préserve le programme/uniformes/indices natifs. Les 32 scénarios GPU contrôlés
+ne prouvent pas une absence de noirs en jeu ni un multiplicateur de FPS.
+
+---
+
 # Versions de Chlorium
 
 ## Convention
@@ -21,8 +31,10 @@ Le manifeste Geode n'accepte qu'un suffixe de prerelease reconnu et numerique.
 | `v0.2.0-alpha.605` | Experience de decomposition Area | V3b verifiee numeriquement dans Orbit ; pics pires dans une paire de performances |
 | `v0.2.0-alpha.606` | Pipeline mathematique combine | Deux composants actifs ; regression mesuree dans Orbit 83-88.5 % |
 | `v0.2.0-alpha.607` | Liberation de caches heap | Essai de chargement Orbit : 13.316 Mio rendus en 1.8037 ms ; gain FPS non etabli |
+| `v0.2.0-alpha.608` | Lots natifs instancies sur GPU | Prototype actif dans Grief 22-26 %, retour utilisateur dÃ©favorable ; fidÃ©litÃ© non validÃ©e, non promu |
+| `v0.2.0-alpha.609` | Quads natifs complets | Paquet historique conservÃ© sÃ©parÃ©ment ; sources modifiÃ©es aprÃ¨s sa crÃ©ation, aucune nouvelle validation V5 |
 
-Les numeros 601-607 identifient des experiences, pas une progression validee
+Les numeros 601-609 identifient des experiences, pas une progression validee
 de performances. Ne pas remplacer automatiquement la candidate normale par une experience.
 Un seul paquet partageant l'identifiant `local.chlorium` peut etre charge.
 L'alpha.6 a remplace l'installation locale apres ces essais ; l'alpha.5 est sauvegardee.

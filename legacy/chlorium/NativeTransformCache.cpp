@@ -1,8 +1,8 @@
-#include "NativeTransformMath.hpp"
-#include "NativeTransformStats.hpp"
-#include "NativeDecompositionSites.hpp"
+#include "renderer/NativeTransformMath.hpp"
+#include "renderer/NativeTransformStats.hpp"
+#include "renderer/NativeDecompositionSites.hpp"
 #ifdef CHLORIUM_EXPERIMENTAL_AREA_MATH
-#include "NearCallThunk.hpp"
+#include "renderer/NearCallThunk.hpp"
 #endif
 #include <Geode/Geode.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
@@ -11,7 +11,7 @@
 #include <intrin.h>
 #include <float.h>
 #include <cstdlib>
-#include "OwnedMathBodyHash.hpp"
+#include "renderer/OwnedMathBodyHash.hpp"
 
 using namespace geode::prelude;
 

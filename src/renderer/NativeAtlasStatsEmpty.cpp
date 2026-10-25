@@ -1,4 +1,4 @@
-#if defined(CHLORIUM_NATIVE_GPU_TRANSFERS_ONLY) || defined(CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS) || defined(CHLORIUM_EXPERIMENTAL_MATRIX_REUSE)
+#if defined(CHLORIUM_NATIVE_GPU_TRANSFERS_ONLY) || defined(CHLORIUM_EXPERIMENTAL_AREA_DIVISIONS) || defined(CHLORIUM_EXPERIMENTAL_MATRIX_REUSE) || defined(CHLORIUM_EXPERIMENTAL_NATIVE_SNAPSHOTS)
 #include "NativeAtlasUploads.hpp"
 // Native GPU transfers do not need a shadow cache or atlas lifecycle hooks.
 namespace chlorium::native {

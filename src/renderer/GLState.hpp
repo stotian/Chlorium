@@ -2,7 +2,7 @@
 
 #include <array>
 
-enum class GLStateScope { Full, SpriteDraw };
+enum class GLStateScope { Full, SpriteDraw, NativeQuad, NativeVertex };
 
 // Used with OpenGL already included. Save each texture unit before switching
 // units; querying the binding on one unit and restoring it on another corrupts
@@ -60,6 +60,31 @@ struct GLStateSnapshot {
     static GLStateSnapshot capture(GLStateScope scope = GLStateScope::Full) {
         GLStateSnapshot state{};
         state.scope = scope;
+        if (scope == GLStateScope::NativeVertex) {
+            glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &state.vao);
+            glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &state.arrayBuffer);
+            glGetIntegerv(GL_ACTIVE_TEXTURE, &state.activeTexture);
+            glActiveTexture(GL_TEXTURE0);
+            glGetIntegerv(GL_TEXTURE_BINDING_2D, &state.textures[0]);
+            glActiveTexture(state.activeTexture);
+            return state;
+        }
+        if (scope == GLStateScope::NativeQuad) {
+            // The native-quad backend does not touch blend, UBO, indirect,
+            // texture unit 1 or the native VAO's element buffer. Buffer writes
+            // restore ARRAY_BUFFER themselves, including failure paths.
+            // This scope requires the backend's already-checked GL 4.6 API.
+            glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &state.vao);
+            glGetIntegerv(GL_CURRENT_PROGRAM, &state.program);
+            glGetIntegerv(GL_ACTIVE_TEXTURE, &state.activeTexture);
+            glActiveTexture(GL_TEXTURE0);
+            glGetIntegerv(GL_TEXTURE_BINDING_2D, &state.textures[0]);
+            glActiveTexture(state.activeTexture);
+            glGetIntegerv(storageBinding, &state.storageBuffer);
+            static_assert(storageBindings[3] == 4);
+            state.indexedStorage[3] = captureIndexed(storageBinding, storageStart, storageSize, 4);
+            return state;
+        }
         glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &state.vao);
         glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &state.arrayBuffer);
         glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &state.elementBuffer);
@@ -101,6 +126,24 @@ struct GLStateSnapshot {
     }
 
     void restore() const {
+        if (scope == GLStateScope::NativeVertex) {
+            glBindVertexArray(vao);
+            glBindBuffer(GL_ARRAY_BUFFER, arrayBuffer);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, textures[0]);
+            glActiveTexture(activeTexture);
+            return;
+        }
+        if (scope == GLStateScope::NativeQuad) {
+            glBindVertexArray(vao); // Also restores that VAO's element binding.
+            restoreIndexed(storageTarget, 4, indexedStorage[3]);
+            glBindBuffer(storageTarget, storageBuffer);
+            glUseProgram(program);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, textures[0]);
+            glActiveTexture(activeTexture);
+            return;
+        }
         glBindVertexArray(vao);
         glBindBuffer(GL_ARRAY_BUFFER, arrayBuffer);
         if (vao || elementBuffer) glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);

@@ -2,6 +2,7 @@
 #include "Geode/cocos/CCDirector.h"
 #include "renderer/Buffer.hpp"
 #include "renderer/Shader.hpp"
+#include "renderer/ContextEpoch.hpp"
 
 using namespace geode::prelude;
 
@@ -11,16 +12,11 @@ $on_mod(Loaded) {
     modStartTime = std::chrono::steady_clock::now();
 }
 
-using ProcGlObjectLabel = void(*)(GLenum, GLuint, GLsizei, const char*);
-
-ProcGlObjectLabel glObjectLabelProc = nullptr;
-
 void glObjectLabel(GLenum id, GLuint name, GLsizei length, const char* label) {
     #ifdef GEODE_WINDOWS
-    if (!glObjectLabelProc)
-        glObjectLabelProc = (ProcGlObjectLabel)wglGetProcAddress("glObjectLabel");
-    if (glObjectLabelProc)
-        glObjectLabelProc(id, name, length, label);
+    // WGL procedures belong to the current driver/context. Never reuse a
+    // process-global address or call WGL's unsupported-function sentinels.
+    (void)chlorium::research::gl::labelObject(id, name, length, label);
     #endif
 }
 

@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "decision": "RETRAVAILLER_NO_RELEASE",
+  "audit_is_exhaustive_bug_absence_proof": false,
+  "scope": [
+    "native normal runtime",
+    "native quads V4",
+    "legacy static renderer",
+    "Area/group CPU architecture",
+    "GL/buffers/shaders",
+    "build profiles",
+    "measurement/comparison",
+    "packaging/provenance"
+  ],
+  "compiler_analysis": {
+    "profile": "native-static-analysis",
+    "source_translation_units": 5,
+    "warnings_total": 50,
+    "project_source_warnings": 3,
+    "project_warning_codes": [
+      "C4996",
+      "C6246"
+    ],
+    "note": "Not a clean-warning build; legacy renderer excluded from this analyzer profile"
+  },
+  "checks": {
+    "context_gpu": 36,
+    "render_cpu": 18,
+    "buffer_cpu": 36,
+    "geometry_cpu": 7,
+    "profile_invariants": 6,
+    "mixed_build_profiles": "rejected_before_compilation"
+  },
+  "builds": {
+    "quad-audit-r3": {
+      "compile_status": "passed",
+      "link_status": "passed",
+      "game_status": "not_run",
+      "dll_sha256": "a69258af244bce6e2604e87302a7b8b46a4f716d53a189bd039627522e0096a5",
+      "source_archive_sha256": "d78d38262de99bb375d6d016eb048691510f74d8e5dc14a2fa022be062aeb24a"
+    },
+    "measurement-audit-r2": {
+      "compile_status": "passed",
+      "link_status": "passed",
+      "game_status": "not_run",
+      "dll_sha256": "b91ec1e7d4ad95d95b9621a45beb0a73dff0cb55758ab29b7b9c1b609672cd12",
+      "source_archive_sha256": "c60e0174934b3a05e30ae123936cfd949631889595ec96a5a7ce46d09eca9e75"
+    },
+    "native-static-analysis": {
+      "compile_status": "passed",
+      "link_status": "passed",
+      "game_status": "not_run",
+      "dll_sha256": "d93361337c159d80779685dd40c208587ae6fcad22fc40f51c4bda5f2a95fdbc",
+      "source_archive_sha256": "1f62e9f37ed5b1288a22a497366033a5db26bbc32cf5b590c702fa83a22aff13"
+    }
+  },
+  "restored_profiles": [
+    {
+      "diagnostic": "runtime-area-census-v5",
+      "status": "restored_and_sha256_verified",
+      "files": 90
+    },
+    {
+      "diagnostic": "runtime-area-census-v5-visible",
+      "status": "restored_and_sha256_verified",
+      "files": 90
+    },
+    {
+      "diagnostic": "runtime-area-census-v5-frames",
+      "status": "restored_and_sha256_verified",
+      "files": 90
+    }
+  ],
+  "installed_package_sha256": "7939B0339E33C2F0F8B8E2A9FEDA9B1793A5C36D6F2558BDC4BC4C2877533AEA",
+  "source_sha256": {
+    "src/common.cpp": "a4fa11d74267a400d83399f5f83a88d31701cb94651ec6f302be946df44d671c",
+    "src/renderer/NativeQuadRenderer.cpp": "972013a7d722ba1ea9188fa6a7c318d353967bc772ff8c3726a2f73b4386a920",
+    "tests/auto_level_benchmark.cpp": "cb93c1238f9b8622e113646034c9dcbb42a8538e5d3904c5c2aafc3c8ff1c62a",
+    "tools/ModProfile.ps1": "23be9f380f5da4be63964abfa88ea43884a65e367d96658b828e578fba2bb6ea",
+    "tools/run-runtime-audit.ps1": "40478bc8eaef12ec6c14719a3e3b42fd6ec28c7a58d5875d1c23a2e0807dbbea",
+    "tests/mod-profile-checks.ps1": "7107de0671894a41a3d338833438b8caad6e7d365fdf4397c4da72d1eb04cc62",
+    "research/R4-04/build_quad_candidate.py": "748346c3487376358f58142632c5a6b5635dbb3d03ef2c6b93b9a86a401c44ca",
+    "research/R4-04/package_private_fixture.py": "bd21d324afca335168c52cdcf71c34e476df4d5fc81732decc48910c51d5101b"
+  },
+  "black_screen_fix_proven": false,
+  "fps_x3_proven": false
+}

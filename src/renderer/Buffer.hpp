@@ -2,6 +2,11 @@
 
 #include "Geode/cocos/platform/win32/CCGL.h"
 #include <common.hpp>
+#ifdef CHLORIUM_BUFFER_CONTEXT_HEADER
+#include CHLORIUM_BUFFER_CONTEXT_HEADER
+#else
+#include "ContextEpoch.hpp"
+#endif
 
 #define GL_SHADER_STORAGE_BUFFER 0x90D2
 #ifndef GL_SHADER_STORAGE_BARRIER_BIT
@@ -10,6 +15,9 @@
 
 class Buffer {
 public:
+    Buffer() = default;
+    Buffer(const Buffer&) = delete;
+    Buffer& operator=(const Buffer&) = delete;
     ~Buffer();
 
     inline usize getSize() const { return size; }
@@ -20,14 +28,17 @@ public:
     void write(void* data, usize size, usize offset = 0);
 
     inline void bindAs(GLenum binding) {
+        requireContext();
         glBindBuffer(binding, id);
     }
 
     inline void bindAsUniformBuffer(u32 binding) {
+        requireContext();
         glBindBufferBase(GL_UNIFORM_BUFFER, binding, id);
     }
 
     inline void bindAsStorageBuffer(u32 binding) {
+        requireContext();
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, binding, id);
     }
 
@@ -87,6 +98,10 @@ public:
     }
 
 private:
+    void requireContext() const;
+    // GL names are local to their owning context. Never delete a stale name
+    // in a replacement context, where that number may belong to the game.
+    std::shared_ptr<chlorium::research::gl::ContextEpoch<>> context;
     usize size = 0;
     u32 id = 0;
     bool shouldMap = true;

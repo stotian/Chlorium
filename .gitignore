@@ -11,6 +11,11 @@
 !/research/R4-00/
 !/research/R4-01/
 !/research/R4-06/
+!/research/R4-07/
+!/research/R4-04/
+!/research/R4-08/
+!/research/R4-09/
+!/research/R4-10/
 **/*.local.json
 **/*.local.txt
 !/LICENSE.md
@@ -28,6 +33,7 @@
 !/package-local.ps1
 !/test-*.cmd
 !/src/
+!/legacy/
 !/resources/
 !/tests/
 !/tools/

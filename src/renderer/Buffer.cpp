@@ -1,16 +1,22 @@
 #include "Buffer.hpp"
 #include <stdexcept>
 #include <limits>
+#include <memory>
+#include <algorithm>
 
 using namespace geode::prelude;
 
 Buffer::~Buffer() {
     unmap();
-    glDeleteBuffers(1, &id);
+    if (id && context) context->destroyOwnedBuffer(id);
+}
+void Buffer::requireContext() const {
+    if (!context || !context->isCurrent()) throw std::runtime_error("GPU buffer context/epoch is stale");
 }
 
 void Buffer::read(void* data, usize size, usize offset) {
     if (!size) return;
+    requireContext();
     if (!data || offset > this->size || size > this->size - offset)
         throw std::out_of_range("Buffer read outside storage");
 
@@ -25,6 +31,7 @@ void Buffer::read(void* data, usize size, usize offset) {
 
 void Buffer::write(void* data, usize size, usize offset) {
     if (!size) return;
+    requireContext();
     if (!data || offset > this->size || size > this->size - offset)
         throw std::out_of_range("Buffer write outside storage");
 
@@ -57,6 +64,7 @@ void Buffer::unmap() {
 void Buffer::flush(usize offset, usize size) {
     if (!mappedData) return;
     if (!size) return;
+    requireContext();
     if (offset > this->size || size > this->size - offset) {
         assert(false && "Buffer upload outside allocated storage");
         return;
@@ -86,30 +94,35 @@ void Buffer::flush(usize offset, usize size) {
 Buffer* Buffer::create(const char* name, usize size, GLenum usage) {
     if (size > static_cast<usize>(std::numeric_limits<std::ptrdiff_t>::max()))
         throw std::length_error("GPU buffer size is not representable");
+    auto ret = std::make_unique<Buffer>();
+    ret->context = chlorium::research::gl::acquireContextEpoch();
+    if (!ret->context) throw std::runtime_error("GPU buffer requires a current context");
     u32 buffer = 0;
     glGenBuffers(1, &buffer);
     if (!buffer) throw std::runtime_error("GPU buffer name allocation failed");
+    ret->id = buffer;
 
     i32 previouslyBoundBuffer;
     glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &previouslyBoundBuffer);
 
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
     // glGenBuffers reserves a name; the object exists only after first bind.
-    glObjectLabel(GL_BUFFER, buffer, strlen(name), name);
+    if (name) glObjectLabel(GL_BUFFER, buffer, static_cast<GLsizei>(std::min<std::size_t>(strlen(name), 128)), name);
     glBufferData(GL_ARRAY_BUFFER, size, NULL, usage);
     GLint64 allocated = 0;
     glGetBufferParameteri64v(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &allocated);
 
     glBindBuffer(GL_ARRAY_BUFFER, previouslyBoundBuffer);
     if (allocated < 0 || static_cast<usize>(allocated) != size) {
-        glDeleteBuffers(1, &buffer);
         throw std::runtime_error("GPU buffer storage allocation failed");
     }
 
-    auto ret  = new Buffer();
-    ret->id = buffer;
     ret->size = size;
+#ifdef CHLORIUM_EXPERIMENTAL_NATIVE_QUADS
+    ret->shouldMap = false; // Owned quad storage uses explicit sparse sub-updates.
+#else
     ret->shouldMap = Mod::get()->getSettingValue<bool>("use_mapped_buffers");
+#endif
 
-    return ret;
+    return ret.release();
 }

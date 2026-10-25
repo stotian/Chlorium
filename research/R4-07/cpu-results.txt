@@ -1,0 +1,2 @@
+area_trace_checks.cpp
+{"event":"area_input_census_fixture","checks":62,"status":"passed","semantic_coverage":"partial_input_only","record_bytes":144}

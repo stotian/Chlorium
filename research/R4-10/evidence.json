@@ -1,0 +1,80 @@
+{
+  "experiment": "R4-10",
+  "decision": "keep_as_requested_experimental_baseline",
+  "version": "v0.3.0-alpha.1",
+  "runtime_tested_package_sha256": "fda75cd4c9ba34a029c28896ac41ea2759bbb76ba4db7a26046dc3311c23b33a",
+  "delivered_package_sha256": "475191c75d2e1d6afffd34cb75ec2f705f44055d86fccbae8b1304b84dc36f1d",
+  "dll_sha256": "947d59e36bcce14026c97630cd95d1e1ac04fbb62dcf872f1a0a2718491d91b7",
+  "repack_changed_entries": [
+    "about.md",
+    "changelog.md",
+    "support.md"
+  ],
+  "render_payload_unchanged_since_runtime_test": true,
+  "gpu_checks": 218,
+  "exact_pixel_scenarios": 32,
+  "gpu_readback_state_checks": 257,
+  "runtime": {
+    "level": 129598490,
+    "target_percent": [
+      74,
+      78
+    ],
+    "user_mods": true,
+    "low_detail": false,
+    "shake": false,
+    "noclip": false,
+    "sample_counts": {
+      "sans": 189,
+      "avec": 183
+    },
+    "deaths": [
+      0,
+      0
+    ],
+    "excluded_visual_frames": {
+      "sans": 0,
+      "avec": 0
+    },
+    "full_black_frames": [
+      0,
+      0
+    ],
+    "additional_classified_anomalies": 0,
+    "left_side_anomaly_present_in_both": true,
+    "coverage_complete": true,
+    "native_snapshot_last_record": {
+      "event": "native_snapshot_stats",
+      "percent": 78.01939,
+      "active": true,
+      "frames": 5837,
+      "sprites": 8119,
+      "uploaded_bytes": 2588608512,
+      "fallbacks": 0,
+      "capture_ms": 10250.598699999962
+    },
+    "comparison_sha256": "6bebd6c52e48d189b91f92994c048975797bf5b20a51839a042811aa7fced570"
+  },
+  "performance_comparison": false,
+  "fps_gain_claim": null,
+  "limitations": [
+    "Only the targeted Heliopolis window was compared.",
+    "No universal blackscreen fix or stable 60 FPS demonstrated.",
+    "Native Area/Transform CPU loops remain unchanged.",
+    "A previous invalid readback run is rejected, not included."
+  ],
+  "bismuth_reference_package_sha256": "af319b8d2e45ff0689708f05cbad079fe0b87039af776d6aa1d95a3397158926",
+  "legacy_reference_commit": "2312559c47fdaea2c03ee2934c3db8cbd77e45ac",
+  "legacy_package_sha256": "7939b0339e33c2f0f8b8e2a9feda9b1793a5c36d6f2558bdc4bc4c2877533aea",
+  "cmake_rebuild": {
+    "build_exit_code": 0,
+    "package_exit_code": 0,
+    "package_entries": 34,
+    "dll_sha256": "1f85c766aebe5531b979319214284bdef0ad6fb838453372b281b53cfa118c90",
+    "package_sha256": "d8c7ecb70987e518257b53b9a364753b0691d0145d43acae3c1fd1befb734246",
+    "generator_built_from_matching_bindings_sources": true,
+    "warning": "C4996: getenv in NativeQuadRenderer.cpp; not warning-free",
+    "game_tested": false,
+    "note": "Independent CMake build validation. Delivery retains the runtime-tested manual DLL."
+  }
+}

@@ -11,7 +11,20 @@ Exigences utilisateur, mises a jour le 21 octobre 2026 :
   pas une exception codee dans le moteur.
 - Le fork est independant et s'appelle Chlorium, avec attribution a Bismuth.
 
-## Tests en jeu autorises
+## Cadre actuel — mandat V5 reçu le 25 octobre 2026
+
+Travail individuel, sans sous-agents ni captures périodiques. Après le préflight,
+la mission d'ingénierie du 25 octobre autorise compilations et tests techniques
+statiques/CPU/GPU isolés. Aucun lancement de GD ni changement de l'installation
+sans autorisation explicite. Voir le journal `EXPERIMENTS-V5.md` pour les preuves.
+Les autorisations historiques décrites plus bas sont conservées comme historique.
+La liste suivante définit le périmètre des niveaux envisageables ; elle ne
+constitue pas une autorisation actuelle de lancer le jeu.
+Avant jeu, installation/remplacement de DLL, sauvegardes, push, PR ou publication,
+appliquer le consentement explicite prévu par le mandat V5. Continuer l'audit et
+la préparation hors jeu dans le worktree de recherche en attendant ces étapes.
+
+## Niveaux dans le périmètre
 
 Liste actuelle : **133260800** (Orbit auto), **129598490** (Heliopolis auto),
 **88952972** (Grief auto). Peaceful et LIMBO ont ete retires a la demande

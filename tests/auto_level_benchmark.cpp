@@ -15,6 +15,7 @@
 #include "renderer/NativeAtlasUploads.hpp"
 #include "renderer/NativeTransformStats.hpp"
 #include "renderer/NativeMatrixStats.hpp"
+#include "renderer/NativeSnapshotStats.hpp"
 #include "renderer/NativeAffinePoint.hpp"
 #include "BProfiler.hpp"
 #include "FrameWatch.hpp"
@@ -34,6 +35,9 @@
 #include <sstream>
 
 using namespace geode::prelude;
+#ifdef CHLORIUM_AREA_WORK_CENSUS
+extern "C" void ChloriumFlushAreaWorkCensus();
+#endif
 using Clock = std::chrono::steady_clock;
 extern "C" __declspec(dllexport) const char chloriumAutoCollisionIdentity[] =
     "CHLORIUM_AUTO_COLLISIONS_ALLOWLIST_V4";
@@ -47,6 +51,12 @@ extern "C" __declspec(dllexport) const char chloriumTargetedMathTelemetryIdentit
     "CHLORIUM_TARGETED_MATH_TELEMETRY_V1";
 extern "C" __declspec(dllexport) const char chloriumMathPipelineAuditIdentity[] =
     "CHLORIUM_MATH_PIPELINE_AUDIT_V1";
+extern "C" __declspec(dllexport) const char chloriumSnapshotAuditIdentity[] =
+    "CHLORIUM_NATIVE_SNAPSHOT_AUDIT_V1";
+extern "C" __declspec(dllexport) const char chloriumPresentedCaptureIdentity[] =
+    "CHLORIUM_PRESENTED_CAPTURE_ONLY_V3";
+extern "C" __declspec(dllexport) const char chloriumReadbackStateIdentity[] =
+    "CHLORIUM_READBACK_STATE_GUARDS_V5";
 bool chloriumAuditUseNative() { return std::getenv("CHLORIUM_AUDIT_NATIVE") != nullptr; }
 #ifdef CHLORIUM_MEASUREMENT_ONLY
 extern "C" __declspec(dllexport) extern const char chloriumPassiveTransformTimingIdentity[] =
@@ -74,7 +84,7 @@ bool setupFinished = false;
 bool timingStarted = false, finishing = false, frameHadContext = false;
 bool previousFrameEligible = false, foregroundBeforeFrame = false;
 int menuFrames = 0, draws = 0, queryIndex = 0, activeQuery = -1, progressSecond = -1;
-int lastCaptureSegment = -1, deaths = 0, rendererInactiveFrames = 0, issuedQuery = -1;
+int deaths = 0, rendererInactiveFrames = 0, issuedQuery = -1;
 double duration = 360, initialGameTime = 0;
 double targetFrom = 0, targetTo = 100;
 bool targeted = false, targetEntered = false, targetCompleted = false;
@@ -135,6 +145,21 @@ std::string gapReason;
 
 void line(const std::string& text) { if (report) { report << text << '\n'; report.flush(); } }
 bool matrixSnapshot(chlorium::matrix::Snapshot& result);
+bool recordNativeSnapshotStats(float percent) {
+    using Stats = chlorium::snapshot::Stats;
+    using Read = bool (*)(Stats*, std::size_t);
+    static const auto read = [] {
+        auto module = GetModuleHandleW(L"local.chlorium.dll");
+        return module ? reinterpret_cast<Read>(GetProcAddress(module, "ChloriumReadNativeSnapshotStats")) : nullptr;
+    }();
+    Stats stats;
+    const bool available = read && read(&stats, sizeof(stats)) && stats.version == 1;
+    if (available)
+        line(fmt::format("{{\"event\":\"native_snapshot_stats\",\"percent\":{},\"active\":{},\"frames\":{},\"sprites\":{},\"uploaded_bytes\":{},\"fallbacks\":{},\"capture_ms\":{}}}",
+            percent, stats.active != 0, stats.frames, stats.sprites, stats.uploadedBytes, stats.fallbacks, stats.captureMilliseconds));
+    return !std::getenv("CHLORIUM_REQUIRE_NATIVE_SNAPSHOTS") ||
+        (available && stats.active && stats.frames && stats.sprites && !stats.fallbacks);
+}
 bool recordMathPatchState(float percent) {
     using namespace chlorium::native;
     static const auto requirement = std::getenv("CHLORIUM_REQUIRE_TARGETED_MATH_V3");
@@ -382,6 +407,9 @@ bool recordFrame(PlayLayer* play, Clock::time_point before, Clock::time_point af
     return included;
 }
 void finish(bool fullLevel, const char* reason) {
+#ifdef CHLORIUM_AREA_WORK_CENSUS
+    ChloriumFlushAreaWorkCensus();
+#endif
     if (finishing) return;
     finishing = true;
     frameWatch.finish();
@@ -397,8 +425,11 @@ void finish(bool fullLevel, const char* reason) {
     const bool mathVerified = transformMathStats().failures == 0;
     const bool targetedMathActive = recordMathPatchState(PlayLayer::get() ? PlayLayer::get()->getCurrentPercent() : -1.f);
     recordAffineStats(PlayLayer::get() ? PlayLayer::get()->getCurrentPercent() : -1.f);
+    const bool snapshotsActive = recordNativeSnapshotStats(PlayLayer::get() ? PlayLayer::get()->getCurrentPercent() : -1.f);
     const bool visualVerified = frameWatch.coverageComplete();
-    stop((fullLevel || targetCompleted) && deaths == 0 && graphicsVerified && mathVerified && visualVerified && targetedMathActive,
+    stop((fullLevel || targetCompleted) && deaths == 0 && graphicsVerified && mathVerified && visualVerified && targetedMathActive && snapshotsActive,
+        deaths != 0 ? "Run contains deaths; paired performance/visual validation rejected" :
+        !snapshotsActive ? "Native snapshot renderer did not stay active; no GPU batching performance verdict is valid" :
         !targetedMathActive ? "Required targeted math V3 is unavailable, inactive or changed owner; no candidate performance verdict is valid" :
         !visualVerified ? "Visual readback failed or coverage is incomplete; no black-screen verdict is valid" :
         !mathVerified ? "Exact native transform math verification failed" :
@@ -453,33 +484,12 @@ class EndNode : public CCNode {
             issuedQuery = activeQuery;
             queryIndex = (queryIndex + 1) % 32; activeQuery = -1;
         }
-        if (!running || !PlayLayer::get() || elapsed() < 1 || !inTarget(PlayLayer::get())) return;
-        const int segment = segmentFor(PlayLayer::get());
-        if (segment <= lastCaptureSegment) return;
-        lastCaptureSegment = segment;
-        GLint view[4]{}, readFB = 0, drawFB = 0, alignment = 4;
-        glGetIntegerv(GL_VIEWPORT, view); glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFB);
-        glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFB);
-        if (view[2] <= 0 || view[3] <= 0 || view[2] > 8192 || view[3] > 8192) return;
-        std::vector<unsigned char> pixels(static_cast<size_t>(view[2]) * view[3] * 4);
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, drawFB);
-        GLint previousBuffer; glGetIntegerv(GL_READ_BUFFER, &previousBuffer);
-        glGetIntegerv(GL_PACK_ALIGNMENT, &alignment);
-        glReadBuffer(drawFB ? GL_COLOR_ATTACHMENT0 : GL_BACK); glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        glReadPixels(view[0], view[1], view[2], view[3], GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
-        glReadBuffer(previousBuffer); glPixelStorei(GL_PACK_ALIGNMENT, alignment);
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, readFB);
-        std::vector<unsigned char> rgb(static_cast<size_t>(view[2]) * view[3] * 3);
-        for (int y = 0; y < view[3]; ++y)
-            for (int x = 0; x < view[2]; ++x)
-                std::memcpy(rgb.data() + (static_cast<size_t>(y) * view[2] + x) * 3,
-                    pixels.data() + (static_cast<size_t>(view[3] - 1 - y) * view[2] + x) * 4, 3);
-        std::ofstream image(directory / "references" / fmt::format("auto-{}-{}-{}.ppm", allowedLevel, chloriumAuditUseNative() ? "native" : "chlorium", segment), std::ios::binary);
-        image << "P6\n" << view[2] << ' ' << view[3] << "\n255\n";
-        image.write(reinterpret_cast<const char*>(rgb.data()), rgb.size());
-        capturedThisFrame = true; // Screenshot readback/I/O is not a frame-time sample.
-        line(fmt::format("{{\"event\":\"capture\",\"segment\":{},\"percent\":{},\"game_time\":{}}}",
-            segment, PlayLayer::get()->getCurrentPercent(), PlayLayer::get()->m_gameState.m_totalTime));
+        // Do not read a framebuffer from inside the object-layer traversal.
+        // Native effects can render into an intermediate/multisampled target;
+        // the former unvalidated reference read could generate GL errors and
+        // poison the first presented-frame read. FrameWatch is the sole image
+        // collector, after final composition, with validated PBO/FBO state.
+
     }
 };
 void tick() {
@@ -747,6 +757,7 @@ void tick() {
             finish(false, "Required targeted math V3 stopped being active"); return;
         }
         recordAffineStats(play->getCurrentPercent());
+        recordNativeSnapshotStats(play->getCurrentPercent());
         line(fmt::format("{{\"event\":\"native_transform_math\",\"elapsed\":{},\"percent\":{},\"installed\":{},\"phases\":{},\"calls\":{},\"hits\":{},\"misses\":{},\"bypassed\":{},\"low_reuse_phases\":{},\"verified\":{},\"failures\":{}}}",
             time, play->getCurrentPercent(), math.installed, math.phases, math.calls, math.hits,
             math.misses, math.bypassed, math.lowReusePhases, math.verified, math.failures));
@@ -809,6 +820,10 @@ class $modify(AutoBenchmarkPresentation, CCEGLView) {
     void swapBuffers() {
         // The default back buffer is the actual image about to be presented.
         // Scene traversal can still be inside an intermediate shader target.
+        if (running && setupFinished && PlayLayer::get() && targeted) {
+            const auto percent=PlayLayer::get()->getCurrentPercent();
+            if(percent>=targetFrom-.5 && percent<targetFrom) frameWatch.observeBeforeTarget(frameSequence,percent);
+        }
         if (running && timingStarted && PlayLayer::get() && inTarget(PlayLayer::get())) {
             const auto capturesBefore = frameWatch.captureCount();
             frameWatch.draw(frameSequence, PlayLayer::get()->getCurrentPercent(),

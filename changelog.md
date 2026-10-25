@@ -1,3 +1,17 @@
+# 25 October 2026 — v0.3.0-alpha.1: renderer becomes the project baseline
+
+Retire the alpha.6 math-only path to legacy/chlorium and preserve a local archive.
+Make the native-vertex CPU/GPU renderer the default CMake/local build.
+Preserve the actual native shader, uniforms and unsigned-short index store;
+submit complete 96-byte native quads without reconstructing the MVP or colors.
+Retain native preparation, callbacks, gameplay and fallback for unknown atlas hooks.
+
+Pass 32 exact GPU pixel scenarios and 257 readback/state checks. A paired
+Heliopolis 74–78% visual diagnostic with user mods reaches the target with no
+deaths, no invalid reads, and no additional full/partial dark episode detected.
+This is targeted visual evidence, not a universal blackscreen fix or an FPS claim.
+Keep original Bismuth attribution and distinguish its supplied 2.2081 reference.
+
 # 24 October 2026 - Measured math experiments and unused heap caches
 
 Resume authorized testing. Compile targeted math V3/V3b and normal mode;

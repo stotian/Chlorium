@@ -8,6 +8,10 @@ $cacheText = Get-Content -LiteralPath $cachePath -Raw
 $auditBuild = $cacheText -match '(?m)^CHLORIUM_RUNTIME_AUDIT:BOOL=ON\r?$'
 $harnessOnly = $cacheText -match '(?m)^CHLORIUM_AUDIT_HARNESS_ONLY:BOOL=ON\r?$'
 $orbitProbe = $cacheText -match '(?m)^CHLORIUM_ORBIT_BENCHMARK:BOOL=ON\r?$'
+$nativeQuads = $cacheText -match '(?m)^CHLORIUM_EXPERIMENTAL_NATIVE_QUADS:BOOL=ON\r?$'
+$nativeVertex = $cacheText -match '(?m)^CHLORIUM_NATIVE_VERTEX_PARITY:BOOL=ON\r?$'
+$baseRenderer = $nativeQuads -and $nativeVertex
+$snapshots = $cacheText -match '(?m)^CHLORIUM_EXPERIMENTAL_NATIVE_SNAPSHOTS:BOOL=ON\r?$'
 $staticRenderer = $cacheText -match '(?m)^CHLORIUM_EXPERIMENTAL_STATIC_RENDERER:BOOL=ON\r?$'
 $intrusiveProfiler = $cacheText -match '(?m)^CHLORIUM_ENABLE_PROFILER:BOOL=ON\r?$'
 $experimentalMoves = $cacheText -match '(?m)^CHLORIUM_EXPERIMENTAL_NATIVE_MOVES:BOOL=ON\r?$'
@@ -21,8 +25,9 @@ $pipeline = $cacheText -match '(?m)^CHLORIUM_EXPERIMENTAL_MATH_PIPELINE:BOOL=ON\
 $heap = $cacheText -match '(?m)^CHLORIUM_EXPERIMENTAL_HEAP_RELEASE:BOOL=ON\r?$'
 $retiredAtlas = $cacheText -match '(?m)^CHLORIUM_NATIVE_ATLAS_CACHE:BOOL=ON\r?$'
 if (!$Audit -and $retiredAtlas) { throw 'The retired GPU atlas cache cannot be packaged as a normal mod' }
-if (($streaming -or $area -or $matrix -or $affine -or $areaMath -or $heap) -and !$Experimental) { throw 'Use -Experimental with a separate output directory for experimental builds' }
-if ($Experimental -and ((!$streaming -and !$area -and !$matrix -and !$affine -and !$areaMath -and !$heap) -or $Audit -or
+if ((($snapshots -and !$baseRenderer) -or $streaming -or $area -or $matrix -or $affine -or $areaMath -or $heap) -and !$Experimental) { throw 'Use -Experimental with a separate output directory for alternate research builds' }
+if (!$Audit -and !$Experimental -and !$baseRenderer) { throw 'Legacy Chlorium is archived; the default package requires the native-vertex renderer' }
+if ($Experimental -and ((!$snapshots -and !$streaming -and !$area -and !$matrix -and !$affine -and !$areaMath -and !$heap) -or $Audit -or
     [IO.Path]::GetFullPath((Join-Path $root $OutputDirectory)) -eq (Join-Path $root 'dist'))) {
     throw 'An experimental package requires an isolated experimental build and output directory'
 }
@@ -32,7 +37,7 @@ if ([bool]$Audit -ne $auditBuild) {
 if (!$Audit -and ($harnessOnly -or $orbitProbe -or $intrusiveProfiler -or $experimentalMoves -or $measurementOnly)) {
     throw 'A development harness is enabled: create a normal build before packaging Chlorium'
 }
-if (!$Audit -and $staticRenderer) {
+if (!$Audit -and $staticRenderer -and !$snapshots) {
     throw 'The incomplete static renderer is development-only; create a normal native-compatible build'
 }
 $out = Join-Path $root $OutputDirectory
@@ -43,10 +48,10 @@ $id = if ($Audit) { 'local.chlorium.audit' } else { $manifest.id }
 $manifest.id = $id
 if ($Audit) { $manifest.name = 'Chlorium runtime audit' }
 elseif ($Experimental) {
-    $manifest.name = if ($heap) { 'Chlorium unused heap cache experiment' } elseif ($pipeline) { 'Chlorium exact math pipeline experiment' } elseif ($areaMath) { 'Chlorium Area decomposition experiment' } elseif ($affine) { 'Chlorium affine point experiment' } elseif ($matrix) { 'Chlorium matrix reuse experiment' } elseif ($area) { 'Chlorium Area arithmetic experiment' } else { 'Chlorium streaming experiment' }
+    $manifest.name = if ($baseRenderer) { 'Chlorium CPU/GPU renderer' } elseif ($nativeQuads) { 'Chlorium exact native quad GPU experiment' } elseif ($snapshots) { 'Chlorium native snapshot GPU experiment' } elseif ($heap) { 'Chlorium unused heap cache experiment' } elseif ($pipeline) { 'Chlorium exact math pipeline experiment' } elseif ($areaMath) { 'Chlorium Area decomposition experiment' } elseif ($affine) { 'Chlorium affine point experiment' } elseif ($matrix) { 'Chlorium matrix reuse experiment' } elseif ($area) { 'Chlorium Area arithmetic experiment' } else { 'Chlorium streaming experiment' }
     # Geode accepts a known prerelease tag and one numeric suffix only.
     # Keep the experiment name in `name`; extra suffixes prevent loading.
-    $manifest.version = if ($heap) { 'v0.2.0-alpha.607' } elseif ($pipeline) { 'v0.2.0-alpha.606' } elseif ($areaMath) { 'v0.2.0-alpha.605' } elseif ($affine) { 'v0.2.0-alpha.604' } elseif ($matrix) { 'v0.2.0-alpha.603' } elseif ($area) { 'v0.2.0-alpha.602' } else { 'v0.2.0-alpha.601' }
+    $manifest.version = if ($baseRenderer) { $manifest.version } elseif ($nativeQuads) { 'v0.2.0-alpha.610' } elseif ($snapshots) { 'v0.2.0-alpha.608' } elseif ($heap) { 'v0.2.0-alpha.607' } elseif ($pipeline) { 'v0.2.0-alpha.606' } elseif ($areaMath) { 'v0.2.0-alpha.605' } elseif ($affine) { 'v0.2.0-alpha.604' } elseif ($matrix) { 'v0.2.0-alpha.603' } elseif ($area) { 'v0.2.0-alpha.602' } else { 'v0.2.0-alpha.601' }
 }
 else {
     # Native packages expose only controls used by their active implementation.
@@ -54,7 +59,7 @@ else {
     $manifest.settings.PSObject.Properties.Remove('ingame_enable')
     $manifest.settings.PSObject.Properties.Remove('use_mapped_buffers')
 }
-if ($Experimental) {
+if ($Experimental -and (!$snapshots -or $nativeQuads)) {
     $manifest.settings.enabled.name = 'Activer cette experience'
     $manifest.settings.PSObject.Properties.Remove('ingame_enable')
     $manifest.settings.PSObject.Properties.Remove('use_mapped_buffers')
@@ -70,9 +75,9 @@ if (!$binaryText.Contains($identity)) {
     throw 'The DLL build identity does not match this package: a fresh build is required'
 }
 if (!$Audit -and !$Experimental -and
-    (!$binaryText.Contains('CHLORIUM_NATIVE_GPU_TRANSFERS_ONLY_V1') -or
+    (!$binaryText.Contains('CHLORIUM_NATIVE_VERTEX_BACKEND_V5') -or
       $binaryText.Contains('CHLORIUM_NATIVE_ATLAS_CACHE_IMPLEMENTATION_V1'))) {
-    throw 'Normal packages require native GPU transfers and no retired atlas cache'
+    throw 'The base renderer requires native-vertex V5 identity and no retired atlas cache'
 }
 if ($streaming -ne $binaryText.Contains('CHLORIUM_EXPERIMENTAL_NATIVE_STREAMING_V1')) {
     throw 'Streaming build identity mismatch: rebuild before packaging'
@@ -86,6 +91,9 @@ if ($areaMath -ne $binaryText.Contains('CHLORIUM_EXPERIMENTAL_AREA_MATH_V1')) { 
 if ($areaMath -and !$binaryText.Contains('CHLORIUM_AREA_MATH_TARGETED_CALLS_V3')) { throw 'Area math revision mismatch: rebuild before packaging' }
 if ($pipeline -ne $binaryText.Contains('CHLORIUM_EXPERIMENTAL_MATH_PIPELINE_V1') -or ($pipeline -and (!$matrix -or !$areaMath))) { throw 'Combined math pipeline identity/configuration mismatch' }
 if ($heap -ne $binaryText.Contains('CHLORIUM_EXPERIMENTAL_HEAP_RELEASE_V1')) { throw 'Heap release identity mismatch' }
+if ($snapshots -ne $binaryText.Contains('CHLORIUM_EXPERIMENTAL_NATIVE_SNAPSHOTS_V1')) { throw 'Native snapshot build identity mismatch' }
+if ($snapshots -and $binaryText.Contains('CHLORIUM_NATIVE_ATLAS_CACHE_IMPLEMENTATION_V1')) { throw 'Snapshot builds must not include the retired atlas cache' }
+if ($nativeQuads -and !$binaryText.Contains($(if ($nativeVertex) {'CHLORIUM_NATIVE_VERTEX_BACKEND_V5'} else {'CHLORIUM_NATIVE_QUAD_BACKEND_V4'}))) { throw 'Native renderer backend identity mismatch' }
 $binaryText = $null
 $package = Join-Path $out "$id.geode"
 if (Test-Path -LiteralPath $package) { Remove-Item -LiteralPath $package }

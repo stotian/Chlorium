@@ -1,5 +1,6 @@
 #include "Shader.hpp"
 #include "ShaderPreprocessor.hpp"
+#include "ContextEpoch.hpp"
 #include "Geode/cocos/platform/win32/CCGL.h"
 #include "common.hpp"
 #include "glslang/MachineIndependent/Versions.h"
@@ -11,18 +12,28 @@
 #include <SPIRV/GlslangToSpv.h>
 #include <optional>
 #include <memory>
+#include <cstdint>
+#include <new>
 
 using namespace geode;
 static std::map<std::string, std::shared_ptr<const u32>> programCache;
 static std::map<std::string, std::string> sourceCache;
-static std::shared_ptr<const u32> ownProgram(u32 id) {
-    return {new u32(id), [](const u32* handle) { glDeleteProgram(*handle); delete handle; }};
+static std::shared_ptr<const u32> ownProgram(u32 id, std::shared_ptr<chlorium::research::gl::ContextEpoch<>> context) {
+    const auto handle = new (std::nothrow) u32(id);
+    if (!handle) { glDeleteProgram(id); throw std::bad_alloc(); }
+    // shared_ptr invokes this deleter even if its control-block allocation
+    // fails. A new GL context may reuse an old program's numeric name.
+    return {handle, [context](const u32* value) {
+        if (context && context->isCurrent()) glDeleteProgram(*value);
+        delete value;
+    }};
 }
 void Shader::clearCache() { programCache.clear(); sourceCache.clear(); }
 
 
 Shader::~Shader() {
-    if (program && !programOwner) glDeleteProgram(program);
+    // All linked programs have a shared owner with a context generation.
+    // Never delete an unowned numeric name in whichever context happens to run.
 }
 
 void printErrorLog(std::string str) {
@@ -94,7 +105,9 @@ static u32 createShader(i32 type, const char* source) {
 }
 
 Shader* Shader::create(const ShaderSources& sources) {
-    const auto key = "draw:" + sources.vertexSource + '\0' + sources.fragmentSource;
+    auto context = chlorium::research::gl::acquireContextEpoch();
+    if (!context) return nullptr;
+    const auto key = std::to_string(context->epoch()) + ":draw:" + sources.vertexSource + '\0' + sources.fragmentSource;
     if (auto it = programCache.find(key); it != programCache.end()) {
         auto* shader = new Shader(); shader->programOwner = it->second;
         shader->program = *it->second; return shader;
@@ -132,12 +145,13 @@ Shader* Shader::create(const ShaderSources& sources) {
         return nullptr;
     }
 
-    Shader* shader = new Shader();
+    auto owner = ownProgram(program, std::move(context));
+    std::unique_ptr<Shader, decltype(&Shader::destroy)> shader(new Shader(), &Shader::destroy);
+    shader->programOwner = std::move(owner);
     shader->program = program;
-    shader->programOwner = ownProgram(program);
     if (programCache.size() >= 8) programCache.clear();
     programCache.emplace(key, shader->programOwner);
-    return shader;
+    return shader.release();
 }
 
 static u32 createShaderProgram(const std::vector<u32>& shaders) {
@@ -188,13 +202,15 @@ Shader* Shader::create(
 }
 
 Shader* Shader::createCompute(const fs::path& path, std::map<std::string, std::string> macroVariables) {
+    auto context = chlorium::research::gl::acquireContextEpoch();
+    if (!context) return nullptr;
     auto preCode = generatePreCode(macroVariables);
 
     auto source = preprocessShader(path, preCode, EShLangCompute);
     if (!source)
         return nullptr;
 
-    const auto key = "compute:" + *source;
+    const auto key = std::to_string(context->epoch()) + ":compute:" + *source;
     if (auto it = programCache.find(key); it != programCache.end()) {
         auto* shader = new Shader(); shader->programOwner = it->second;
         shader->program = *it->second; return shader;
@@ -210,12 +226,13 @@ Shader* Shader::createCompute(const fs::path& path, std::map<std::string, std::s
     if (program == 0)
         return nullptr;
 
-    Shader* ret = new Shader();
+    auto owner = ownProgram(program, std::move(context));
+    std::unique_ptr<Shader, decltype(&Shader::destroy)> ret(new Shader(), &Shader::destroy);
+    ret->programOwner = std::move(owner);
     ret->program = program;
-    ret->programOwner = ownProgram(program);
     if (programCache.size() >= 8) programCache.clear();
     programCache.emplace(key, ret->programOwner);
-    return ret;
+    return ret.release();
 }
 
 void Shader::setMatrix4(i32 location, const float* data) {

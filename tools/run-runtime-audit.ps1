@@ -41,8 +41,10 @@ try {
     $measurementOnly = $binary.Contains('CHLORIUM_MEASUREMENT_ONLY_V1')
     $supportsTargetedMath = $binary.Contains('CHLORIUM_TARGETED_MATH_TELEMETRY_V1')
     $supportsMathPipeline = $binary.Contains('CHLORIUM_MATH_PIPELINE_AUDIT_V1')
-    if ($VisualWatch -and !$binary.Contains('CHLORIUM_VISUAL_READBACK_V2')) {
-        throw 'New visual diagnostics require readback V2: validated reads, partial frames and complete coverage'
+    $supportsNativeSnapshots = $binary.Contains('CHLORIUM_NATIVE_SNAPSHOT_AUDIT_V1')
+    if ($VisualWatch -and (!$binary.Contains('CHLORIUM_VISUAL_READBACK_V2') -or
+        !$binary.Contains('CHLORIUM_PRESENTED_CAPTURE_ONLY_V3') -or !$binary.Contains('CHLORIUM_READBACK_STATE_GUARDS_V5'))) {
+        throw 'Rebuild visual diagnostics with presented-frame reads, scoped GL restoration, and complete probe/file coverage'
     }
     if ($CapturePercent.Count -and !$binary.Contains('CHLORIUM_VISUAL_PROBES_V1')) { throw 'Rebuild a harness supporting visual probes' }
     if ($WithUserMods -and (!$measurementOnly -or !$binary.Contains('CHLORIUM_AUTO_USER_MOD_PROFILE_V1'))) {
@@ -64,6 +66,7 @@ if (Test-Path -LiteralPath $destination) { throw 'An audit package already exist
 if ($measurementOnly -and (Test-Path -LiteralPath $productionDestination)) { throw 'The fixture already contains Chlorium; refusing to replace it' }
 $requireTargetedMath = $false
 $requireMathPipeline = $false
+$requireNativeSnapshots = $false
 if ($measurementOnly -and !$Native) {
     if (!$ProductionPackage) { $ProductionPackage = Join-Path $root 'dist\local.chlorium.geode' }
     Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -86,6 +89,10 @@ if ($measurementOnly -and !$Native) {
             if (!$supportsMathPipeline) { throw 'Rebuild the measurement module to require both active math pipeline components' }
             $requireMathPipeline = $true
         }
+        if ($binary.Contains('CHLORIUM_EXPERIMENTAL_NATIVE_SNAPSHOTS_V1')) {
+            if (!$supportsNativeSnapshots) { throw 'Rebuild the independent measurement module to verify native snapshot activation' }
+            $requireNativeSnapshots = $true
+        }
         $binary = $null
     } finally { $productionZip.Dispose() }
 }
@@ -104,6 +111,7 @@ $previousStreamMode = $env:CHLORIUM_STREAM_MODE
 $previousExpectedMods = $env:CHLORIUM_EXPECTED_USER_MODS
 $previousProbes = $env:CHLORIUM_VISUAL_PROBES
 $previousTargetedMath = $env:CHLORIUM_REQUIRE_TARGETED_MATH_V3
+$previousNativeSnapshots = $env:CHLORIUM_REQUIRE_NATIVE_SNAPSHOTS
 $testProcess = $null
 $resourceTrace = $null
 $stagedProduction = $false
@@ -116,6 +124,7 @@ $profileSettingsHash = $null
 $loaderSavedPath = Join-Path $env:LOCALAPPDATA 'GeometryDash\geode\mods\geode.loader\saved.json'
 try {
     if (Test-Path -LiteralPath ($output + '.stop-request')) { Remove-Item -LiteralPath ($output + '.stop-request') }
+    if (Test-Path -LiteralPath ($output + '.snapshot-failure.json')) { Remove-Item -LiteralPath ($output + '.snapshot-failure.json') }
     if (Test-Path -LiteralPath $output) { Remove-Item -LiteralPath $output }
     Copy-Item -LiteralPath $Package -Destination $destination
     if ($WithUserMods) {
@@ -181,7 +190,14 @@ try {
         $profileSettingsHash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData(
             [Text.Encoding]::UTF8.GetBytes(($effectiveSettings -join "`n"))))
         $env:CHLORIUM_EXPECTED_USER_MODS = (($userModManifest | Where-Object requested_enabled | ForEach-Object id) -join ',')
-    } else { $env:CHLORIUM_EXPECTED_USER_MODS = $null }
+    } else {
+        $env:CHLORIUM_EXPECTED_USER_MODS = $null
+        . (Join-Path $PSScriptRoot 'ModProfile.ps1')
+        $isolatedProfile = Get-ResearchModProfile -ModsDirectory (Join-Path $game 'geode/mods') -ProfileRoot (Join-Path $env:LOCALAPPDATA 'GeometryDash')
+        $profileHash = $isolatedProfile.profile_sha256
+        $profileSettingsHash = $isolatedProfile.settings_sha256
+        $isolatedProfile.mods | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath ($output + '.mods.json') -Encoding UTF8
+    }
     if ($measurementOnly -and !$Native) {
         Copy-Item -LiteralPath $ProductionPackage -Destination $productionDestination
         $stagedProduction = $true
@@ -210,6 +226,7 @@ try {
         area_math_trace_requested = $null -ne $env:CHLORIUM_AREA_MATH_TRACE
         targeted_math_v3_required = $requireTargetedMath
         combined_math_pipeline_required = $requireMathPipeline
+        native_snapshots_required = $requireNativeSnapshots
         target_from_percent = $FromPercent; target_to_percent = $ToPercent
         low_detail_requested = $false; disable_shake_requested = $true
         debug_overlays_disabled_requested = [bool]$WithUserMods
@@ -233,9 +250,39 @@ try {
     $env:CHLORIUM_TARGET_TO = $ToPercent.ToString([Globalization.CultureInfo]::InvariantCulture)
     $env:CHLORIUM_STREAM_MODE = $StreamMode
     $env:CHLORIUM_REQUIRE_TARGETED_MATH_V3 = if ($requireMathPipeline) { 'pipeline' } elseif ($requireTargetedMath) { '1' } else { $null }
+    $env:CHLORIUM_REQUIRE_NATIVE_SNAPSHOTS = if ($requireNativeSnapshots) { '1' } else { $null }
     # This is the visible interactive game being tested, not a background
     # helper. Let GD manage its own normal focused rendering/timing.
     $testProcess = Start-Process -FilePath (Join-Path $game 'GeometryDash.exe') -WorkingDirectory $game -PassThru
+    # One activation request, never a fabricated foreground metric. The
+    # harness still checks the real owning PID before/after measured frames.
+    if (!('ChloriumResearchFocus' -as [type])) {
+        Add-Type -TypeDefinition @'
+using System;
+using System.Runtime.InteropServices;
+public static class ChloriumResearchFocus {
+    [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr window);
+    [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr window, int mode);
+    [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr window, out uint pid);
+    public static uint ForegroundPid() {
+        uint pid; GetWindowThreadProcessId(GetForegroundWindow(), out pid); return pid;
+    }
+}
+'@
+    }
+    $focusDeadline = [DateTime]::UtcNow.AddSeconds(20)
+    while (!$testProcess.HasExited -and !$testProcess.MainWindowHandle -and [DateTime]::UtcNow -lt $focusDeadline) {
+        Start-Sleep -Milliseconds 100
+        $testProcess.Refresh()
+    }
+    $focusRequested = $false
+    if (!$testProcess.HasExited -and $testProcess.MainWindowHandle) {
+        [ChloriumResearchFocus]::ShowWindow($testProcess.MainWindowHandle,9) | Out-Null
+        $focusRequested = [ChloriumResearchFocus]::SetForegroundWindow($testProcess.MainWindowHandle)
+    }
+    [ordered]@{requested=$focusRequested;observed=([ChloriumResearchFocus]::ForegroundPid() -eq $testProcess.Id)} |
+        ConvertTo-Json | Set-Content -LiteralPath ($output + '.focus.json') -Encoding UTF8
     $processClock = [Diagnostics.Stopwatch]::StartNew()
     Write-Output "Dedicated test process: $($testProcess.Id)"
     $deadline = [DateTime]::UtcNow.AddSeconds([Math]::Max(600, $BenchmarkSeconds + 300))
@@ -275,6 +322,7 @@ try {
     $env:CHLORIUM_EXPECTED_USER_MODS = $previousExpectedMods
     $env:CHLORIUM_VISUAL_PROBES = $previousProbes
     $env:CHLORIUM_REQUIRE_TARGETED_MATH_V3 = $previousTargetedMath
+    $env:CHLORIUM_REQUIRE_NATIVE_SNAPSHOTS = $previousNativeSnapshots
     if ($resourceTrace) { $resourceTrace.Dispose() }
     if ($testProcess -and !$testProcess.HasExited) { Stop-Process -Id $testProcess.Id -ErrorAction SilentlyContinue }
     if ($testProcess) { $testProcess.WaitForExit(5000) | Out-Null; $testProcess.Dispose() }

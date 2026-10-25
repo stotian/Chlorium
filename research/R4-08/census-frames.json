@@ -1,0 +1,738 @@
+[
+  {
+    "schema": 1,
+    "phase": 0,
+    "percent": 96.00267791748047,
+    "area_inclusive_ms": 1.0972,
+    "value_calls": 42,
+    "visible": true,
+    "director_frame": 12108,
+    "physics_phases": 6,
+    "visible_phases": 1,
+    "dt_sum": 0.025000001303851604,
+    "stages": [
+      {
+        "name": "move_group",
+        "calls": 12,
+        "members": 6,
+        "inclusive_ms": 0.0181
+      },
+      {
+        "name": "rotate_group",
+        "calls": 24,
+        "members": 12,
+        "inclusive_ms": 0.1624
+      },
+      {
+        "name": "transform_group",
+        "calls": 48,
+        "members": 24,
+        "inclusive_ms": 0.7075999999999998
+      },
+      {
+        "name": "tint_group",
+        "calls": 0,
+        "members": 0,
+        "inclusive_ms": 0
+      },
+      {
+        "name": "transform_objects",
+        "calls": 24,
+        "members": 1020,
+        "inclusive_ms": 0.6557000000000001
+      }
+    ],
+    "diagnostic_only": true,
+    "native_calls_preserved": true
+  },
+  {
+    "schema": 1,
+    "phase": 1,
+    "percent": 96.02095794677734,
+    "area_inclusive_ms": 1.4756,
+    "value_calls": 70,
+    "visible": true,
+    "director_frame": 12109,
+    "physics_phases": 10,
+    "visible_phases": 1,
+    "dt_sum": 0.041666668839752674,
+    "stages": [
+      {
+        "name": "move_group",
+        "calls": 20,
+        "members": 10,
+        "inclusive_ms": 0.026600000000000006
+      },
+      {
+        "name": "rotate_group",
+        "calls": 40,
+        "members": 20,
+        "inclusive_ms": 0.2135
+      },
+      {
+        "name": "transform_group",
+        "calls": 80,
+        "members": 40,
+        "inclusive_ms": 1.0494999999999992
+      },
+      {
+        "name": "tint_group",
+        "calls": 0,
+        "members": 0,
+        "inclusive_ms": 0
+      },
+      {
+        "name": "transform_objects",
+        "calls": 40,
+        "members": 1700,
+        "inclusive_ms": 0.9682999999999999
+      }
+    ],
+    "diagnostic_only": true,
+    "native_calls_preserved": true
+  },
+  {
+    "schema": 1,
+    "phase": 2,
+    "percent": 96.05142974853516,
+    "area_inclusive_ms": 1.4043999999999999,
+    "value_calls": 63,
+    "visible": true,
+    "director_frame": 12110,
+    "physics_phases": 9,
+    "visible_phases": 1,
+    "dt_sum": 0.03750000195577741,
+    "stages": [
+      {
+        "name": "move_group",
+        "calls": 18,
+        "members": 9,
+        "inclusive_ms": 0.023500000000000004
+      },
+      {
+        "name": "rotate_group",
+        "calls": 36,
+        "members": 18,
+        "inclusive_ms": 0.19469999999999998
+      },
+      {
+        "name": "transform_group",
+        "calls": 72,
+        "members": 36,
+        "inclusive_ms": 1.0157999999999996
+      },
+      {
+        "name": "tint_group",
+        "calls": 0,
+        "members": 0,
+        "inclusive_ms": 0
+      },
+      {
+        "name": "transform_objects",
+        "calls": 36,
+        "members": 1530,
+        "inclusive_ms": 0.9378
+      }
+    ],
+    "diagnostic_only": true,
+    "native_calls_preserved": true
+  },
+  {
+    "schema": 1,
+    "phase": 3,
+    "percent": 96.07884979248047,
+    "area_inclusive_ms": 1.3466,
+    "value_calls": 56,
+    "visible": true,
+    "director_frame": 12111,
+    "physics_phases": 8,
+    "visible_phases": 1,
+    "dt_sum": 0.03333333507180214,
+    "stages": [
+      {
+        "name": "move_group",
+        "calls": 16,
+        "members": 8,
+        "inclusive_ms": 0.021
+      },
+      {
+        "name": "rotate_group",
+        "calls": 32,
+        "members": 16,
+        "inclusive_ms": 0.2202
+      },
+      {
+        "name": "transform_group",
+        "calls": 64,
+        "members": 32,
+        "inclusive_ms": 0.9392999999999995
+      },
+      {
+        "name": "tint_group",
+        "calls": 0,
+        "members": 0,
+        "inclusive_ms": 0
+      },
+      {
+        "name": "transform_objects",
+        "calls": 32,
+        "members": 1360,
+        "inclusive_ms": 0.8726999999999997
+      }
+    ],
+    "diagnostic_only": true,
+    "native_calls_preserved": true
+  },
+  {
+    "schema": 1,
+    "phase": 4,
+    "percent": 96.10321807861328,
+    "area_inclusive_ms": 1.4508,
+    "value_calls": 56,
+    "visible": true,
+    "director_frame": 12112,
+    "physics_phases": 8,
+    "visible_phases": 1,
+    "dt_sum": 0.03333333507180214,
+    "stages": [
+      {
+        "name": "move_group",
+        "calls": 16,
+        "members": 8,
+        "inclusive_ms": 0.022100000000000005
+      },
+      {
+        "name": "rotate_group",
+        "calls": 32,
+        "members": 16,
+        "inclusive_ms": 0.29499999999999993
+      },
+      {
+        "name": "transform_group",
+        "calls": 64,
+        "members": 32,
+        "inclusive_ms": 0.9567999999999994
+      },
+      {
+        "name": "tint_group",
+        "calls": 0,
+        "members": 0,
+        "inclusive_ms": 0
+      },
+      {
+        "name": "transform_objects",
+        "calls": 32,
+        "members": 1360,
+        "inclusive_ms": 0.8845999999999999
+      }
+    ],
+    "diagnostic_only": true,
+    "native_calls_preserved": true
+  },
+  {
+    "schema": 1,
+    "phase": 5,
+    "percent": 96.12760162353516,
+    "area_inclusive_ms": 1.5471,
+    "value_calls": 56,
+    "visible": true,
+    "director_frame": 12113,
+    "physics_phases": 8,
+    "visible_phases": 1,
+    "dt_sum": 0.03333333507180214,
+    "stages": [
+      {
+        "name": "move_group",
+        "calls": 16,
+        "members": 8,
+        "inclusive_ms": 0.0217
+      },
+      {
+        "name": "rotate_group",
+        "calls": 32,
+        "members": 16,
+        "inclusive_ms": 0.21139999999999992
+      },
+      {
+        "name": "transform_group",
+        "calls": 64,
+        "members": 32,
+        "inclusive_ms": 1.1468
+      },
+      {
+        "name": "tint_group",
+        "calls": 0,
+        "members": 0,
+        "inclusive_ms": 0
+      },
+      {
+        "name": "transform_objects",
+        "calls": 32,
+        "members": 1360,
+        "inclusive_ms": 1.0742
+      }
+    ],
+    "diagnostic_only": true,
+    "native_calls_preserved": true
+  },
+  {
+    "schema": 1,
+    "phase": 6,
+    "percent": 96.15196990966797,
+    "area_inclusive_ms": 17.0885,
+    "value_calls": 1190,
+    "visible": true,
+    "director_frame": 12114,
+    "physics_phases": 8,
+    "visible_phases": 1,
+    "dt_sum": 0.03333333507180214,
+    "stages": [
+      {
+        "name": "move_group",
+        "calls": 1150,
+        "members": 6511,
+        "inclusive_ms": 1.7141999999999937
+      },
+      {
+        "name": "rotate_group",
+        "calls": 32,
+        "members": 16,
+        "inclusive_ms": 0.45420000000000005
+      },
+      {
+        "name": "transform_group",
+        "calls": 1618,
+        "members": 13836,
+        "inclusive_ms": 11.954299999999947
+      },
+      {
+        "name": "tint_group",
+        "calls": 0,
+        "members": 0,
+        "inclusive_ms": 0
+      },
+      {
+        "name": "transform_objects",
+        "calls": 599,
+        "members": 27267,
+        "inclusive_ms": 10.569499999999993
+      }
+    ],
+    "diagnostic_only": true,
+    "native_calls_preserved": true
+  },
+  {
+    "schema": 1,
+    "phase": 7,
+    "percent": 96.17634582519531,
+    "area_inclusive_ms": 23.442800000000002,
+    "value_calls": 1859,
+    "visible": true,
+    "director_frame": 12115,
+    "physics_phases": 11,
+    "visible_phases": 1,
+    "dt_sum": 0.04583333572372794,
+    "stages": [
+      {
+        "name": "move_group",
+        "calls": 1804,
+        "members": 10230,
+        "inclusive_ms": 2.77520000000004
+      },
+      {
+        "name": "rotate_group",
+        "calls": 44,
+        "members": 22,
+        "inclusive_ms": 0.6149999999999999
+      },
+      {
+        "name": "transform_group",
+        "calls": 2530,
+        "members": 21736,
+        "inclusive_ms": 16.595499999999802
+      },
+      {
+        "name": "tint_group",
+        "calls": 0,
+        "members": 0,
+        "inclusive_ms": 0
+      },
+      {
+        "name": "transform_objects",
+        "calls": 935,
+        "members": 42581,
+        "inclusive_ms": 14.772900000000007
+      }
+    ],
+    "diagnostic_only": true,
+    "native_calls_preserved": true
+  },
+  {
+    "schema": 1,
+    "phase": 8,
+    "percent": 96.2098617553711,
+    "area_inclusive_ms": 31.5925,
+    "value_calls": 2535,
+    "visible": true,
+    "director_frame": 12116,
+    "physics_phases": 15,
+    "visible_phases": 1,
+    "dt_sum": 0.06250000325962901,
+    "stages": [
+      {
+        "name": "move_group",
+        "calls": 2460,
+        "members": 13950,
+        "inclusive_ms": 3.5250000000000767
+      },
+      {
+        "name": "rotate_group",
+        "calls": 60,
+        "members": 30,
+        "inclusive_ms": 0.7093999999999999
+      },
+      {
+        "name": "transform_group",
+        "calls": 3450,
+        "members": 29640,
+        "inclusive_ms": 22.682699999999922
+      },
+      {
+        "name": "tint_group",
+        "calls": 0,
+        "members": 0,
+        "inclusive_ms": 0
+      },
+      {
+        "name": "transform_objects",
+        "calls": 1275,
+        "members": 58065,
+        "inclusive_ms": 20.089000000000002
+      }
+    ],
+    "diagnostic_only": true,
+    "native_calls_preserved": true
+  },
+  {
+    "schema": 1,
+    "phase": 9,
+    "percent": 96.25556182861328,
+    "area_inclusive_ms": 42.76400000000001,
+    "value_calls": 3549,
+    "visible": true,
+    "director_frame": 12117,
+    "physics_phases": 21,
+    "visible_phases": 1,
+    "dt_sum": 0.08750000456348062,
+    "stages": [
+      {
+        "name": "move_group",
+        "calls": 3444,
+        "members": 19530,
+        "inclusive_ms": 4.053100000000098
+      },
+      {
+        "name": "rotate_group",
+        "calls": 84,
+        "members": 42,
+        "inclusive_ms": 0.9705999999999996
+      },
+      {
+        "name": "transform_group",
+        "calls": 4830,
+        "members": 41496,
+        "inclusive_ms": 31.399400000000014
+      },
+      {
+        "name": "tint_group",
+        "calls": 0,
+        "members": 0,
+        "inclusive_ms": 0
+      },
+      {
+        "name": "transform_objects",
+        "calls": 1785,
+        "members": 81291,
+        "inclusive_ms": 27.870399999999936
+      }
+    ],
+    "diagnostic_only": true,
+    "native_calls_preserved": true
+  },
+  {
+    "schema": 1,
+    "phase": 10,
+    "percent": 96.31954193115234,
+    "area_inclusive_ms": 51.3128,
+    "value_calls": 4394,
+    "visible": true,
+    "director_frame": 12118,
+    "physics_phases": 26,
+    "visible_phases": 1,
+    "dt_sum": 0.10833333898335695,
+    "stages": [
+      {
+        "name": "move_group",
+        "calls": 4264,
+        "members": 24180,
+        "inclusive_ms": 5.1909000000000125
+      },
+      {
+        "name": "rotate_group",
+        "calls": 104,
+        "members": 52,
+        "inclusive_ms": 1.1269999999999991
+      },
+      {
+        "name": "transform_group",
+        "calls": 5980,
+        "members": 51376,
+        "inclusive_ms": 37.81530000000114
+      },
+      {
+        "name": "tint_group",
+        "calls": 0,
+        "members": 0,
+        "inclusive_ms": 0
+      },
+      {
+        "name": "transform_objects",
+        "calls": 2210,
+        "members": 100646,
+        "inclusive_ms": 33.395299999999814
+      }
+    ],
+    "diagnostic_only": true,
+    "native_calls_preserved": true
+  },
+  {
+    "schema": 1,
+    "phase": 11,
+    "percent": 96.39875793457031,
+    "area_inclusive_ms": 57.76730000000001,
+    "value_calls": 4901,
+    "visible": true,
+    "director_frame": 12119,
+    "physics_phases": 29,
+    "visible_phases": 1,
+    "dt_sum": 0.12083333963528275,
+    "stages": [
+      {
+        "name": "move_group",
+        "calls": 4756,
+        "members": 26970,
+        "inclusive_ms": 5.914199999999942
+      },
+      {
+        "name": "rotate_group",
+        "calls": 116,
+        "members": 58,
+        "inclusive_ms": 1.2617999999999991
+      },
+      {
+        "name": "transform_group",
+        "calls": 6670,
+        "members": 57304,
+        "inclusive_ms": 42.67670000000198
+      },
+      {
+        "name": "tint_group",
+        "calls": 0,
+        "members": 0,
+        "inclusive_ms": 0
+      },
+      {
+        "name": "transform_objects",
+        "calls": 2465,
+        "members": 112259,
+        "inclusive_ms": 37.57879999999997
+      }
+    ],
+    "diagnostic_only": true,
+    "native_calls_preserved": true
+  },
+  {
+    "schema": 1,
+    "phase": 12,
+    "percent": 96.48711395263672,
+    "area_inclusive_ms": 61.070000000000014,
+    "value_calls": 5577,
+    "visible": true,
+    "director_frame": 12120,
+    "physics_phases": 33,
+    "visible_phases": 1,
+    "dt_sum": 0.13750000717118382,
+    "stages": [
+      {
+        "name": "move_group",
+        "calls": 5412,
+        "members": 30690,
+        "inclusive_ms": 5.980999999999925
+      },
+      {
+        "name": "rotate_group",
+        "calls": 132,
+        "members": 66,
+        "inclusive_ms": 1.3682999999999992
+      },
+      {
+        "name": "transform_group",
+        "calls": 7590,
+        "members": 65208,
+        "inclusive_ms": 44.62430000000208
+      },
+      {
+        "name": "tint_group",
+        "calls": 0,
+        "members": 0,
+        "inclusive_ms": 0
+      },
+      {
+        "name": "transform_objects",
+        "calls": 2805,
+        "members": 127743,
+        "inclusive_ms": 39.28800000000001
+      }
+    ],
+    "diagnostic_only": true,
+    "native_calls_preserved": true
+  },
+  {
+    "schema": 1,
+    "phase": 13,
+    "percent": 96.58765411376953,
+    "area_inclusive_ms": 69.3652,
+    "value_calls": 6422,
+    "visible": true,
+    "director_frame": 12121,
+    "physics_phases": 38,
+    "visible_phases": 1,
+    "dt_sum": 0.15833334159106016,
+    "stages": [
+      {
+        "name": "move_group",
+        "calls": 6232,
+        "members": 35340,
+        "inclusive_ms": 7.404999999999841
+      },
+      {
+        "name": "rotate_group",
+        "calls": 152,
+        "members": 76,
+        "inclusive_ms": 1.5624999999999991
+      },
+      {
+        "name": "transform_group",
+        "calls": 8740,
+        "members": 75088,
+        "inclusive_ms": 50.630900000002924
+      },
+      {
+        "name": "tint_group",
+        "calls": 0,
+        "members": 0,
+        "inclusive_ms": 0
+      },
+      {
+        "name": "transform_objects",
+        "calls": 3230,
+        "members": 147098,
+        "inclusive_ms": 44.66879999999988
+      }
+    ],
+    "diagnostic_only": true,
+    "native_calls_preserved": true
+  },
+  {
+    "schema": 1,
+    "phase": 14,
+    "percent": 96.70343017578125,
+    "area_inclusive_ms": 91.53889999999997,
+    "value_calls": 8619,
+    "visible": true,
+    "director_frame": 12122,
+    "physics_phases": 51,
+    "visible_phases": 1,
+    "dt_sum": 0.21250001108273864,
+    "stages": [
+      {
+        "name": "move_group",
+        "calls": 8364,
+        "members": 47430,
+        "inclusive_ms": 9.89529999999964
+      },
+      {
+        "name": "rotate_group",
+        "calls": 204,
+        "members": 102,
+        "inclusive_ms": 2.2241
+      },
+      {
+        "name": "transform_group",
+        "calls": 11730,
+        "members": 100776,
+        "inclusive_ms": 66.13230000000554
+      },
+      {
+        "name": "tint_group",
+        "calls": 0,
+        "members": 0,
+        "inclusive_ms": 0
+      },
+      {
+        "name": "transform_objects",
+        "calls": 4335,
+        "members": 197421,
+        "inclusive_ms": 58.19490000000001
+      }
+    ],
+    "diagnostic_only": true,
+    "native_calls_preserved": true
+  },
+  {
+    "schema": 1,
+    "phase": 15,
+    "percent": 96.85881042480469,
+    "area_inclusive_ms": 86.57329999999996,
+    "value_calls": 12733,
+    "visible": false,
+    "director_frame": 12123,
+    "physics_phases": 47,
+    "visible_phases": 0,
+    "dt_sum": 0.19583334354683757,
+    "stages": [
+      {
+        "name": "move_group",
+        "calls": 7708,
+        "members": 43710,
+        "inclusive_ms": 10.945999999999694
+      },
+      {
+        "name": "rotate_group",
+        "calls": 188,
+        "members": 94,
+        "inclusive_ms": 1.887299999999998
+      },
+      {
+        "name": "transform_group",
+        "calls": 10810,
+        "members": 92872,
+        "inclusive_ms": 61.352000000004466
+      },
+      {
+        "name": "tint_group",
+        "calls": 0,
+        "members": 0,
+        "inclusive_ms": 0
+      },
+      {
+        "name": "transform_objects",
+        "calls": 3995,
+        "members": 181937,
+        "inclusive_ms": 53.948599999999914
+      }
+    ],
+    "diagnostic_only": true,
+    "native_calls_preserved": true
+  }
+]

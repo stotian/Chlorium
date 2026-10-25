@@ -13,9 +13,11 @@
 #include <numeric>
 #include "renderer/ShaderPreprocessor.hpp"
 #include "renderer/HSVEncoding.hpp"
+#include "renderer/NativeQuadState.hpp"
 #include "../resources/shaders/headers/shared.h"
 #include "renderer/GLState.hpp"
 #include <limits>
+#include <chrono>
 
 #ifndef GL_SHADER_STORAGE_BUFFER
 #define GL_SHADER_STORAGE_BUFFER 0x90D2
@@ -90,6 +92,75 @@ template <class T> T get(GLuint id) {
 struct Vertex { glm::vec2 position, uv; std::uint32_t sprite; };
 static_assert(sizeof(Vertex) == 20 && sizeof(RawSprite) == 48 && sizeof(PreCulledSprite) == 16);
 static_assert(sizeof(GroupCombinationState) == 48 && sizeof(ObjectInfo) == 80 && sizeof(GameStateBuffer) == 144);
+
+void nativeQuadScopeChecks(GLuint nativeProgram, GLuint otherProgram) {
+    const auto original = GLStateSnapshot::capture();
+    GLuint vaos[2]{}, buffers[2]{}, textures[3]{};
+    glGenVertexArrays(2, vaos); glGenBuffers(2, buffers); glGenTextures(3, textures);
+    GLint alignment = 0;
+    glGetIntegerv(0x90DF /* GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT */, &alignment);
+    for (auto id : buffers) {
+        glBindBuffer(GL_ARRAY_BUFFER, id);
+        glBufferData(GL_ARRAY_BUFFER, alignment * 4, nullptr, GL_DYNAMIC_DRAW);
+    }
+    glBindVertexArray(vaos[0]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[0]);
+    glBindBuffer(GL_DRAW_INDIRECT_BUFFER, buffers[1]);
+    glBindBufferRange(GL_SHADER_STORAGE_BUFFER, 4, buffers[0], alignment, alignment * 2);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, buffers[1]);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffers[1]);
+    glUseProgram(nativeProgram);
+    glDisable(GL_BLEND);
+    glBlendEquationSeparate(GL_FUNC_SUBTRACT, GL_FUNC_REVERSE_SUBTRACT);
+    glBlendFuncSeparate(GL_DST_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+    for (unsigned unit = 0; unit < 3; ++unit) {
+        glActiveTexture(GL_TEXTURE0 + unit); glBindTexture(GL_TEXTURE_2D, textures[unit]);
+    }
+    auto sameState = [](const GLStateSnapshot& a, const GLStateSnapshot& b) {
+        require(a.vao == b.vao && a.elementBuffer == b.elementBuffer, "native quad restores VAO and native EBO");
+        require(a.arrayBuffer == b.arrayBuffer && a.indirectBuffer == b.indirectBuffer, "native quad preserves array and indirect targets");
+        require(a.program == b.program && a.activeTexture == b.activeTexture && a.textures == b.textures, "native quad restores program and texture units");
+        require(a.blendEnabled == b.blendEnabled && a.blendSrcRGB == b.blendSrcRGB && a.blendDstRGB == b.blendDstRGB &&
+            a.blendSrcAlpha == b.blendSrcAlpha && a.blendDstAlpha == b.blendDstAlpha &&
+            a.blendEquationRGB == b.blendEquationRGB && a.blendEquationAlpha == b.blendEquationAlpha, "native quad preserves exact native blend state");
+        require(a.storageBuffer == b.storageBuffer && a.uniformBuffer == b.uniformBuffer, "native quad restores generic storage and preserves uniform target");
+        auto equal = [](const auto& x, const auto& y) { return x.buffer == y.buffer && x.offset == y.offset && x.size == y.size; };
+        require(equal(a.indexedUniform, b.indexedUniform), "native quad preserves UBO range");
+        for (unsigned slot = 0; slot < a.indexedStorage.size(); ++slot)
+            require(equal(a.indexedStorage[slot], b.indexedStorage[slot]), "native quad restores SSBO range and preserves other slots");
+    };
+    for (bool unbound : {false, true}) {
+        if (unbound) glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, 0);
+        const auto before = GLStateSnapshot::capture();
+        const auto minimal = GLStateSnapshot::capture(GLStateScope::NativeQuad);
+        glUseProgram(otherProgram); glBindVertexArray(vaos[1]);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, buffers[1]);
+        glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, textures[2]);
+        // Exactly the state mutated by the raw native-quad submission.
+        minimal.restore();
+        sameState(before, GLStateSnapshot::capture());
+        glGetIntegerv(GL_TEXTURE_BINDING_2D, &alignment);
+        require(alignment == textures[2], "native quad preserves active texture unit 2");
+        require(glGetError() == GL_NO_ERROR, "native quad scope has no driver errors");
+    }
+    // Compare only capture/restore CPU cost, without a draw or a game FPS claim.
+    std::array<std::vector<double>, 2> times;
+    for (unsigned repeat = 0; repeat < 10; ++repeat) for (unsigned order = 0; order < 2; ++order) {
+        const unsigned variant = (order + repeat) % 2;
+        const auto scope = variant ? GLStateScope::NativeQuad : GLStateScope::SpriteDraw;
+        const auto started = std::chrono::steady_clock::now();
+        for (unsigned n = 0; n < 512; ++n) GLStateSnapshot::capture(scope).restore();
+        const auto elapsed = std::chrono::duration<double, std::micro>(std::chrono::steady_clock::now() - started).count() / 512;
+        if (repeat) times[variant].push_back(elapsed);
+    }
+    for (auto& samples : times) std::sort(samples.begin(), samples.end());
+    std::cout << "State-only CPU median us/call: SpriteDraw=" << times[0][4] << ", NativeQuad=" << times[1][4]
+              << " (9 alternating batches, 512 calls each; no GD FPS measurement)\n";
+    original.restore();
+    glDeleteTextures(3, textures); glDeleteBuffers(2, buffers); glDeleteVertexArrays(2, vaos);
+}
+
+#include "NativeVertexParityChecks.hpp"
 
 int main(int argc, char** argv) try {
     root = argc > 1 ? argv[1] : ".";
@@ -200,6 +271,7 @@ int main(int argc, char** argv) try {
     require(activeBinding == GAME_STATE_BUFFER_BINDING, "draw program's only UBO is game state at binding 3");
     auto basic = link({compile("basic.vert", GL_VERTEX_SHADER, EShLangVertex),
                        compile("basic.frag", GL_FRAGMENT_SHADER, EShLangFragment)});
+    nativeQuadScopeChecks(basic, drawProgram);
     glDeleteProgram(basic);
 
     GameStateBuffer state{};
@@ -411,6 +483,54 @@ int main(int argc, char** argv) try {
     std::cout << "COMPUTE BENCHMARK (131072 sprites, median GPU ms): serial=" << serialTimes[2]
               << ", parallel=" << parallelTimes[2] << ", ratio=" << serialTimes[2] / parallelTimes[2] << '\n';
     glDeleteProgram(serial);
+    glDisable(GL_BLEND);
+    glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D,white);
+    const unsigned char nativeAtlasPixels[]{255,0,0,255, 0,0,255,255};
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA8,2,1,0,GL_RGBA,GL_UNSIGNED_BYTE,nativeAtlasPixels);
+    auto nativeQuadDraw = link({compile("nativeQuad.vert",GL_VERTEX_SHADER,EShLangVertex),
+                               compile("nativeQuad.frag",GL_FRAGMENT_SHADER,EShLangFragment)});
+    std::array<chlorium::snapshot::NativeQuadState,2> nativeQuads{};
+    nativeQuads[0].corners = {{{-.5f,.5f,0,0xffffffffu,0,1},
+                               {-.5f,-.5f,0,0xffffffffu,0,0},
+                               {.5f,.5f,0,0xffffffffu,.5f,1},
+                               {.5f,-.5f,0,0xffffffffu,.5f,0}}};
+    nativeQuads[1] = nativeQuads[0];
+    for (auto& vertex : nativeQuads[1].corners) { vertex.x += 100; vertex.y += 100; }
+    auto nativeQuadBuffer = buffer(RAW_SPRITE_BUFFER_BINDING,nativeQuads.data(),sizeof(nativeQuads));
+    GLuint emptyVao = 0; glGenVertexArrays(1,&emptyVao); glBindVertexArray(emptyVao);
+    // Deliberately no vertex/index buffers or attributes on this VAO.
+    auto drawNativeQuads = [&] {
+        glClear(GL_COLOR_BUFFER_BIT); glUseProgram(nativeQuadDraw);
+        const glm::mat4 identity(1);
+        glUniformMatrix4fv(glGetUniformLocation(nativeQuadDraw,"u_mvp"),1,GL_FALSE,&identity[0][0]);
+        glUniform1i(glGetUniformLocation(nativeQuadDraw,"u_spriteSheetTexture"),0);
+        glDrawArraysInstanced(GL_TRIANGLE_STRIP,0,4,2);
+        std::array<unsigned char,4> pixel{};
+        glReadPixels(32,32,1,1,GL_RGBA,GL_UNSIGNED_BYTE,pixel.data());
+        return pixel;
+    };
+    auto nativePixel = drawNativeQuads();
+    require(nativePixel[0] > 250 && nativePixel[2] < 2,"instanced native quad draws from exact 96-byte records without geometry buffers");
+    for (auto& vertex : nativeQuads[0].corners) vertex.u += .5f;
+    write(nativeQuadBuffer,nativeQuads);
+    nativePixel = drawNativeQuads();
+    require(nativePixel[2] > 250 && nativePixel[0] < 2,"instanced native quad preserves current native UVs and instance addressing");
+    for (auto& vertex : nativeQuads[0].corners) vertex.x = -vertex.x;
+    write(nativeQuadBuffer,nativeQuads);
+    nativePixel = drawNativeQuads();
+    require(nativePixel[2] > 250,"native mirrored quad keeps both strip triangles visible");
+    for (auto& vertex : nativeQuads[0].corners) vertex.z = 2;
+    write(nativeQuadBuffer,nativeQuads); nativePixel = drawNativeQuads();
+    require(nativePixel[0] == 0 && nativePixel[2] == 0,"exact native vertex depth is retained instead of forcing sprites to z=0");
+    for (auto& vertex : nativeQuads[0].corners) { vertex.z = 0; vertex.color = 0x800000ffu; }
+    write(nativeQuadBuffer,nativeQuads);
+    const unsigned whiteAgain = 0xffffffffu;
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA8,1,1,0,GL_RGBA,GL_UNSIGNED_BYTE,&whiteAgain);
+    glEnable(GL_BLEND); glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    nativePixel = drawNativeQuads();
+    require(nativePixel[0] >= 127 && nativePixel[0] <= 129,"instanced path retains native SRC_ALPHA blending without double premultiplication");
+    nativeVertexParityChecks();
+    glDisable(GL_BLEND); glDeleteProgram(nativeQuadDraw); glDeleteVertexArrays(1,&emptyVao);
     require(glGetError() == GL_NO_ERROR, "no OpenGL errors across shader, compute, upload and draw tests");
     glDeleteProgram(program); glDeleteProgram(drawProgram);
     wglMakeCurrent(nullptr, nullptr); wglDeleteContext(context);

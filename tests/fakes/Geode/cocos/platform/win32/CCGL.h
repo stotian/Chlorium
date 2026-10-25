@@ -1,4 +1,5 @@
 #pragma once
+#define CHLORIUM_BUFFER_CONTEXT_HEADER <BufferContextFake.hpp>
 #include <cstddef>
 #include <cstdint>
 using GLenum = unsigned;

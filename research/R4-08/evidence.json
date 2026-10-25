@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "decision": "RETRAVAILLER",
+  "baseline_commit": "7e7abf8c020df83d418fa861219e2f883938e9bf",
+  "worktree_has_uncommitted_changes": true,
+  "checks": {
+    "assertions": 460672,
+    "native_differential_lanes": 349600,
+    "packed_lanes": 198700,
+    "schedule_sequences": 1200,
+    "numeric_mutant_exit": 1,
+    "dependency_mutant_exit": 1
+  },
+  "kernel_only_timings": [
+    {
+      "zone": 0.0,
+      "objects": 65536,
+      "samples_per_variant": [
+        9,
+        9
+      ],
+      "native_median_us": 287.2,
+      "packed_median_us": 39.5,
+      "kernel_ratio": 7.270886075949367
+    },
+    {
+      "zone": 0.2,
+      "objects": 65536,
+      "samples_per_variant": [
+        9,
+        9
+      ],
+      "native_median_us": 266.0,
+      "packed_median_us": 53.4,
+      "kernel_ratio": 4.9812734082397006
+    },
+    {
+      "zone": 0.5,
+      "objects": 65536,
+      "samples_per_variant": [
+        9,
+        9
+      ],
+      "native_median_us": 239.6,
+      "packed_median_us": 47.7,
+      "kernel_ratio": 5.0230607966457015
+    }
+  ],
+  "runtime_diagnostic": {
+    "rows": 15,
+    "included": 14,
+    "foreground": 15,
+    "deaths": 1,
+    "game_run_success": false,
+    "target_reached": true,
+    "frame_buckets": 16,
+    "area_phases": 328,
+    "visible_phases": 15,
+    "membership_counts_are_proposed_not_executed_visits": true,
+    "black_screen_verdict": "not_tested_no_visual_watch",
+    "paired_fps_verdict": "invalid_run_contains_death"
+  },
+  "native_integration": "not_run",
+  "fps_x3_proven": false,
+  "sources": {
+    "area_batch_checks.cpp": "c87f829f1175935b9404003696164af3020611a67b2b2ee6a2e51183a66133ec",
+    "AreaBatch.hpp": "bfcfd9dd7bb60c288c44ef3a52d2cee6f10e394bea1a44bf89e13a92e58f3fb3",
+    "AreaWaveSchedule.hpp": "9d644aaa11279bfca639654dd142c9ee1eb3df89d63fd36866634f945cfe3fe2",
+    "AreaWorkCensus.cpp": "f0d578d7436acdad7d3e21d076ca02caa49189057e5eeb66afde454e4d467f8c",
+    "run-cpu.cmd": "f5f80d3be340b35bb8a03c616306c9206884a34181f14861706496c64e600ad6"
+  }
+}
