@@ -240,3 +240,21 @@ comme réponse au goulot. Cibler un programme causal de groupes qui supprime des
 parcours d'objets, avec lectures, publication et callbacks équivalents.
 L'objectif ≥60 FPS à chaque
 image, sans noirs sur les trois niveaux, reste non atteint. Preuves R4-11.
+
+## 2026-10-25 — R4-12 : programme causal de groupes et dette explicite
+
+Premier modèle de représentation différée : une commande pure par groupe,
+fusion des flux par ordre global à chaque lecture, matérialisation avant
+changement d'appartenance, handles générationnels, checkpoints, stockage borné
+et barrière complète avant lecteur inconnu. Aucun branchement aux objets GD.
+**105 394 contrôles** contre le modèle immédiat ; deux mutations rejetées
+(ordre intergroupes et barrière supprimée). Allocation par liste de slots libres.
+
+Exemple CPU unique, pas un benchmark FPS : 32 768 objets, 64 événements,
+256 lecteurs. 6 340,3 µs immédiats, 340,2 µs pour les lectures différées, mais
+**24 868,3 µs à la barrière finale**. Les 16 384 opérations immédiates deviennent
+2 097 152 après règlement de la dette, comme la référence. **RETRAVAILLER** :
+ne pas présenter le déplacement du travail comme une accélération. Étape
+suivante : règlement/publication bornés et barrières natives prouvées. Les effets
+Area complets, collisions, champs observables et rendu restent à intégrer.
+L'objectif global n'est pas satisfait ; aucune nouvelle installation ni run GD.

@@ -1,0 +1,37 @@
+{
+  "experiment": "R4-12",
+  "decision": "rework_debt_settlement_no_runtime_promotion",
+  "model_checks": 105394,
+  "oracle": "eager closed position-affine model, not GD",
+  "mutants": {
+    "cross_group_order": "rejected_exit_1",
+    "dropped_barrier": "rejected_exit_1"
+  },
+  "source_sha256": {
+    "CausalWorldIR.hpp": "1df313145d76b9bfeca9c3e943c657ddfa7d4dfaeec471f8e7c52e54f9835c52",
+    "causal_world_checks.cpp": "3fa9f78ae444d96d3cc6adbf6a97753ec97d6a2835fa7e5e5da347005c5fb571",
+    "run-cpu.cmd": "0bc4dc6bee09933bbd985d62ab73970fba67a56e1e068499173d1de0c56f0aa4"
+  },
+  "cpu_log_sha256": "35047fb4bef2be8fe4f0857cf9c309ac6828f7fe9233190c748868d1f3366cbd",
+  "timing_kind": "single demonstration, not benchmark or FPS",
+  "timing": {
+    "objects": 32768.0,
+    "events": 64.0,
+    "readers": 256.0,
+    "eager_us": 6340.3,
+    "deferred_read_us": 340.2,
+    "debt_barrier_us": 24868.3,
+    "immediate_ops": 16384.0,
+    "total_settled_ops": 2097152.0
+  },
+  "deferred_debt_fully_charged": true,
+  "barrier_below_16_67_ms": false,
+  "native_callback_reader_coverage": "unproven",
+  "gd_area_semantics": "not_implemented",
+  "variable_fp_controls_and_observers": "not_modelled",
+  "game_launches": 0,
+  "installed": false,
+  "fps_gain_proven": false,
+  "stable_60_all_test_levels": false,
+  "blackscreen_all_test_levels": "not_verified"
+}
