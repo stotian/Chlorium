@@ -1,0 +1,66 @@
+{
+  "experiment": "R4-11",
+  "decision": "rework_traversal_architecture_no_runtime_promotion",
+  "cpu_checks": 1048611,
+  "fused_native_comparisons": 65536,
+  "fp_control_combinations": 16,
+  "mutation_exit_code": 1,
+  "mutation_failure": "fused raw pose equals actual Cocos plus GD block",
+  "source_sha256": {
+    "PoseProgram.hpp": "3ad9db8d3719bf69130ce1d13b41723c5e00f14b3c2b91d6d94bd192198c85dd",
+    "PoseOracle.asm": "6592e5981b5ee563776020f51f06e32384f9d74eea1577da3db77f32640b645f",
+    "pose_program_checks.cpp": "d60ade437a799076628d4eb599e9d81a55a98c225e877e4cd27cd8026804d913",
+    "run-cpu.cmd": "ce65dc30893d15c040897bdd175e92a690a68b31f994d7340a87dab392b95a09"
+  },
+  "cpu_log_sha256": "8873f3af5c4c384aa6028d814ab7f6c2e5127bf8858a6a972405e1fecd15ab8c",
+  "runtime_census": {
+    "level": 133260800,
+    "target_percent": [
+      96,
+      97
+    ],
+    "profile": "isolated",
+    "samples": 14,
+    "deaths": 0,
+    "full_detail": true,
+    "shake": false,
+    "noclip": false,
+    "totals": {
+      "phases": 23830,
+      "actual_concat_calls": 1084638,
+      "measured_calls": 44344,
+      "budget_skipped_calls": 1040294,
+      "input_recipes": 30765,
+      "input_reused": 13579,
+      "input_overflow": 0,
+      "result_recipes": 30765,
+      "result_reused": 13579,
+      "result_overflow": 0,
+      "nested_barriers": 0,
+      "missing_results": 0
+    },
+    "prefix_sample_only": true,
+    "sampled_recipe_reuse_fraction": 0.30621955619700525,
+    "raw_report_sha256": "2324090bf1ec0afe09c35cc4f8b3173d9535bf923bcc584838ac3b38050b132d",
+    "pose_report_sha256": "ab8635bf403822ffb198ebc7c91ea0899c5f69d138fe4e187806fe24c550a611",
+    "audit_package_sha256": "681a2010700424875a7f8856dda875434ea2fd7b1389ec99a3470125d5450581",
+    "performance_baseline": false,
+    "black_screen_validation": false
+  },
+  "failed_user_mod_launch": {
+    "exit_code": -805306369,
+    "stage": "downloading_before_loading",
+    "cause": "unknown",
+    "valid_measurement": false
+  },
+  "profile_restorations": {
+    "count": 2,
+    "files_each": 90,
+    "sha256_verified": true
+  },
+  "installed_package_unchanged": true,
+  "renderer_runtime_accelerator_installed": false,
+  "fps_gain_proven": false,
+  "stable_60_fps_proven": false,
+  "all_test_level_blackscreen_gate_passed": false
+}

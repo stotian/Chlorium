@@ -37,11 +37,11 @@ try {
         $files += Get-ChildItem -LiteralPath (Join-Path $root $name) -File -Recurse |
             Where-Object { $_.Extension -notin @('.pyc','.exe','.obj','.dll','.pdb','.geode') -and $_.Name -notlike '*.local.*' }
     }
-    foreach ($name in @('R4-00','R4-01','R4-04','R4-06','R4-07','R4-08','R4-09','R4-10')) {
+    foreach ($name in @('R4-00','R4-01','R4-04','R4-06','R4-07','R4-08','R4-09','R4-10','R4-11')) {
         $directory = Join-Path $root "research/$name"
         if (!(Test-Path -LiteralPath $directory)) { continue }
         $files += Get-ChildItem -LiteralPath $directory -File -Recurse |
-            Where-Object { $_.Extension -in @('.md','.txt','.json','.csv','.py','.cpp','.hpp','.cmd','.ps1') -and $_.Name -notlike '*.local.*' }
+            Where-Object { $_.Extension -in @('.md','.txt','.json','.csv','.py','.cpp','.hpp','.asm','.cmd','.ps1') -and $_.Name -notlike '*.local.*' }
     }
     foreach ($file in $files) {
         $relative = $file.FullName.Substring($root.Length + 1).Replace('\','/')

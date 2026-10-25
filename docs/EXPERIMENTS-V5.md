@@ -213,3 +213,30 @@ du SDK. La vérification de cette chaîne reste distincte du binaire testé en j
 Reconstruction CMake et empaquetage standard réussis (34 entrées, identité V5).
 Un avertissement C4996 getenv subsiste ; pas de prétention zéro avertissement.
 Le paquet de livraison conserve le DLL manuel testé, distinct de ce rebuild.
+
+## 2026-10-25 — R4-11 : programmes de poses et fusion des nœuds temporaires
+
+Deux prototypes CPU isolés : compilation des recettes linéaires communes à une
+phase, puis pipeline fusionné sans cache pour les poses toutes différentes.
+**1 048 611 contrôles natifs réussis**, dont 65 536 poses fusionnées comparées
+au constructeur Cocos et au bloc réel de décomposition GD. Opérations float
+natives, aucun angle quantifié. Une corruption volontaire est rejetée.
+Le cas unique a motivé un arrêt du compilateur après 1 024 entrées sans assez
+de partage. Timings de snapshots seulement, pas de gain FPS démontré.
+
+Un lancement tous mods échoue au chargement, cause inconnue. Un second diagnostic
+en profil isolé atteint Orbit auto 97 %, zéro mort, détails complets sans shake
+ni noclip : 1 084 638 compositions, 23 830 appels transformAreaObjects dans
+14 compartiments d'image. Classification plafonnée à 4 096 appels/image :
+13 579 répétitions sur 44 344 appels classés (30,62 %), sans extrapoler aux
+1 040 294 appels hors budget. Les deux restaurations des 90 fichiers sont
+vérifiées ; installation V5 inchangée. Aucune conclusion sur les noirs.
+
+La fusion sans cache seule donne 2 544,2 contre 2 708,1 µs pour 16 384 entrées,
+en fixture sans publication d'état ni callbacks objets : gain de noyau d'environ
+6 %, insuffisant pour une refonte dominante. **Décision : RETRAVAILLER.** Garder
+les noyaux comme références, sans installer le cache ou la fusion mathématique
+comme réponse au goulot. Cibler un programme causal de groupes qui supprime des
+parcours d'objets, avec lectures, publication et callbacks équivalents.
+L'objectif ≥60 FPS à chaque
+image, sans noirs sur les trois niveaux, reste non atteint. Preuves R4-11.

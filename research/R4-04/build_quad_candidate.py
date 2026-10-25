@@ -24,6 +24,7 @@ profiles = {
     "--area-census": "measurement-area-census-v5",
     "--area-census-visible": "measurement-area-visible-v5",
     "--area-census-frames": "measurement-area-frames-v5",
+    "--pose-census": "measurement-pose-census-v6",
 }
 if len(sys.argv) > 2 or (len(sys.argv) == 2 and sys.argv[1] not in profiles):
     raise SystemExit("Choose exactly one explicit research build profile")
@@ -35,6 +36,7 @@ native_vertex = profile == "native-vertex-black-v5"
 visible_census = selected == "--area-census-visible"
 frame_census = selected == "--area-census-frames"
 area_census = selected in ("--area-census", "--area-census-visible", "--area-census-frames")
+pose_census = selected == "--pose-census"
 previous = Path("C:/Users/stoti/Chlorium/build")
 ninja = (previous / "build.ninja").read_text(encoding="utf-8")
 block = re.search(r"^build CMakeFiles\\Chlorium.dir\\src\\renderer\\NativeQuadRenderer.cpp.obj:.*?(?=^build |\Z)", ninja, re.M | re.S)
@@ -68,6 +70,9 @@ if measurement:
         if frame_census:
             flags += ["/DCHLORIUM_AREA_CENSUS_FRAMES=1"]
         source_names.append("research/R4-08/AreaWorkCensus.cpp")
+    if pose_census:
+        flags += ["/DCHLORIUM_AREA_WORK_CENSUS=1", "/DCHLORIUM_POSE_CENSUS=1"]
+        source_names.append("research/R4-11/PoseCensus.cpp")
 sources = [root / name for name in source_names]
 if native_vertex:
     flags += ["/DCHLORIUM_NATIVE_VERTEX_PARITY=1"]
@@ -119,7 +124,7 @@ save()
 # SDK/static dependency identities remain in the fingerprint; no GD binary,
 # save data, private logs or credentials enter this source archive.
 snapshot_files = set()
-for folder in ("src", "legacy", "tests", "research/R4-08"):
+for folder in ("src", "legacy", "tests", "research/R4-08", "research/R4-11"):
     for pattern in ("*.cpp", "*.hpp", "*.h"):
         snapshot_files.update((root / folder).rglob(pattern))
 snapshot_files.update(root / resource["path"] for resource in manifest["resources"])

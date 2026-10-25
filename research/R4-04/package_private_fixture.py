@@ -9,7 +9,7 @@ import zipfile
 
 root = Path(__file__).resolve().parents[2]
 profile = sys.argv[1] if len(sys.argv) == 2 else ""
-if profile not in ("quad-v4", "quad-v4-scope-r2", "quad-audit-r3", "native-vertex-black-v5", "measurement-v5", "measurement-audit-r2", "measurement-black-watch-v5", "measurement-area-census-v5", "measurement-area-visible-v5", "measurement-area-frames-v5"):
+if profile not in ("quad-v4", "quad-v4-scope-r2", "quad-audit-r3", "native-vertex-black-v5", "measurement-v5", "measurement-audit-r2", "measurement-black-watch-v5", "measurement-area-census-v5", "measurement-area-visible-v5", "measurement-area-frames-v5", "measurement-pose-census-v6"):
     raise SystemExit("Choose an explicit compiled research profile")
 out = root / "build-research" / profile
 build = json.loads((out / "build-fingerprint.json").read_text(encoding="utf-8"))

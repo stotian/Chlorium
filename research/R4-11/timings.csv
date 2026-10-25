@@ -1,0 +1,5 @@
+recipes,native_fixture_us,program_fixture_us,recipe_compilations,reused,fallback,stopped_at
+1,5506.7,2891.1,1,65535,0,0
+16,5079.3,2468.4,16,65520,0,0
+256,3902,2150.1,256,65280,0,0
+65536,4715.7,4710.2,1024,0,64512,1024

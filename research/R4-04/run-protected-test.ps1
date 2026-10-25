@@ -4,11 +4,14 @@ param(
     [switch]$WithUserMods,
     [switch]$PrepareOnly,
     [switch]$AreaCensus,
+    [switch]$PoseCensus,
     [switch]$BlackScreen,
     [ValidateSet('initial','visible','frames')][string]$CensusRevision='initial',
     [switch]$RetryStartup
 )
 $ErrorActionPreference = 'Stop'
+if ($PoseCensus -and $AreaCensus) { throw 'Choose one census' }
+if ($PoseCensus) { $AreaCensus=$true }
 $taskRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $taskPlanPath = Join-Path $PSScriptRoot 'runtime-plan.local.json'
 $taskPlan = Get-Content -LiteralPath $taskPlanPath -Raw | ConvertFrom-Json
@@ -21,6 +24,8 @@ $taskCampaign = Join-Path $taskRoot $(if ($AreaCensus) {'build-research/runtime-
 if ($AreaCensus -and $CensusRevision -eq 'visible') { $taskCampaign += '-visible' }
 if ($AreaCensus -and $CensusRevision -eq 'frames') { $taskCampaign += '-frames' }
 if ($BlackScreen) { $taskCampaign=Join-Path $taskRoot 'build-research/runtime-blackscreen-v5' }
+if ($PoseCensus) { $taskCampaign=Join-Path $taskRoot 'build-research/runtime-pose-census-v6' }
+if ($PoseCensus -and !$WithUserMods) { $taskCampaign += '-isolated' }
 if ($AreaCensus -and ($Level -ne 133260800 -or $Mode -ne 'native')) { throw 'Area census is a native Orbit diagnostic only' }
 $taskRun = Join-Path $taskCampaign "$Level-$Mode"
 if (Test-Path -LiteralPath $taskRun) {
@@ -151,6 +156,7 @@ try {
         if ($CensusRevision -eq 'frames') {
             $taskParameters.Package = Join-Path $taskRoot 'build-research/measurement-area-frames-v5/local.chlorium.audit.geode'
         }
+        if ($PoseCensus) { $taskParameters.Package = Join-Path $taskRoot 'build-research/measurement-pose-census-v6/local.chlorium.audit.geode' }
         $taskParameters.FromPercent = 96
         $taskParameters.ToPercent = 97
         $taskParameters.VisualWatch = $false
