@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "experiment_id": "R4-01",
+  "repository_head": "2312559c47fdaea2c03ee2934c3db8cbd77e45ac",
+  "source_commit_for_new_work": null,
+  "hypothesis": "Les mutations privees du ledger sont detectees sans deduplication ni changement d'ordre.",
+  "feature_path_verified": false,
+  "build_fingerprint": null,
+  "baseline_id": "synthetic-fixture-only",
+  "candidate_id": null,
+  "prepared_mutation_count": 12,
+  "executed_mutation_count": 12,
+  "test_status": {
+    "cpu_fixture": "passed",
+    "built_win64": "not_run",
+    "gpu_fixture": "not_run",
+    "visual_runtime": "not_run",
+    "performance_ab": "not_run"
+  },
+  "metrics": {
+    "median_frame_ms": null,
+    "p95_frame_ms": null,
+    "p99_frame_ms": null,
+    "worst_frame_ms": null,
+    "bytes_uploaded": null,
+    "peak_ram_bytes": null,
+    "peak_vram_bytes": null
+  },
+  "evidence_files": [
+    "DRAW_LEDGER_SCHEMA.md",
+    "ledger_oracle.py",
+    "fixture.json",
+    "fixture_mutations.py",
+    "DECISION.md"
+  ],
+  "decision": "CONTINUER",
+  "limitations": [
+    "Comparateur sur fixture synthetique seulement",
+    "Pas de producteur de traces natives",
+    "GPU et gameplay non testes"
+  ]
+}

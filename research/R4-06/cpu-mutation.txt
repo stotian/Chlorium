@@ -1,0 +1,2 @@
+alpha_checks.cpp
+FAIL: differential output bits

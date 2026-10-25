@@ -5,6 +5,14 @@
 !/.gitattributes
 !/.github/
 !/README.md
+!/RESEARCH_BASELINE.md
+!/research/
+/research/*
+!/research/R4-00/
+!/research/R4-01/
+!/research/R4-06/
+**/*.local.json
+**/*.local.txt
 !/LICENSE.md
 !/COPYING
 !/NOTICE.md

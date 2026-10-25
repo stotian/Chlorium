@@ -1,0 +1,2 @@
+Control accepted; 12/12 private ledger mutations rejected
+Exit code: 0; observed during the V5 engineering run.

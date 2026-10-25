@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "capture_complete": true,
+  "frames": [{
+    "scene_epoch": 1,
+    "frame_id": 12,
+    "context_generation": 1,
+    "draws": [
+      {"native_draw_ordinal": 0, "primitive_ordinal": 0, "resource_generation": 1, "texture_key": "fixture:atlas", "shader_key": "fixture:position-texture-color", "quad_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "blend": {"enabled": true, "src_rgb": "SRC_ALPHA", "dst_rgb": "ONE_MINUS_SRC_ALPHA", "src_alpha": "SRC_ALPHA", "dst_alpha": "ONE_MINUS_SRC_ALPHA", "equation_rgb": "FUNC_ADD", "equation_alpha": "FUNC_ADD"}, "target": "fixture:back", "viewport": [0,0,16,16], "scissor": "disabled", "stencil": "disabled", "depth": "disabled"},
+      {"native_draw_ordinal": 1, "primitive_ordinal": 0, "resource_generation": 1, "texture_key": "fixture:atlas", "shader_key": "fixture:position-texture-color", "quad_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "blend": {"enabled": true, "src_rgb": "SRC_ALPHA", "dst_rgb": "ONE_MINUS_SRC_ALPHA", "src_alpha": "SRC_ALPHA", "dst_alpha": "ONE_MINUS_SRC_ALPHA", "equation_rgb": "FUNC_ADD", "equation_alpha": "FUNC_ADD"}, "target": "fixture:back", "viewport": [0,0,16,16], "scissor": "disabled", "stencil": "disabled", "depth": "disabled"}
+    ],
+    "triggers": [
+      {"sequence": 0, "event": "move", "target": "group:7", "value_bits": "3f800000"},
+      {"sequence": 1, "event": "alpha", "target": "group:7", "value_bits": "3f000000"}
+    ],
+    "state_before": {"program": "fixture:stock", "vao": "fixture:native", "draw_fbo": "fixture:back", "read_fbo": "fixture:back", "texture": "fixture:atlas", "sampler": "fixture:default", "blend": {"enabled": true, "src_rgb": "SRC_ALPHA", "dst_rgb": "ONE_MINUS_SRC_ALPHA", "src_alpha": "SRC_ALPHA", "dst_alpha": "ONE_MINUS_SRC_ALPHA", "equation_rgb": "FUNC_ADD", "equation_alpha": "FUNC_ADD"}, "scissor": "disabled", "stencil": "disabled", "depth": "disabled", "cocos_cache": {"program": "fixture:stock", "blend_enabled": true}},
+    "state_after": {"program": "fixture:stock", "vao": "fixture:native", "draw_fbo": "fixture:back", "read_fbo": "fixture:back", "texture": "fixture:atlas", "sampler": "fixture:default", "blend": {"enabled": true, "src_rgb": "SRC_ALPHA", "dst_rgb": "ONE_MINUS_SRC_ALPHA", "src_alpha": "SRC_ALPHA", "dst_alpha": "ONE_MINUS_SRC_ALPHA", "equation_rgb": "FUNC_ADD", "equation_alpha": "FUNC_ADD"}, "scissor": "disabled", "stencil": "disabled", "depth": "disabled", "cocos_cache": {"program": "fixture:stock", "blend_enabled": true}}
+  }]
+}
