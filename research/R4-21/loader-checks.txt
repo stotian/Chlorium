@@ -1,0 +1,4 @@
+system_input_guard_checks.cpp
+system_input_guard_checks.cpp
+PASS foreign XInput rejected in child; no Geode loaded
+PASS owned Cocos load/unload retains system XInput; no Geode loaded

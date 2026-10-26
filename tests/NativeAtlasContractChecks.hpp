@@ -1,4 +1,5 @@
 #pragma once
+#include "SystemInputGuard.hpp"
 #include "renderer/NativeVertexLease.hpp"
 #include "renderer/NativeStoreHydration.hpp"
 #include "renderer/NativeGpuReplacement.hpp"
@@ -19,11 +20,13 @@ struct AtlasMemoryFixture {
 };
 static_assert(offsetof(AtlasMemoryFixture,texture)==0x58&&offsetof(AtlasMemoryFixture,quads)==0x60);
 void nativeAtlasContractChecks() {
+    chlorium::test::SystemInputGuard systemInput;
     const auto saved=GLStateSnapshot::capture();
     auto cocos=LoadLibraryExW(L"C:\\Program Files (x86)\\Steam\\steamapps\\common\\Geometry Dash\\libcocos2d.dll",nullptr,
         LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
     if(!cocos) std::cerr<<"Cocos oracle load error "<<GetLastError()<<'\n';
     require(cocos!=nullptr,"local Cocos module available for actual atlas contract oracle");
+    chlorium::test::SystemInputGuard::assertNoGeode();
     auto base=reinterpret_cast<const unsigned char*>(cocos);
     std::uint64_t hash=14695981039346656037ull;
     for(std::size_t n=32;n<0x15f;++n) hash=(hash^base[0xa6350+n])*1099511628211ull;

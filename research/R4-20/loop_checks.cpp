@@ -160,7 +160,10 @@ int main(int argc,char** argv) {
     _mm_setcsr(0x1f80);require(identityLinearPhase(*candidate,oracle),"identity phase supported");auto actual=_mm_getcsr()&63;
     equivalent(*native,*candidate);require(expected==actual,"final FP flags");
     correctness(oracle);
+    if(argc>1)benchmark(oracle,argv[1]);
+    chlorium::test::SystemInputGuard::assertNoGeode();
+    if(argc>1)std::cout<<"PASS alternating full-phase fixture timings; no GD FPS claim\n";
+    std::cout<<"Cocos fixture isolated: system XInput selected; Geode absent\n";
     std::cout<<"PASS "<<checks<<" complete native loop identity checks, native_flags="<<expected<<'\n';
-    if(argc>1){benchmark(oracle,argv[1]);std::cout<<"PASS alternating full-phase fixture timings; no GD FPS claim\n";}
     _mm_setcsr(saved);
 }

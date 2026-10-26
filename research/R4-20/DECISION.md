@@ -89,3 +89,11 @@ known callbacks cannot invalidate that footprint. No such stability certificate
 has been implemented or measured here. Unknown callbacks, lifetime/checkpoint
 changes or a phase that can write the certified fields must break the program.
 Removing guards from arbitrary GD memory would not constitute that proof.
+
+## Loader-isolation qualification (R4-21)
+
+The historical runs above did not verify XInput/Geode loader isolation.
+R4-21 fixes this harness defect; do not treat those timings as an isolated
+production reference. The first guarded dense pair still regresses:
+11965.9 / 12489.8 us median. The guarded stage rerun overlapped the user game,
+so its timing values are excluded. No runtime candidate is promoted.

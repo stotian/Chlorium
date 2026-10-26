@@ -1,0 +1,34 @@
+{
+  "raw_private_logs": {
+    "system-input-child-checks.local.txt": {
+      "sha256": "61242ce56239cb47615c80d4629ecf44a6b17c52880487f5a818efbec8773f21",
+      "bytes": 187
+    },
+    "verify-area-system-input.local.txt": {
+      "sha256": "fce5103d5c1c5363f0bc022fe3f1dac8bad9747b5a50c05d5a61e9de260c791b",
+      "bytes": 146
+    },
+    "verify-gpu-system-input.local.txt": {
+      "sha256": "26cfa65d61509a36291afdf9aab449c85429aa44bb981cbdaf34cf7f00d33d42",
+      "bytes": 950
+    },
+    "verify-area-isolated-stages.local.txt": {
+      "sha256": "e2535b55d3661a29760ac62e24948c63b777d589a4831e389dbe3e40ee6b13b7",
+      "bytes": 208
+    },
+    "verify-gpu-isolated-final.local.txt": {
+      "sha256": "bd69fd90822223d4834de45094c9fc97801c1e70b739b24fb129d13a7fbc7ce1",
+      "bytes": 42
+    },
+    "pose-isolation-compile.local.txt": {
+      "sha256": "007c337f27b51152422d91ef53baf90b34eeffdb20e760b85dc4b2e36c3658be",
+      "bytes": 25
+    }
+  },
+  "game_launched_by_agent": false,
+  "installation_changed": false,
+  "timing_excluded": [
+    "verify-area-isolated-stages.local.txt"
+  ],
+  "gpu_final_attempt": "cancelled before execution"
+}

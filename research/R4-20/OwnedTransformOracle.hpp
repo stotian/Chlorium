@@ -1,9 +1,11 @@
 #pragma once
 #include "../R4-19/OwnedAreaOracle.hpp"
 #include "NativeLayout.hpp"
+#include "../../tests/SystemInputGuard.hpp"
 #include <string>
 
 class OwnedTransformOracle {
+    chlorium::test::SystemInputGuard systemInput_;
     unsigned char* code_=nullptr;
     HMODULE cocos_=nullptr,crt_=nullptr;
     std::uint64_t cookie_=0;
@@ -46,6 +48,7 @@ public:
         crt_=LoadLibraryExW(L"ucrtbase.dll",nullptr,LOAD_LIBRARY_SEARCH_SYSTEM32);
         try {
             if(!cocos_||!crt_)throw std::runtime_error("oracle libraries unavailable");
+            chlorium::test::SystemInputGuard::assertNoGeode();
             retain_=reinterpret_cast<void(*)(void*)>(cocosExport("?retain@CCObject@cocos2d@@QEAAXXZ"));
             release_=reinterpret_cast<void(*)(void*)>(cocosExport("?release@CCObject@cocos2d@@QEAAXXZ"));
             atan2_=reinterpret_cast<float(*)(float,float)>(GetProcAddress(crt_,"atan2f"));

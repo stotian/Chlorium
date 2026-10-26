@@ -1,6 +1,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
+#include "SystemInputGuard.hpp"
 #include "renderer/NativeAffinePoint.hpp"
 #include <array>
 #include <bit>
@@ -25,9 +26,11 @@ __declspec(noinline) Point* candidate(Point* out,const Point* in,const Matrix* m
     return applyImportedNonAliased(out,in,matrix,&imported,expectedNative,expectedEntry);
 }
 int wmain(int argc,wchar_t** argv) try {
+    chlorium::test::SystemInputGuard systemInput;
     require(argc==2,"pass installed libcocos2d.dll");
     auto module=LoadLibraryExW(argv[1],nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
     require(module,"load installed Cocos");
+    chlorium::test::SystemInputGuard::assertNoGeode();
     auto base=reinterpret_cast<const unsigned char*>(module);
     auto native=reinterpret_cast<Apply>(GetProcAddress(module,"?__CCPointApplyAffineTransform@cocos2d@@YA?AVCCPoint@1@AEBV21@AEBUCCAffineTransform@1@@Z"));
     require(native && reinterpret_cast<const unsigned char*>(native)==base+0x65a0,"installed helper address");

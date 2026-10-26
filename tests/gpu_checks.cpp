@@ -539,6 +539,8 @@ int main(int argc, char** argv) try {
     glDeleteProgram(program); glDeleteProgram(drawProgram);
     wglMakeCurrent(nullptr, nullptr); wglDeleteContext(context);
     ReleaseDC(window, dc); DestroyWindow(window);
+    chlorium::test::SystemInputGuard::assertNoGeode();
+    std::cout << "Cocos fixture isolated: system XInput selected; Geode absent\n";
     std::cout << "PASS: " << checks << " real GPU checks\n";
     return 0;
 } catch (const std::exception& error) {

@@ -421,3 +421,17 @@ de validation, 7383,8 us de boucle objets, 19,2 us de compilation constante.
 Ces medianes distinctes ne forment pas une paire additive ni un gain FPS.
 Prochaine preuve discriminante : groupe possede, suite synchrone bornee et
 empreinte d'ecriture des callbacks stable pour valider une seule fois.
+
+## 2026-10-26 - R4-21 : isolation du chargeur des fixtures Cocos
+
+La fenetre Geode provenait du banc GPU : dependance XInput du Cocos chargee
+depuis le jeu. Garde commune : DLL Windows absolue, chemin/handle verifies,
+refus du proxy deja charge, reference gardee apres dechargement Cocos. Tous
+les lecteurs natifs Cocos sont couverts, sans modification du jeu.
+
+Deux tests enfants passes (DLL factice et cycle Cocos), GPU 1162 controles,
+Area 327427. Premiere paire dense isolee : 11965,9 / 12489,8 us, regression.
+Mesures historiques sans preuve d'isolation qualifiees ; chronos ulterieurs
+concurrents a la partie utilisateur exclus. GPU final annule, aucun lancement GD.
+Inspecteur ACCEPT ; demandes P2 couvertes. GARDER uniquement le correctif de
+fixture ; aucune preuve de gain FPS ou de correction des blackscreens.

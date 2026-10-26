@@ -1,6 +1,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
+#include "SystemInputGuard.hpp"
 #include "renderer/NativeRotationReuse.hpp"
 #include "renderer/MatrixReusePolicy.hpp"
 #include "renderer/NearCallSlot.hpp"
@@ -23,9 +24,11 @@ std::uint64_t hash(const unsigned char* bytes, std::size_t size) {
     return h;
 }
 int wmain(int argc, wchar_t** argv) try {
+    chlorium::test::SystemInputGuard systemInput;
     require(argc == 2, "pass the installed libcocos2d.dll path");
     auto module=LoadLibraryExW(argv[1],nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
     if (!module) { std::cerr << "LoadLibrary error " << GetLastError() << '\n'; return 2; }
+    chlorium::test::SystemInputGuard::assertNoGeode();
     auto base=reinterpret_cast<const unsigned char*>(module);
     const auto dos=reinterpret_cast<const IMAGE_DOS_HEADER*>(base);
     const auto pe=reinterpret_cast<const IMAGE_NT_HEADERS64*>(base+dos->e_lfanew);

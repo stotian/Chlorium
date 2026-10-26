@@ -2,6 +2,7 @@
 #define NOMINMAX
 #include <windows.h>
 #include "PoseProgram.hpp"
+#include "../../tests/SystemInputGuard.hpp"
 #include <algorithm>
 #include <chrono>
 #include <cstring>
@@ -97,8 +98,10 @@ const Oracle* oracle=nullptr;
 pose::LinearPose nativeLinear(const pose::Matrix& m) { return oracle->linear(m); }
 volatile float sink=0;
 void checkFused(const char* path,const Oracle& actual,const char* timingPath) {
+    chlorium::test::SystemInputGuard systemInput;
     const auto module=LoadLibraryExA(path,nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
     require(module!=nullptr,"Cocos oracle loaded in isolated fixture");
+    chlorium::test::SystemInputGuard::assertNoGeode();
     const auto base=reinterpret_cast<unsigned char*>(module);
     require(hash({base+0x37f0,0x468})==0x7abc292bc9db4855ull,"actual node matrix routine");
     const auto cosine=*reinterpret_cast<pose::Trig*>(base+0xe4ac8),sine=*reinterpret_cast<pose::Trig*>(base+0xe4ad0);
