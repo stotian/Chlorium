@@ -1,0 +1,366 @@
+{
+  "timestamp": "0x69702da0",
+  "image_size": "0xa3a000",
+  "game_launched": false,
+  "native_readers_globally_resolved": false,
+  "native_suppression_authorized_by_this_report": false,
+  "functions": [
+    {
+      "name": "resetAreaObjectValues",
+      "rva": "0x227c30",
+      "length": 633,
+      "fnv64": "0xde24cd39a33793b3",
+      "sha256": "a773d00d232ccd9a0630b4cfb4606a00f2db7c14142c6622575efc886c74fdb2",
+      "linear_instruction_coverage": true,
+      "branch_targets_at_instruction_boundaries": true,
+      "instruction_count": 139,
+      "branch_count": 22,
+      "calls": [
+        {
+          "site": "0x227c68",
+          "operand": "0x227eb0",
+          "classification": "relocated_last_values"
+        },
+        {
+          "site": "0x227d7b",
+          "operand": "qword ptr [rax + 0x508]",
+          "classification": "unreachable_update_false_scale"
+        },
+        {
+          "site": "0x227deb",
+          "operand": "qword ptr [rax + 0x520]",
+          "classification": "unreachable_update_false_rotation"
+        },
+        {
+          "site": "0x227e03",
+          "operand": "0x227eb0",
+          "classification": "relocated_last_values"
+        },
+        {
+          "site": "0x227e77",
+          "operand": "0x12d2a0",
+          "classification": "forbidden_growth_trap"
+        }
+      ],
+      "rip_operands": [
+        {
+          "site": "0x227d73",
+          "target": "0x622c24",
+          "classification": "relocated_float_one_constant"
+        }
+      ]
+    },
+    {
+      "name": "updateAreaObjectLastValues",
+      "rva": "0x227eb0",
+      "length": 148,
+      "fnv64": "0x7e900f672011e2d2",
+      "sha256": "119ac569e89ba339444cbd92666e2d79e160d493461b3ad1ee577f7db0a0bcc9",
+      "linear_instruction_coverage": true,
+      "branch_targets_at_instruction_boundaries": true,
+      "instruction_count": 25,
+      "branch_count": 3,
+      "calls": [],
+      "rip_operands": []
+    },
+    {
+      "name": "moveAreaObject",
+      "rva": "0x22aab0",
+      "length": 225,
+      "fnv64": "0x1de6f3edba821e9",
+      "sha256": "663115c28b054d1307f43455f1e0dc31741c91a613f2fcaada3e109898ae3b71",
+      "linear_instruction_coverage": true,
+      "branch_targets_at_instruction_boundaries": true,
+      "instruction_count": 54,
+      "branch_count": 11,
+      "calls": [
+        {
+          "site": "0x22aad3",
+          "operand": "0x227c30",
+          "classification": "relocated_reset"
+        },
+        {
+          "site": "0x22ab76",
+          "operand": "qword ptr [rax + 0x490]",
+          "classification": "fixture_section_observer"
+        }
+      ],
+      "rip_operands": []
+    },
+    {
+      "name": "transformAreaObjects",
+      "rva": "0x229720",
+      "length": 1634,
+      "fnv64": "0xa6208a97dbf7526d",
+      "sha256": "9443f3fbb2f728e8cb12539de1750f4bdf9eb289558966b3a2e269ec80def8e4",
+      "linear_instruction_coverage": true,
+      "branch_targets_at_instruction_boundaries": true,
+      "instruction_count": 322,
+      "branch_count": 24,
+      "calls": [
+        {
+          "site": "0x22975e",
+          "operand": "0x227c30",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229770",
+          "operand": "qword ptr [rax + 0x490]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229781",
+          "operand": "qword ptr [rax + 0x4a8]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229796",
+          "operand": "qword ptr [rax + 0xb8]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x2297a9",
+          "operand": "qword ptr [rax + 0x78]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x2297bf",
+          "operand": "qword ptr [rax + 0x88]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x2297d6",
+          "operand": "qword ptr [rax + 0xf0]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x2297e9",
+          "operand": "qword ptr [rax + 0x100]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x2297fc",
+          "operand": "qword ptr [rax + 0x150]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229809",
+          "operand": "qword ptr [rip + 0x2ed5a1]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x22981b",
+          "operand": "qword ptr [rax + 0x1f8]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229832",
+          "operand": "qword ptr [rax + 0x1c0]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x22983f",
+          "operand": "qword ptr [rip + 0x2ed563]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229857",
+          "operand": "qword ptr [rax + 0x320]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229875",
+          "operand": "qword ptr [rip + 0x2ed185]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229954",
+          "operand": "qword ptr [rax + 0x4a8]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229962",
+          "operand": "qword ptr [rip + 0x2ed0a0]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229971",
+          "operand": "0x227c30",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x22998c",
+          "operand": "qword ptr [r8 + 0x4a8]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x22999b",
+          "operand": "qword ptr [rip + 0x2ed067]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x2299b0",
+          "operand": "qword ptr [rip + 0x2ec3ba]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x2299c5",
+          "operand": "qword ptr [rax + 0xb8]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x2299dd",
+          "operand": "qword ptr [rax + 0x78]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x2299f2",
+          "operand": "qword ptr [rax + 0x88]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229a2e",
+          "operand": "qword ptr [rax + 0x160]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229a41",
+          "operand": "qword ptr [rax + 0x170]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229a59",
+          "operand": "qword ptr [rax + 0x308]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229a6c",
+          "operand": "qword ptr [rip + 0x2ecb56]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229a9a",
+          "operand": "0x22aab0",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229ad4",
+          "operand": "0x4d188a",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229b17",
+          "operand": "0x4d188a",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229b26",
+          "operand": "0x4d1848",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229b4c",
+          "operand": "0x4d1848",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229bcc",
+          "operand": "qword ptr [rax + 0x520]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229bf1",
+          "operand": "qword ptr [rax + 0x578]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229bfd",
+          "operand": "qword ptr [rax + 0x490]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229cb8",
+          "operand": "qword ptr [rax + 0x508]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229ccc",
+          "operand": "qword ptr [rax + 0x490]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229d4f",
+          "operand": "qword ptr [rax + 0x498]",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229d60",
+          "operand": "0x4d0750",
+          "classification": "unresolved_native_barrier"
+        }
+      ],
+      "rip_operands": [
+        {
+          "site": "0x22973d",
+          "target": "0x6ba040",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229809",
+          "target": "0x516db0",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x22983f",
+          "target": "0x516da8",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229875",
+          "target": "0x516a00",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x2298d0",
+          "target": "0x6243f0",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x2298e2",
+          "target": "0x623200",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229962",
+          "target": "0x516a08",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x22999b",
+          "target": "0x516a08",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x2299b0",
+          "target": "0x515d70",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229a6c",
+          "target": "0x5165c8",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229b3b",
+          "target": "0x623294",
+          "classification": "unresolved_native_barrier"
+        },
+        {
+          "site": "0x229cb0",
+          "target": "0x622c24",
+          "classification": "unresolved_native_barrier"
+        }
+      ]
+    }
+  ]
+}

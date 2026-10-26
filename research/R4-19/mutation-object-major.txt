@@ -1,0 +1,2 @@
+stamped_area_checks.cpp
+FAIL entire object bytes match owned native producer after 6 checks

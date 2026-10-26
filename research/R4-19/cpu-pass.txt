@@ -1,0 +1,5 @@
+stamped_area_checks.cpp
+PASS 376652 owned native Area shadow checks; 3 complete native bodies; 16 SSE controls
+Command stamps, object bytes, tracking identity/order, callback views and masked FP flags compared.
+native_move_calls=49185 sequences=4145 callback_events=47351
+No native work suppressed; no GD launch; no FPS claim.

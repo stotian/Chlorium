@@ -2,6 +2,10 @@
 
 **Keep as an isolated architecture component. No native phase suppression.**
 
+R4-19's complete native producer oracle establishes that moves within one GD
+command stamp accumulate; resets occur only on a newer stamp. This replacement
+model does not describe those same-command calls. See `../R4-19/DECISION.md`.
+
 R4-12/13 merely postponed the same arithmetic debt. Here an immutable uniform
 translation program can eliminate intermediate reset/apply pairs only when a
 bit-based dyadic proof establishes that every add/subtract restores exactly

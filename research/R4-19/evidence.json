@@ -1,0 +1,43 @@
+{
+  "experiment": "R4-19",
+  "decision": "keep_native_oracle_rework_phase_elimination",
+  "runtime_integration": false,
+  "game_launched": false,
+  "performance_measured": false,
+  "fps_gain_claimed": false,
+  "native_fixture": {
+    "checks_passed": 376652,
+    "native_move_calls": 49185,
+    "compared_sequences": 4145,
+    "compared_callback_events": 47351,
+    "sse_control_combinations": 16,
+    "complete_executed_native_bodies": 3,
+    "complete_statically_inventoried_bodies": 4,
+    "compiler": "MSVC C++20 /O2 /fp:strict /W4",
+    "positive_log": "cpu-pass.txt",
+    "native_body_metadata": "native-contract.json"
+  },
+  "negative_controls": [
+    {"variant": "last_writer", "exit_code": 1, "rejected_at_check": 5, "log": "mutation-last-writer.txt"},
+    {"variant": "object_major", "exit_code": 1, "rejected_at_check": 6, "log": "mutation-object-major.txt"},
+    {"variant": "transient_callback_slot_corruption", "exit_code": 1, "rejected_at_check": 82, "log": "mutation-callback-slot.txt"}
+  ],
+  "native_counterexample": {
+    "same_stamp_moves": [2, 4],
+    "native_total_displacement": 6,
+    "native_float_offset": 6,
+    "native_tracking_registrations": 1,
+    "native_section_callback_count": 2,
+    "r4_18_replacement_model_displacement": 4
+  },
+  "inspection": {
+    "independent_subagent": true,
+    "verdict": "ACCEPT_for_isolated_fixture",
+    "p0_p1_demonstrated": 0,
+    "p2_snapshot_and_branch_boundary_gaps_addressed": true,
+    "additional_targeted_tests": ["transient_callback_slot_corruption", "decreasing_signed_stamps", "rip_and_call_relocation_inventory"],
+    "followup_agent_pass": false,
+    "record": "inspection.md"
+  },
+  "unproven": ["real_updateObjectSection_effects", "external_hooks", "reset_false", "vector_growth", "checkpoint_lifetimes", "full_Area_interpreter", "per_object_operand_producer", "GD_visual_fidelity", "GD_frametimes"]
+}

@@ -367,3 +367,26 @@ autres effets restent a prouver. Retour booleen du reset natif confirme et coher
 l'appelant conditionne un callback virtuel sur AL. Cette observation interdit
 de supprimer les callbacks sur la seule preuve arithmetique. Aucun hook actuel
 sur cette fonction.
+
+## 2026-10-26 - R4-19 : shadow du producteur Area natif complet
+
+Trois fonctions natives completes executees dans une fixture isolee, empreintes
+et relocalisations verifiees : moveAreaObject, resetAreaObjectValues et capture
+des dernieres valeurs. Aucune instruction proprietaire distribuee. Le reset
+depend du numero de commande : +2 puis +4 au meme stamp donne +6, un seul
+enregistrement et deux callbacks de section. Le modele de remplacement R4-18
+donne +4 : ses gains synthetiques ne permettent pas de supprimer ces appels GD.
+
+376652 controles, 49185 appels natifs, 4145 sequences et 47351 callbacks compares
+sur 16 modes SSE. Tous les octets objets, le layer normalise et les identites
+des slots sont compares aussi aux callbacks. Reutilisation/extension des slots,
+stamps decroissants, positions bloquees et observateur ecrivant un autre objet.
+Trois mutations rejetees : dernier ecrivain, ordre par objet, corruption de slot
+temporaire masquee a l'etat final. Inspecteur independant : ACCEPT pour fixture ;
+deux lacunes P2 corrigees avec controles cibles, sans nouvelle passe d'agent.
+
+GARDER l'oracle, RETRAVAILLER l'elision. Inventaire complet des branches directes
+et appels de transformAreaObjects ; lecteurs indirects et effets reels de
+updateObjectSection encore ouverts. Aucun lancement GD, aucune installation,
+aucun benchmark/FPS revendique. Suite : producteur reel des operands par objet
+et barrières du helper-transform avant suppression des parcours.

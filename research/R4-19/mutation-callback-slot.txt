@@ -1,0 +1,2 @@
+stamped_area_checks.cpp
+FAIL every callback and its visible state match in order after 82 checks
