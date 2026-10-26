@@ -1,0 +1,105 @@
+{
+  "experiment": "R4-18",
+  "status": "isolated_closed_model_only",
+  "correctness_checks": 458659,
+  "controls": "4 rounding modes x DAZ x FTZ, masked exceptions",
+  "native_oracle": {
+    "game_timestamp": "0x69702da0",
+    "game_image_size": "0xa3a000",
+    "component_rva": "0x227c6d",
+    "component_length": 119,
+    "component_fnv64": "0x84b38d0d06292674",
+    "field_position_double": "0x3b8",
+    "field_offset_float": "0x2a0",
+    "field_dirty_byte": "0x352",
+    "external_calls_or_RIP_dependencies": false,
+    "game_bytes_committed": false,
+    "full_Area_function_verified": false
+  },
+  "unsafe_mutant": "rejected after 2 checks: rounded cancellation cannot be superseded",
+  "model_only_timings": [
+    {
+      "case": "exact_grid",
+      "objects": "4096",
+      "phases": "64",
+      "batches": "9",
+      "eager_median_us": "1461.1",
+      "proved_median_us": "34.7",
+      "eager_max_us": "1655.4",
+      "proved_max_us": "46.3",
+      "coalesced_objects": "4096"
+    },
+    {
+      "case": "exact_grid",
+      "objects": "32768",
+      "phases": "64",
+      "batches": "9",
+      "eager_median_us": "11391.3",
+      "proved_median_us": "283.9",
+      "eager_max_us": "12037.2",
+      "proved_max_us": "330.4",
+      "coalesced_objects": "32768"
+    },
+    {
+      "case": "mixed",
+      "objects": "4096",
+      "phases": "64",
+      "batches": "9",
+      "eager_median_us": "1364.4",
+      "proved_median_us": "279.6",
+      "eager_max_us": "1502.4",
+      "proved_max_us": "344.4",
+      "coalesced_objects": "2048"
+    },
+    {
+      "case": "mixed",
+      "objects": "32768",
+      "phases": "64",
+      "batches": "9",
+      "eager_median_us": "11171.6",
+      "proved_median_us": "2302.4",
+      "eager_max_us": "12482.5",
+      "proved_max_us": "2464.6",
+      "coalesced_objects": "16384"
+    },
+    {
+      "case": "full_precision",
+      "objects": "4096",
+      "phases": "64",
+      "batches": "9",
+      "eager_median_us": "1392.9",
+      "proved_median_us": "554.8",
+      "eager_max_us": "1467.1",
+      "proved_max_us": "617.8",
+      "coalesced_objects": "0"
+    },
+    {
+      "case": "full_precision",
+      "objects": "32768",
+      "phases": "64",
+      "batches": "9",
+      "eager_median_us": "11669.8",
+      "proved_median_us": "4472.7",
+      "eager_max_us": "13574.7",
+      "proved_max_us": "4570.7",
+      "coalesced_objects": "0"
+    }
+  ],
+  "GD_integration": false,
+  "GD_FPS_gain_verified": false,
+  "blackscreens_fixed_verified": false,
+  "native_callbacks_and_read_sets_verified": false,
+  "checks_log_sha256": "b0c3c29db15cffad8b152d8d8d068208142e7bcae8bb2282ebc370db87246d32",
+  "benchmark_log_sha256": "fe19ff66502f91d4c75f1a03deb5cbb8b2c6b0fe3b75ae306353cc8614fc5c40",
+  "mutant_log_sha256": "b18472b9901a3a35889e4b3b369c82fc643713ce78c408e39965dc9d823ea65e",
+  "oracle_exe_sha256": "70ab728d2ce763a4c52980b82834ef9104cad3a735dfa0b6d6bd92737c663964",
+  "binding_contract": {
+    "SDK_generated_return_type": "bool (verified in generated GJBaseGameLayer.hpp)",
+    "native_epilogue": "0x227e0d: return BPL through EAX",
+    "native_caller": "0x22909f call reset, 0x2290a4 tests AL, conditional virtual callback 0x490",
+    "current_Chlorium_reset_hook_installed": false,
+    "current_blackscreen_cause_proven": false,
+    "SDK_and_native_return_contract_agree": true
+  },
+  "default_CMake_build": "passed with installation disabled; phase kernel remains isolated"
+}

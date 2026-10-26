@@ -1,0 +1,96 @@
+{
+  "function": "GJBaseGameLayer::transformAreaObjects",
+  "first_unwind_fragment": [
+    "0x229720",
+    "0x229884"
+  ],
+  "first_fragment_sha256": "3aaa8069c9f50ad851c77353b31ec3110d4fc2c351294cd9ec551018ffa0ed0c",
+  "full_function_coverage": false,
+  "all_native_readers_resolved": false,
+  "commands_may_be_coalesced_in_GD": false,
+  "calls_in_first_fragment": [
+    {
+      "site_rva": "0x22975e",
+      "operand": "0x227c30",
+      "classification": "known_native_reset",
+      "SDK_return_type": "bool",
+      "must_preserve_conditional_callback": true
+    },
+    {
+      "site_rva": "0x229770",
+      "operand": "qword ptr [rax + 0x490]",
+      "classification": "unresolved_virtual_or_direct"
+    },
+    {
+      "site_rva": "0x229781",
+      "operand": "qword ptr [rax + 0x4a8]",
+      "classification": "unresolved_virtual_or_direct"
+    },
+    {
+      "site_rva": "0x229796",
+      "operand": "qword ptr [rax + 0xb8]",
+      "classification": "unresolved_virtual_or_direct"
+    },
+    {
+      "site_rva": "0x2297a9",
+      "operand": "qword ptr [rax + 0x78]",
+      "classification": "unresolved_virtual_or_direct"
+    },
+    {
+      "site_rva": "0x2297bf",
+      "operand": "qword ptr [rax + 0x88]",
+      "classification": "unresolved_virtual_or_direct"
+    },
+    {
+      "site_rva": "0x2297d6",
+      "operand": "qword ptr [rax + 0xf0]",
+      "classification": "unresolved_virtual_or_direct"
+    },
+    {
+      "site_rva": "0x2297e9",
+      "operand": "qword ptr [rax + 0x100]",
+      "classification": "unresolved_virtual_or_direct"
+    },
+    {
+      "site_rva": "0x2297fc",
+      "operand": "qword ptr [rax + 0x150]",
+      "classification": "unresolved_virtual_or_direct"
+    },
+    {
+      "site_rva": "0x229809",
+      "operand": "qword ptr [rip + 0x2ed5a1]",
+      "classification": "import",
+      "dll": "libcocos2d.dll",
+      "symbol": "?retain@CCObject@cocos2d@@QEAAXXZ"
+    },
+    {
+      "site_rva": "0x22981b",
+      "operand": "qword ptr [rax + 0x1f8]",
+      "classification": "unresolved_virtual_or_direct"
+    },
+    {
+      "site_rva": "0x229832",
+      "operand": "qword ptr [rax + 0x1c0]",
+      "classification": "unresolved_virtual_or_direct"
+    },
+    {
+      "site_rva": "0x22983f",
+      "operand": "qword ptr [rip + 0x2ed563]",
+      "classification": "import",
+      "dll": "libcocos2d.dll",
+      "symbol": "?release@CCObject@cocos2d@@QEAAXXZ"
+    },
+    {
+      "site_rva": "0x229857",
+      "operand": "qword ptr [rax + 0x320]",
+      "classification": "unresolved_virtual_or_direct"
+    },
+    {
+      "site_rva": "0x229875",
+      "operand": "qword ptr [rip + 0x2ed185]",
+      "classification": "import",
+      "dll": "libcocos2d.dll",
+      "symbol": "??0CCPoint@cocos2d@@QEAA@XZ"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+case,objects,phases,batches,eager_median_us,proved_median_us,eager_max_us,proved_max_us,coalesced_objects
+exact_grid,4096,64,9,1461.1,34.7,1655.4,46.3,4096
+exact_grid,32768,64,9,11391.3,283.9,12037.2,330.4,32768
+mixed,4096,64,9,1364.4,279.6,1502.4,344.4,2048
+mixed,32768,64,9,11171.6,2302.4,12482.5,2464.6,16384
+full_precision,4096,64,9,1392.9,554.8,1467.1,617.8,0
+full_precision,32768,64,9,11669.8,4472.7,13574.7,4570.7,0

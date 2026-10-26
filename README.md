@@ -31,6 +31,11 @@ ne mesurent pas un gain FPS et ne couvrent pas tous les effets/niveaux/mods. Les
 restent la priorité de validation. **Ni l'absence universelle de défauts visuels,
 ni les 60 FPS stables, ni un ×3 FPS ne sont encore démontrés.**
 
+Les transports V8 et V9 ont été écartés après les comparaisons FPS sur Grief :
+aucun gain convaincant, queues de temps dégradées. Le [prototype R4-18](research/R4-18/DECISION.md) supprime
+des phases de translation dans un modèle numérique prouvé ; il n’est pas
+branché aux effets natifs et ne constitue pas un gain FPS GD.
+
 Le renderer ne réduit pas encore les grandes boucles Area/Transform du moteur.
 Les prochains gains doivent venir de programmes de groupes/poses, de traitements
 par lots et d'une sélection spatiale du travail GPU, sans supprimer de logique.

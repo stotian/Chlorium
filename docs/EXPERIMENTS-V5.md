@@ -348,3 +348,22 @@ FPS ; p99 23,288 -> 28,913 ms. Pire natif 999,632 ms contre 36,778 ms, mais
 incident natif ponctuel : aucun gain de stabilite prouve. **NE PAS PROMOUVOIR**.
 Conserver les preuves ; cesser les variantes de transport seules et supprimer
 du travail de preparation dans la prochaine architecture.
+
+
+## 2026-10-26 - R4-18 : elimination prouvee de phases de translation
+
+Programme immuable, quantum dyadique et garde exacte 53 bits : supprimer les
+reset/apply intermediaires seulement si chaque addition/soustraction est exacte.
+Sinon rejeu ordonne. Barriere de lecture verifiee aussi sur le prefixe visible.
+458659 controles, 16 modes SSE, oracle du vrai composant reset GD possede
+(119 octets extraits seulement a l'execution) : positions, offsets, dirty et
+flags masques. Mutation sans garde rejetee ; aucun code de jeu dans Git.
+
+Modele CPU 32768 objets / 64 phases : grille exacte 11391,3 -> 283,9 us,
+mixte 11171,6 -> 2302,4 us, precision pleine 11669,8 -> 4472,7 us (aucune
+coalescence dans ce dernier cas). Aucun gain FPS GD deduit, aucune activation.
+Lecteurs/callbacks natifs, formule de production, uniformite reelle et tous les
+autres effets restent a prouver. Retour booleen du reset natif confirme et coherent avec le header SDK genere ;
+l'appelant conditionne un callback virtuel sur AL. Cette observation interdit
+de supprimer les callbacks sur la seule preuve arithmetique. Aucun hook actuel
+sur cette fonction.
