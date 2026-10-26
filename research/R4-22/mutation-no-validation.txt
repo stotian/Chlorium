@@ -1,0 +1,2 @@
+program_checks.cpp
+FAIL unsupported program rejected after 1

@@ -1,0 +1,26 @@
+{
+  "experiment": "R4-22",
+  "positive_assertions": 26053,
+  "r420_regression_assertions": 327427,
+  "max_steps": 64,
+  "dense_final_state_objects": [
+    64,
+    4096
+  ],
+  "dense_steps": 16,
+  "performance_measured": false,
+  "gd_launched": false,
+  "installation_changed": false,
+  "inspector": "accept_closed_fixture_P2_capacity_test_fixed",
+  "mutant_exits": {
+    "no_validation": 1,
+    "borrow_input": 1
+  },
+  "raw_private_log_sha256": {
+    "checks.txt": "8b134eadf9492dc9c8c7b683c4ae5c671476956e8cac6a4faa5f92e35c7314ef",
+    "mutation-borrow.txt": "b51e34d14e5b473d6087241245eccec19d35c7d87983ab4b79a72cded46b1f3d",
+    "mutation-no-validation.txt": "be5587831c7d5fc8dce2c98e1dabe1ebb79c111856aca43fde39efa22b0b1fc4",
+    "r420-regression.txt": "6969b489dc556f06ac8aa4f785745b76d33d59f806298dd064a889e4debd75e6",
+    "stage-compile.txt": "6984e212d907b86bc35c24830a00c79d32bf58af7d29b84099eabcf59bba9598"
+  }
+}

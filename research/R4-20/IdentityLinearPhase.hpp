@@ -31,16 +31,13 @@ inline pose::Matrix materializeIdentityHelper(Node& child,Point p) {
     child.put(0x8c,local);child.data[0x111]=child.data[0x112]=0;child.data[0x11c]=1;
     return local;
 }
-// Closed-fixture specialization. Object readers, resets, moves and publication
-// order remain native. Private identity helpers are materialized directly and
-// constant linear decomposition is compiled once. No GD hook uses this code.
-inline bool identityLinearPhase(World& w,const OwnedTransformOracle& oracle,float sx=1,float sy=1,bool resetVisual=true) {
-#ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
-    const auto audit0=AuditClock::now();
-#endif
+// These helpers are valid only under the closed fixture ownership contract.
+// No GD hook or externally reusable certificate is exposed.
+namespace detail {
+inline bool identityEligible(World& w,const OwnedTransformOracle& oracle,float sx,float sy) {
     const auto control=_mm_getcsr();
     if((control&0x7f80u)!=0x1f80u||std::bit_cast<std::uint32_t>(sx)!=0x3f800000u||
-       std::bit_cast<std::uint32_t>(sy)!=0x3f800000u||w.unknownObserver||!finitePosition(w.center))return false;
+       std::bit_cast<std::uint32_t>(sy)!=0x3f800000u||w.unknownObserver||!identityObject(w.center))return false;
     if(!w.ownedPointers(false)||w.objectTable[0x4a8/8]!=oracle.realPositionEntry())return false;
     if(w.layerTable[0x490/8]!=reinterpret_cast<void*>(&World::section)||
        w.layerTable[0x498/8]!=reinterpret_cast<void*>(&World::disabled)||
@@ -66,18 +63,22 @@ inline bool identityLinearPhase(World& w,const OwnedTransformOracle& oracle,floa
     if(w.parent.get<void*>(0xd8))return false;
     const auto childParent=w.child.get<void*>(0xd8);
     if(childParent&&childParent!=w.parent.data.data())return false;
-#ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
-    const auto audit1=AuditClock::now();
-#endif
+    return oracle.atan2()!=nullptr;
+}
+inline unsigned identityFlags(const OwnedTransformOracle& oracle) {
+    const auto control=_mm_getcsr();
     const auto trig=oracle.atan2();
-    if(!trig)return false;
     const auto previousErrno=errno;
     _mm_setcsr(control&~63u);
     const auto minusZero=std::bit_cast<float>(0x80000000u);
     const auto linear=pose::decompose({1,0,minusZero,1,0,0},trig);
     const auto linearFlags=_mm_getcsr()&63;
     _mm_setcsr(control);errno=previousErrno;
-    if(linear.scaleX!=1.f||linear.scaleY!=1.f||linear.rotationX!=0.f||linear.rotationY!=0.f)return false;
+    if(linear.scaleX!=1.f||linear.scaleY!=1.f||linear.rotationX!=0.f||linear.rotationY!=0.f)
+        throw std::runtime_error("unsupported identity decomposition");
+    return linearFlags;
+}
+inline void executeIdentity(World& w,const OwnedTransformOracle& oracle,unsigned linearFlags,float sx,float sy,bool resetVisual) {
 #ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
     const auto audit2=AuditClock::now();
 #endif
@@ -126,10 +127,28 @@ inline bool identityLinearPhase(World& w,const OwnedTransformOracle& oracle,floa
 #ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
     const auto audit5=AuditClock::now();
     const auto ns=[](auto span){return std::chrono::duration_cast<std::chrono::nanoseconds>(span).count();};
-    stageAudit.validation+=ns(audit1-audit0);stageAudit.compilation+=ns(audit2-audit1);
     stageAudit.preparation+=ns(audit3-audit2);stageAudit.objects+=ns(audit4-audit3);
     stageAudit.publication+=ns(audit5-audit4);++stageAudit.phases;
 #endif
-    (void)resetVisual;return true;
+    (void)resetVisual;
+}
+}
+// Single phase keeps full validation; a synchronous owned program may borrow
+// the same executor only while no external code can mutate its certified fields.
+inline bool identityLinearPhase(World& w,const OwnedTransformOracle& oracle,float sx=1,float sy=1,bool resetVisual=true) {
+#ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
+    const auto audit0=AuditClock::now();
+#endif
+    if(!detail::identityEligible(w,oracle,sx,sy))return false;
+#ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
+    const auto audit1=AuditClock::now();
+#endif
+    const auto flags=detail::identityFlags(oracle);
+#ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
+    const auto audit2=AuditClock::now();
+    const auto ns=[](auto span){return std::chrono::duration_cast<std::chrono::nanoseconds>(span).count();};
+    stageAudit.validation+=ns(audit1-audit0);stageAudit.compilation+=ns(audit2-audit1);
+#endif
+    detail::executeIdentity(w,oracle,flags,sx,sy,resetVisual);return true;
 }
 }

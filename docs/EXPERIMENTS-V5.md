@@ -435,3 +435,20 @@ Mesures historiques sans preuve d'isolation qualifiees ; chronos ulterieurs
 concurrents a la partie utilisateur exclus. GPU final annule, aucun lancement GD.
 Inspecteur ACCEPT ; demandes P2 couvertes. GARDER uniquement le correctif de
 fixture ; aucune preuve de gain FPS ou de correction des blackscreens.
+
+## 2026-10-26 - R4-22 : programme synchrone de groupes possedes
+
+Prototype borne a 64 phases : copie des commandes avant ecritures, une seule
+validation des membres/lineaires/callbacks et decomposition constante partagee.
+L'execution conserve les vrais getters/reset/move et publications. Aucun
+certificat persistant ou handler GD reel suppose stable. Centre verifie comme
+les membres ; ancienne boucle factorisee et toujours couverte.
+
+26053 assertions natives passent : petits mondes compares a chaque callback,
+16 phases sur 4096 objets compares a l'etat final, quatre modes DAZ/FTZ, bornes,
+stamps et registre plein reutilise. Commandes aliasant des positions modifiees
+par le natif couvertes ; mutation par emprunt rejetee a 25971, suppression de
+validation rejetee a 1. R4-20 : 327427 controles sans regression ; variante de
+chronos compilee seulement. Inspecteur ACCEPT pour fixture, P2 de capacite
+corrige et teste. GARDER comme prototype fonctionnel, sans gain FPS revendique.
+Aucun GD lance, aucune installation. Chronos differes pendant la partie Steam.

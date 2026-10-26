@@ -55,7 +55,7 @@ struct World {
     std::vector<void*> members;
     std::vector<Event> events;
     bool capture=true,observerWrites=false,observerClearsFlags=false,unknownObserver=false,overflow=false;
-    unsigned callbacks=0;
+    unsigned callbacks=0,eventLimit=64;
     std::array<void*,0x600/8> objectTable{};
     std::array<void*,0x500/8> layerTable{};
     static inline thread_local World* active=nullptr;
@@ -78,7 +78,7 @@ struct World {
         state.layer.put(0xe28,state.slots.data());state.layer.put(0xe30,state.slots.data());state.layer.put(0xe38,state.slots.data()+state.slots.size());
         state.layer.put(0x8c8,parent.data.data());state.layer.put(0x8e8,child.data.data());
         if(!state.objects.empty())center=state.objects[0];
-        else center.put(0,objectTable.data());
+        else {center.put(0,objectTable.data());center.put(0x3a0,7);center.put(0x488,1.f);center.put(0x48c,1.f);}
         center.put(0x4e0,std::numeric_limits<int>::max());
         center.put(0x3b8,1048576.25);center.put(0x3c0,65536.125);
         group.put(0x38,groupData.data.data());groupData.put<unsigned>(0,count);groupData.put(0x10,members.data());
@@ -106,7 +106,7 @@ struct World {
     }
     void record(EventKind kind,unsigned index=0,float argument=0) {
         ++callbacks;if(!capture)return;
-        if(events.size()==64){overflow=true;return;}
+        if(events.size()>=eventLimit){overflow=true;return;}
         if(state.objects.size()>4)std::abort();
         Event e;e.kind=kind;e.object=index;e.argument=std::bit_cast<std::uint32_t>(argument);e.flags=_mm_getcsr()&63;
         e.pointersValid=ownedPointers();
