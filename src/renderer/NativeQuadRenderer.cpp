@@ -6,6 +6,14 @@
 #include "Shader.hpp"
 #include "GLState.hpp"
 #include "NativeVertexSubmission.hpp"
+#ifdef CHLORIUM_NATIVE_ADAPTIVE_UPLOAD_V6
+#include "AdaptiveUpload.hpp"
+#include "NativeVertexLease.hpp"
+#include "NativeStoreHydration.hpp"
+#ifdef CHLORIUM_NATIVE_GPU_EXCHANGE_V8
+#include "NativeGpuReplacement.hpp"
+#endif
+#endif
 #include <Geode/Geode.hpp>
 #include <Geode/modify/CCSpriteBatchNode.hpp>
 #include <Geode/modify/CCTextureAtlas.hpp>
@@ -23,6 +31,9 @@ static_assert(offsetof(cocos2d::ccV3F_C4B_T2F_Quad,tl) == 0 && offsetof(cocos2d:
 
 namespace chlorium::snapshot {
 Stats stats;
+#ifdef CHLORIUM_NATIVE_ADAPTIVE_UPLOAD_V6
+UploadStatsV6 uploadStats;
+#endif
 unsigned lastFrame = ~0u;
 struct SubmissionTimer {
     std::chrono::steady_clock::time_point started = std::chrono::steady_clock::now();
@@ -45,6 +56,7 @@ struct BatchScope {
     ~BatchScope() { activeBatch = previous; activeCache = previousCache; }
 };
 struct RestoreGL {
+    bool active=true;
 #ifdef CHLORIUM_NATIVE_VERTEX_PARITY
     GLStateSnapshot state = GLStateSnapshot::capture(GLStateScope::NativeVertex);
 #else
@@ -54,8 +66,9 @@ struct RestoreGL {
         // This submission section uses raw GL exclusively, so Cocos' cache is
         // untouched. Restore the actual bindings before returning to native.
         // In particular, do not rewrite blend enable/factors or matrix stacks.
-        state.restore();
+        if(active) state.restore();
     }
+    void handoff() {state.restore();active=false;}
 };
 #ifdef CHLORIUM_NATIVE_VERTEX_PARITY
 bool nativeAtlasContract() {
@@ -83,17 +96,31 @@ bool otherAtlasHooks() {
     checked=frame; conflict=false;
     const auto address=reinterpret_cast<std::uintptr_t>(GetProcAddress(GetModuleHandleW(L"libcocos2d.dll"),
         "?drawNumberOfQuads@CCTextureAtlas@cocos2d@@QEAAXII@Z"));
+#ifdef CHLORIUM_NATIVE_GPU_EXCHANGE_V8
+    const auto cocos=reinterpret_cast<std::uintptr_t>(GetModuleHandleW(L"libcocos2d.dll"));
+#endif
     for (const auto mod : Loader::get()->getAllMods()) {
         if (mod==Mod::get()) continue;
         for (const auto hook : mod->getHooks())
-            if (hook->isEnabled() && hook->getAddress()==address) return conflict=true;
+            if (hook->isEnabled() && (hook->getAddress()==address
+#ifdef CHLORIUM_NATIVE_GPU_EXCHANGE_V8
+                // Moving the upload ahead of the native call requires its
+                // preceding texture getter/bind to have no foreign callback.
+                || hook->getAddress()==cocos+0x10760 || hook->getAddress()==cocos+0x87fe0
+#endif
+                )) return conflict=true;
     }
     return false;
 }
 #endif
 struct QuadBatch {
     std::unique_ptr<Buffer> buffer;
+#ifdef CHLORIUM_NATIVE_ADAPTIVE_UPLOAD_V6
+    AdaptiveUpload uploads;
+    std::size_t capacity=0;
+#else
     std::vector<NativeQuadState> states;
+#endif
     Shader* shader = nullptr;
     GLuint vao = 0;
     bool failed = false;
@@ -117,7 +144,7 @@ struct QuadBatch {
         }
         return false;
     }
-    bool draw(CCTextureAtlas* atlas, unsigned amount, unsigned first) {
+    template<class Forward> bool draw(CCTextureAtlas* atlas, unsigned amount, unsigned first,Forward&& native) {
         if (failed) return false;
         if (!amount) return true;
         if (!atlas->getTexture()) return false;
@@ -164,10 +191,61 @@ struct QuadBatch {
             shader = Shader::create("nativeQuad.vert","nativeQuad.frag");
             if (!shader) return fail("native quad shader compilation");
 #endif
+#ifndef CHLORIUM_NATIVE_DRAW_BRIDGE_V7
             glGenVertexArrays(1,&vao);
             if (!vao) return fail("empty vertex array allocation");
+#endif
         }
-        bool resized = false;
+#ifdef CHLORIUM_NATIVE_ADAPTIVE_UPLOAD_V6
+#ifdef CHLORIUM_NATIVE_GPU_EXCHANGE_V8
+        // Clean draws retain the canonical native GPU contents. For a dirty
+        // draw only the requested CPU range is authoritative; copy everything
+        // else GPU-to-GPU, then transfer the complete store to native ownership.
+        if(atlas->m_bDirty) {
+            const auto cocos=reinterpret_cast<const unsigned char*>(GetModuleHandleW(L"libcocos2d.dll"));
+            const auto table=*reinterpret_cast<const std::uintptr_t* const*>(atlas->getTexture());
+            const unsigned char pureGetter[]{0x8b,0x41,0x48,0xc3};
+            if(table[12]!=reinterpret_cast<std::uintptr_t>(cocos+0x10760) ||
+                std::memcmp(cocos+0x10760,pureGetter,sizeof(pureGetter))) return fail("foreign native texture getter");
+            if(!buffer) buffer.reset(Buffer::createDynamicDraw("Native exchange spare",1));
+            const auto rebuilt=rebuildNativeGpuStore(atlas->m_pBuffersVBO[0],buffer->getId(),
+                static_cast<std::size_t>(first)*sizeof(NativeQuadState),count*sizeof(NativeQuadState),atlas->m_pQuads+first);
+            if(!rebuilt.bytes) return fail("native GPU exchange unsupported or invalid storage");
+            buffer->exchangeNativeStore(atlas->m_pBuffersVBO[0],rebuilt.bytes);
+            atlas->m_bDirty=false;
+            stats.uploadedBytes+=count*sizeof(NativeQuadState);
+            ++uploadStats.direct;uploadStats.uploaded+=count;
+        } else ++uploadStats.sparse;
+#else
+        if(capacity<captureCount) {
+            std::size_t next=std::max<std::size_t>(256,capacity);
+            while(next<captureCount) next*=2;
+            auto replacement=std::unique_ptr<Buffer>(Buffer::createDynamicDraw("Adaptive native vertex store",next*sizeof(NativeQuadState)));
+            if(!replacement || !replacement->getId() || !glGetBufferParameteri64v) return fail("adaptive vertex storage unavailable");
+            replacement->bindAs(GL_ARRAY_BUFFER);
+            GLint64 actualBytes=0;glGetBufferParameteri64v(GL_ARRAY_BUFFER,GL_BUFFER_SIZE,&actualBytes);
+            if(actualBytes<0 || static_cast<std::uint64_t>(actualBytes)<next*sizeof(NativeQuadState)) return fail("adaptive vertex storage allocation failed");
+#ifndef CHLORIUM_NATIVE_DRAW_BRIDGE_V7
+            configureNativeVertexLayout(vao,replacement->getId());
+#endif
+            buffer=std::move(replacement);capacity=next;uploads.invalidate();
+        }
+        const auto source=std::as_bytes(std::span(atlas->m_pQuads,captureCount));
+#ifdef CHLORIUM_NATIVE_DRAW_BRIDGE_V7
+        buffer->write(atlas->m_pQuads,source.size());
+        const UploadWork work{UploadMode::Direct,0,0,captureCount,1};
+#else
+        const auto work=uploads.update(source,capacity,[&](std::size_t offset,std::size_t count,const void* data) {
+            buffer->write(const_cast<void*>(data),count*sizeof(NativeQuadState),offset*sizeof(NativeQuadState));
+        });
+#endif
+        stats.uploadedBytes+=work.uploaded*sizeof(NativeQuadState);
+        uploadStats.direct+=work.mode==UploadMode::Direct;uploadStats.seed+=work.mode==UploadMode::Seed;
+        uploadStats.sparse+=work.mode==UploadMode::Sparse;uploadStats.compared+=work.compared;
+        uploadStats.copied+=work.copied;uploadStats.uploaded+=work.uploaded;
+#endif
+#else
+        bool resized=false;
         if (states.size() < captureCount) {
             std::size_t capacity = std::max<std::size_t>(256,states.size());
             while (capacity < captureCount) capacity *= 2;
@@ -208,10 +286,23 @@ struct QuadBatch {
             buffer->write(states.data()+range.first,bytes,range.first*sizeof(NativeQuadState));
             stats.uploadedBytes += bytes;
         }
+#endif
 #ifdef CHLORIUM_NATIVE_VERTEX_PARITY
+#ifdef CHLORIUM_NATIVE_DRAW_BRIDGE_V7
+        restore.handoff();
+#ifdef CHLORIUM_NATIVE_GPU_EXCHANGE_V8
+        native();
+#else
+        {
+            NativeVertexLease lease(atlas->m_pBuffersVBO[0],atlas->m_bDirty,buffer->getId());
+            native();
+        }
+#endif
+#else
         // Keep the actual native program and every uniform (MVP, sampler,
         // effect parameters, mod changes). No shader or matrix reconstruction.
         submitNativeVertices(vao,nativeIndices,atlas->getTexture()->getName(),static_cast<GLsizei>(count),first);
+#endif
 #else
         kmMat4 projection,model,mvp;
         kmGLGetMatrix(KM_GL_PROJECTION,&projection); kmGLGetMatrix(KM_GL_MODELVIEW,&model);
@@ -223,7 +314,9 @@ struct QuadBatch {
         // Preserve that exact state, including changes from other draw hooks.
         glDrawArraysInstanced(GL_TRIANGLE_STRIP,0,4,static_cast<GLsizei>(count));
 #endif
+#ifndef CHLORIUM_NATIVE_DRAW_BRIDGE_V7
         CC_INCREMENT_GL_DRAWS(1);
+#endif
         const auto frame = CCDirector::get()->getTotalFrames();
         if (frame != lastFrame) { lastFrame = frame; ++stats.frames; stats.sprites = 0; }
         stats.sprites += count;
@@ -241,6 +334,12 @@ extern "C" __declspec(dllexport) bool ChloriumReadNativeSnapshotStats(
     output->active = output->active && frame - chlorium::snapshot::lastFrame <= 2 && Mod::get()->getSettingValue<bool>("enabled");
     return true;
 }
+#ifdef CHLORIUM_NATIVE_ADAPTIVE_UPLOAD_V6
+extern "C" __declspec(dllexport) bool ChloriumReadAdaptiveUploadStatsV6(chlorium::snapshot::UploadStatsV6* output,std::size_t size) {
+    if(!output||size!=sizeof(*output)) return false;
+    *output=chlorium::snapshot::uploadStats;return true;
+}
+#endif
 class $modify(ChloriumNativeQuadBatch,CCSpriteBatchNode) {
     // Geode fields require a CCNode. CCTextureAtlas is only a CCObject, so it
     // cannot own m_fields; keep the cache on its owning sprite batch instead.
@@ -267,14 +366,29 @@ class $modify(ChloriumNativeQuadBatch,CCSpriteBatchNode) {
 };
 class $modify(ChloriumNativeQuadAtlas,CCTextureAtlas) {
     void drawNumberOfQuads(unsigned int amount,unsigned int first) {
+        bool nativeInProgress=false;
+        const auto forwardNative=[&] {
+#if defined(CHLORIUM_NATIVE_DRAW_BRIDGE_V7) && !defined(CHLORIUM_NATIVE_GPU_EXCHANGE_V8)
+            // A partial native draw clears an atlas-wide dirty bit. Populate
+            // the entire original store first when switching from a lease.
+            if(amount && m_bDirty && (first || amount<getTotalQuads()) && m_pQuads && m_pBuffersVBO[0] &&
+                wglGetCurrentContext() && glGetBufferParameteri64v && glIsBuffer(m_pBuffersVBO[0])) {
+                const auto required=static_cast<std::uint64_t>(getCapacity())*sizeof(chlorium::snapshot::NativeQuadState);
+                (void)hydrateNativeVertexStore(m_pBuffersVBO[0],m_pQuads,static_cast<std::size_t>(required));
+            }
+#endif
+            nativeInProgress=true;
+            CCTextureAtlas::drawNumberOfQuads(amount,first);
+            nativeInProgress=false;
+        };
         auto batch = chlorium::snapshot::activeBatch;
         auto cache = chlorium::snapshot::activeCache;
-        if (!batch || !cache) { CCTextureAtlas::drawNumberOfQuads(amount,first); return; }
+        if (!batch || !cache) { forwardNative(); return; }
 #ifdef CHLORIUM_NATIVE_VERTEX_PARITY
         // Never skip another mod's atlas callback or guess a changed engine ABI.
         if (!chlorium::snapshot::nativeAtlasContract() || chlorium::snapshot::otherAtlasHooks()) {
             ++chlorium::snapshot::stats.fallbacks;
-            CCTextureAtlas::drawNumberOfQuads(amount,first); return;
+            forwardNative(); return;
         }
 #endif
         auto stock = CCShaderCache::sharedShaderCache()->programForKey(kCCShader_PositionTextureColor);
@@ -285,22 +399,26 @@ class $modify(ChloriumNativeQuadAtlas,CCTextureAtlas) {
         // the batch's shader pointer was read. Do not overwrite its effect.
         if (!batch || !cache || batch->getTextureAtlas() != this || !stock || batch->getShaderProgram() != stock ||
             static_cast<GLuint>(currentProgram) != stock->getProgram()) {
-            CCTextureAtlas::drawNumberOfQuads(amount,first); return;
+            forwardNative(); return;
         }
         try {
-            if (cache->draw(this,amount,first)) return;
+            if (cache->draw(this,amount,first,forwardNative)) return;
         } catch (const std::exception& error) {
+            if(nativeInProgress) throw;
             log::warn("Chlorium native quad allocation/capture failed: {}",error.what());
             cache->fail("native quad allocation/capture exception");
         }
         // Native preparation already ran exactly once. Falling back at the
         // submission boundary avoids repeating updateTransform/mod hooks.
-        CCTextureAtlas::drawNumberOfQuads(amount,first);
+        forwardNative();
     }
 };
 class $modify(ChloriumNativeQuadLevel,PlayLayer) {
     void setupHasCompleted() {
         chlorium::snapshot::stats = {};
+#ifdef CHLORIUM_NATIVE_ADAPTIVE_UPLOAD_V6
+        chlorium::snapshot::uploadStats={};
+#endif
         chlorium::snapshot::lastFrame = ~0u;
         PlayLayer::setupHasCompleted();
     }

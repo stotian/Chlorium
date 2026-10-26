@@ -154,6 +154,16 @@ bool recordNativeSnapshotStats(float percent) {
     }();
     Stats stats;
     const bool available = read && read(&stats, sizeof(stats)) && stats.version == 1;
+    using Upload=chlorium::snapshot::UploadStatsV6;
+    using ReadUpload=bool(*)(Upload*,std::size_t);
+    static const auto readUpload=[] {
+        auto module=GetModuleHandleW(L"local.chlorium.dll");
+        return module?reinterpret_cast<ReadUpload>(GetProcAddress(module,"ChloriumReadAdaptiveUploadStatsV6")):nullptr;
+    }();
+    Upload upload;
+    if(readUpload&&readUpload(&upload,sizeof(upload))&&upload.version==6)
+        line(fmt::format("{{\"event\":\"adaptive_upload_v6\",\"percent\":{},\"direct\":{},\"seed\":{},\"sparse\":{},\"compared_records\":{},\"copied_records\":{},\"uploaded_records\":{}}}",
+            percent,upload.direct,upload.seed,upload.sparse,upload.compared,upload.copied,upload.uploaded));
     if (available)
         line(fmt::format("{{\"event\":\"native_snapshot_stats\",\"percent\":{},\"active\":{},\"frames\":{},\"sprites\":{},\"uploaded_bytes\":{},\"fallbacks\":{},\"capture_ms\":{}}}",
             percent, stats.active != 0, stats.frames, stats.sprites, stats.uploadedBytes, stats.fallbacks, stats.captureMilliseconds));

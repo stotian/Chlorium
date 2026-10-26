@@ -9,7 +9,7 @@ import zipfile
 
 root = Path(__file__).resolve().parents[2]
 profile = sys.argv[1] if len(sys.argv) == 2 else ""
-if profile not in ("quad-v4", "quad-v4-scope-r2", "quad-audit-r3", "native-vertex-black-v5", "measurement-v5", "measurement-audit-r2", "measurement-black-watch-v5", "measurement-area-census-v5", "measurement-area-visible-v5", "measurement-area-frames-v5", "measurement-pose-census-v6"):
+if profile not in ("quad-v4", "quad-v4-scope-r2", "quad-audit-r3", "native-vertex-black-v5", "measurement-v5", "measurement-audit-r2", "measurement-black-watch-v5", "measurement-area-census-v5", "measurement-area-visible-v5", "measurement-area-frames-v5", "measurement-pose-census-v6", "native-adaptive-upload-v6", "measurement-upload-v6", "native-draw-bridge-v7", "native-gpu-exchange-v8"):
     raise SystemExit("Choose an explicit compiled research profile")
 out = root / "build-research" / profile
 build = json.loads((out / "build-fingerprint.json").read_text(encoding="utf-8"))
@@ -24,7 +24,13 @@ if build.get("source_archive_sha256"):
         raise SystemExit("Source archive fingerprint mismatch")
 audit = profile.startswith("measurement-")
 expected = (b"CHLORIUM_RUNTIME_AUDIT_BINARY_V1", b"CHLORIUM_READBACK_STATE_GUARDS_V5") if audit else (
-    b"CHLORIUM_NORMAL_BINARY_V1", b"CHLORIUM_NATIVE_VERTEX_BACKEND_V5" if profile=="native-vertex-black-v5" else b"CHLORIUM_NATIVE_QUAD_BACKEND_V4", b"CHLORIUM_EXPERIMENTAL_NATIVE_SNAPSHOTS_V1")
+    b"CHLORIUM_NORMAL_BINARY_V1", b"CHLORIUM_NATIVE_VERTEX_BACKEND_V5" if profile in ("native-vertex-black-v5","native-adaptive-upload-v6","native-draw-bridge-v7", "native-gpu-exchange-v8") else b"CHLORIUM_NATIVE_QUAD_BACKEND_V4", b"CHLORIUM_EXPERIMENTAL_NATIVE_SNAPSHOTS_V1")
+if profile in ("native-adaptive-upload-v6","native-draw-bridge-v7", "native-gpu-exchange-v8") and b"CHLORIUM_NATIVE_ADAPTIVE_UPLOAD_V6" not in binary:
+    raise SystemExit("Adaptive upload identity missing")
+if profile in ("native-draw-bridge-v7", "native-gpu-exchange-v8") and b"CHLORIUM_NATIVE_DRAW_BRIDGE_V7" not in binary:
+    raise SystemExit("Native draw handoff identity missing")
+if profile=="native-gpu-exchange-v8" and b"CHLORIUM_NATIVE_GPU_EXCHANGE_V8" not in binary:
+    raise SystemExit("Native GPU exchange identity missing")
 if not all(marker in binary for marker in expected):
     raise SystemExit("Wrong binary identity")
 for resource in build["resources"]:
@@ -33,7 +39,7 @@ for resource in build["resources"]:
 manifest = json.loads((root / "mod.json").read_text(encoding="utf-8"))
 manifest["id"] = build["mod_id"]
 manifest["version"] = build["version"]
-manifest["name"] = "Chlorium independent measurement V5" if audit else "Chlorium" if profile=="native-vertex-black-v5" else "Chlorium native quads V4 research"
+manifest["name"] = "Chlorium independent measurement V5" if audit else "Chlorium GPU exchange V8 research" if profile=="native-gpu-exchange-v8" else "Chlorium native handoff V7 research" if profile=="native-draw-bridge-v7" else "Chlorium adaptive upload V6 research" if profile=="native-adaptive-upload-v6" else "Chlorium" if profile=="native-vertex-black-v5" else "Chlorium native quads V4 research"
 manifest["settings"].pop("ingame_enable", None)
 manifest["settings"].pop("use_mapped_buffers", None)
 package = out / (manifest["id"] + ".geode")

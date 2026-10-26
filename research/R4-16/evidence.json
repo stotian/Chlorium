@@ -1,0 +1,247 @@
+{
+  "experiment": "R4-16",
+  "status": "research_only_not_promoted",
+  "profile": "native-gpu-exchange-v8",
+  "version": "v0.3.0-alpha.4",
+  "dll_sha256": "1bff37fc88d53ac001ceed7fb729563a77107e24fc21c9df96f739e4684d9331",
+  "source_archive_sha256": "f94247b7d42970c13b5a058da58a5d9280b2a09b013af36e42a82eab0616f0da",
+  "package_sha256": "4BE271217052E03A343114C419630DF9B30E529026FF09E967CB04E9D0B96202",
+  "oracle_gpu_checks_before_extended_fuzz": 250,
+  "buffer_checks": 41,
+  "rendering_checks": 18,
+  "geometry_checks": 7,
+  "FPS_gain_verified": false,
+  "stable_60_FPS_verified": false,
+  "universal_visual_pass": false,
+  "main_installation_unchanged": true,
+  "grief": {
+    "conditions_verified": true,
+    "sample_counts": {
+      "sans": 3182,
+      "avec": 2971
+    },
+    "excluded_visual_frames": {
+      "sans": 33,
+      "avec": 14
+    },
+    "comparison_sha256": "fa93872e1090998d40d195f3d7fa44e32da70079acda4562e31c08ccba023dac",
+    "paired_unmatched": {
+      "full": 6,
+      "left": 0,
+      "right": 0,
+      "bottom": 0,
+      "top": 0,
+      "repeated_signature": 0
+    },
+    "target_reached_both": true,
+    "deaths_both": 0,
+    "shared_files_restored_per_pass": 90,
+    "attribution": "unresolved; all six unmatched full-dark intervals also occur in earlier native references",
+    "supporting_native_intervals": [
+      {
+        "candidate": [
+          11.921,
+          11.9511
+        ],
+        "earlier_native": [
+          {
+            "campaign": "adaptive-upload-v6",
+            "interval": [
+              11.921,
+              11.9511
+            ],
+            "comparison_sha256": "9a94352a3544d049969ea28000fd9be2c3244d25557f6884116e91fd400743bf"
+          },
+          {
+            "campaign": "native-bridge-v7",
+            "interval": [
+              11.921,
+              11.9511
+            ],
+            "comparison_sha256": "43dbbe039dcbaf3f0e9001d80bf799dbc121e1a254023920ee4af8e2098b615d"
+          }
+        ]
+      },
+      {
+        "candidate": [
+          12.2714,
+          12.2914
+        ],
+        "earlier_native": [
+          {
+            "campaign": "adaptive-upload-v6",
+            "interval": [
+              12.2714,
+              12.2914
+            ],
+            "comparison_sha256": "9a94352a3544d049969ea28000fd9be2c3244d25557f6884116e91fd400743bf"
+          },
+          {
+            "campaign": "native-bridge-v7",
+            "interval": [
+              12.2714,
+              12.2914
+            ],
+            "comparison_sha256": "43dbbe039dcbaf3f0e9001d80bf799dbc121e1a254023920ee4af8e2098b615d"
+          }
+        ]
+      },
+      {
+        "candidate": [
+          12.3815,
+          12.4115
+        ],
+        "earlier_native": [
+          {
+            "campaign": "adaptive-upload-v6",
+            "interval": [
+              12.3815,
+              12.4115
+            ],
+            "comparison_sha256": "9a94352a3544d049969ea28000fd9be2c3244d25557f6884116e91fd400743bf"
+          },
+          {
+            "campaign": "native-bridge-v7",
+            "interval": [
+              12.3815,
+              12.4115
+            ],
+            "comparison_sha256": "43dbbe039dcbaf3f0e9001d80bf799dbc121e1a254023920ee4af8e2098b615d"
+          }
+        ]
+      },
+      {
+        "candidate": [
+          12.5316,
+          12.5616
+        ],
+        "earlier_native": [
+          {
+            "campaign": "adaptive-upload-v6",
+            "interval": [
+              12.5316,
+              12.5616
+            ],
+            "comparison_sha256": "9a94352a3544d049969ea28000fd9be2c3244d25557f6884116e91fd400743bf"
+          }
+        ]
+      },
+      {
+        "candidate": [
+          12.6317,
+          12.6617
+        ],
+        "earlier_native": [
+          {
+            "campaign": "adaptive-upload-v6",
+            "interval": [
+              12.6317,
+              12.6617
+            ],
+            "comparison_sha256": "9a94352a3544d049969ea28000fd9be2c3244d25557f6884116e91fd400743bf"
+          },
+          {
+            "campaign": "native-bridge-v7",
+            "interval": [
+              12.6417,
+              12.6617
+            ],
+            "comparison_sha256": "43dbbe039dcbaf3f0e9001d80bf799dbc121e1a254023920ee4af8e2098b615d"
+          }
+        ]
+      },
+      {
+        "candidate": [
+          30.4081,
+          30.4882
+        ],
+        "earlier_native": [
+          {
+            "campaign": "adaptive-upload-v6",
+            "interval": [
+              30.3981,
+              30.4882
+            ],
+            "comparison_sha256": "9a94352a3544d049969ea28000fd9be2c3244d25557f6884116e91fd400743bf"
+          },
+          {
+            "campaign": "native-bridge-v7",
+            "interval": [
+              30.3981,
+              30.4882
+            ],
+            "comparison_sha256": "43dbbe039dcbaf3f0e9001d80bf799dbc121e1a254023920ee4af8e2098b615d"
+          }
+        ]
+      }
+    ]
+  },
+  "heliopolis": {
+    "native_status": "visual_coverage_failed",
+    "target_reached": true,
+    "deaths": 0,
+    "visual_samples": 22,
+    "readbacks_invalid": 0,
+    "readbacks_pending": 0,
+    "required_probes_missing": 2,
+    "wall_clock_stall_s": 11.4297,
+    "CPU_time_during_stall_s_approx": 0.422,
+    "available_RAM_near_stall_MiB_approx": 360,
+    "shared_files_restored": 90,
+    "verdict": "no blackscreen verdict valid; do not treat as passing"
+  },
+  "final_extended_gpu_checks": 636,
+  "random_GPU_authority_trials": 128,
+  "heliopolis_isolated": {
+    "conditions_verified": true,
+    "comparison_sha256": "aa8f7ffea81c58f29d4d1c51dbc0db3b9425418fead16b27ceea4024e9a72cda",
+    "samples": {
+      "sans": 212,
+      "avec": 202
+    },
+    "unmatched_candidate_episodes": {
+      "full": 0,
+      "left": 0,
+      "right": 0,
+      "bottom": 0,
+      "top": 0,
+      "repeated_signature": 0
+    },
+    "overlay_protocol": {
+      "sans": "audited_V8_binary_pair_without_external_mods",
+      "avec": "audited_V8_binary_pair_without_external_mods"
+    },
+    "coverage": {
+      "sans": {
+        "event": "coverage",
+        "completed": false,
+        "targeted": true,
+        "target_completed": true,
+        "target_from": 74,
+        "target_to": 78,
+        "deaths": 0,
+        "observed_frames": 212,
+        "excluded_frames": 212,
+        "gpu_pending": 0,
+        "renderer_inactive_frames": 0,
+        "cpu_profile": ""
+      },
+      "avec": {
+        "event": "coverage",
+        "completed": false,
+        "targeted": true,
+        "target_completed": true,
+        "target_from": 74,
+        "target_to": 78,
+        "deaths": 0,
+        "observed_frames": 202,
+        "excluded_frames": 202,
+        "gpu_pending": 0,
+        "renderer_inactive_frames": 0,
+        "cpu_profile": ""
+      }
+    },
+    "universal_visual_pass": false,
+    "performance_comparison": false
+  }
+}

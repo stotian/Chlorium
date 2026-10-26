@@ -8,4 +8,9 @@ struct Stats {
     double captureMilliseconds = 0;
 };
 static_assert(sizeof(Stats) == 48);
+struct UploadStatsV6 {
+    std::uint32_t version=6,reserved=0;
+    std::uint64_t direct=0,seed=0,sparse=0,compared=0,copied=0,uploaded=0;
+};
+static_assert(sizeof(UploadStatsV6)==56);
 }

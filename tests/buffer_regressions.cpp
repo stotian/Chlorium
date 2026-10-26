@@ -9,6 +9,7 @@
 bool geode::prelude::mappedUploads = false;
 static GLuint bound = 99, nextID = 1;
 static std::map<GLuint, std::vector<u8>> memory;
+static std::map<GLuint, unsigned> deletions;
 static bool driverMapped = false, failMapping = false, failUnmapping = false;
 static bool failAllocation = false;
 static int mapCalls = 0, uploadCalls = 0, checks = 0;
@@ -19,7 +20,7 @@ void require(bool value, const char* message) {
 void glGetIntegerv(GLenum, GLint* value) { *value = bound; }
 void glBindBuffer(GLenum, GLuint value) { bound = value; }
 void glGenBuffers(GLsizei count, GLuint* ids) { while (count--) *ids++ = nextID++; }
-void glDeleteBuffers(GLsizei count, const GLuint* ids) { while (count--) memory.erase(*ids++); }
+void glDeleteBuffers(GLsizei count, const GLuint* ids) { while (count--) {++deletions[*ids];memory.erase(*ids++);} }
 void glObjectLabel(GLenum, GLuint, GLsizei, const char*) {}
 void glBindBufferBase(GLenum, GLuint, GLuint) {}
 void glBufferData(GLenum, std::size_t size, const void* data, GLenum) {
@@ -95,6 +96,27 @@ int main() {
         require(readRejected && writeRejected && bound == previous, "invalid and overflowing ranges rejected before GL access");
         Buffer::destroy(buffer);
         require(!memory.contains(id) && !driverMapped, "destruction frees CPU staging and GPU buffer");
+    }
+    {
+        auto* spare=Buffer::createDynamicDraw("exchange spare",16);
+        const auto originalSpare=spare->getId();
+        u32 native=0;glGenBuffers(1,&native);glBindBuffer(GL_ARRAY_BUFFER,native);
+        glBufferData(GL_ARRAY_BUFFER,32,nullptr,GL_DYNAMIC_DRAW);
+        const auto originalNative=native;
+        auto alias=originalSpare;
+        bool aliasRejected=false;
+        try {spare->exchangeNativeStore(alias,32);}catch(const std::invalid_argument&){aliasRejected=true;}
+        require(aliasRejected&&alias==originalSpare&&spare->getId()==originalSpare,"aliased exchange leaves ownership unchanged");
+        spare->mapWriteOnly();bool mappedRejected=false;
+        try {spare->exchangeNativeStore(native,32);}catch(const std::invalid_argument&){mappedRejected=true;}
+        require(mappedRejected&&native==originalNative&&spare->getId()==originalSpare,"mapped exchange leaves ownership unchanged");
+        spare->unmap();
+        spare->exchangeNativeStore(native,32);
+        require(native==originalSpare&&spare->getId()==originalNative,"GPU exchange transfers distinct ownership");
+        glDeleteBuffers(1,&native);
+        Buffer::destroy(spare);
+        require(!memory.contains(originalSpare)&&!memory.contains(originalNative),"both exchanged stores destroyed exactly once");
+        require(deletions[originalSpare]==1&&deletions[originalNative]==1,"native/private destruction never double deletes");
     }
     require(mapCalls > 0 && uploadCalls > 0, "both upload paths exercised");
     const auto liveBefore = memory.size();

@@ -13,6 +13,30 @@ from audit_json import read_events
 
 KINDS={'full':0,'left':2,'right':4,'bottom':8,'top':16,'repeated_signature':32}
 
+# Audited native-only V8 fixture and audit HUD outside the measured ROI. This
+# exception is binary-specific, never a general waiver for isolated profiles.
+# Source archives and ownership/overlay contract: research/R4-16/evidence.json.
+ISOLATED_NO_DEBUG_PAIR=(
+    '151f07f5e028eb7f36355216b1b20ac531178c562f94f242dce501010bf23c39',
+    '4be271217052e03a343114c419630df9b30e529026ff09e967cb04e9d0b96202')
+
+
+def overlay_policy(data):
+    p=data['provenance']
+    if p.get('debug_overlays_disabled_requested') is True:
+        return 'debug_disabling_requested'
+    identity=tuple(str(p.get(k,'')).lower() for k in ('measurement_sha256','production_sha256'))
+    loaded={m['id'] for m in data['inventory'] if m.get('loaded')}
+    core={'geode.loader','geode.node-ids','local.chlorium.audit'}
+    known_binary=(identity==ISOLATED_NO_DEBUG_PAIR and 'local.chlorium' in loaded)
+    known_native=(identity[0]==ISOLATED_NO_DEBUG_PAIR[0] and p.get('production_sha256') is None
+                  and 'local.chlorium' not in loaded)
+    if ((known_binary or known_native) and p.get('mod_profile')=='isolated'
+        and data['profile'].get('name')=='isolated' and core<=loaded
+        and loaded<=core|{'local.chlorium'}):
+        return 'audited_V8_binary_pair_without_external_mods'
+    raise ValueError('Unmasked debug overlays can hide black frames: unsupported overlay protocol')
+
 
 def rows(path):
     with path.open(encoding='utf-8-sig',newline='') as stream:
@@ -67,7 +91,7 @@ def read(path,loaded):
         excluded+=not r['eligible']
     provenance=json.loads(Path(str(path)+'.provenance.json').read_text(encoding='utf-8-sig'))
     return dict(events=events,visual=visual,coverage=coverage,watch=watch,visual_coverage=visual_coverage,
-                mods=other_mods,provenance=provenance,excluded_visual_frames=excluded)
+                mods=other_mods,inventory=inventory,profile=profile,provenance=provenance,excluded_visual_frames=excluded)
 
 
 def episodes(data,kind):
@@ -178,9 +202,9 @@ def compare(native,candidate,destination):
         raise ValueError('Different loaded mod state or visual settings')
     if a['provenance'].get('visual_probe_percents',[])!=b['provenance'].get('visual_probe_percents',[]):
         raise ValueError('Different requested visual probe percentages')
-    if any(r['provenance'].get('debug_overlays_disabled_requested') is not True for r in (a,b)):
-        raise ValueError('Unmasked debug overlays can hide black frames: use the corrected full-mod protocol')
+    overlay_protocol={'sans':overlay_policy(a),'avec':overlay_policy(b)}
     report=dict(level=a['provenance']['level'],conditions_verified=True,
+                overlay_protocol=overlay_protocol,
                 production_sha256=b['provenance']['production_sha256'],
                 measurement_sha256=a['provenance']['measurement_sha256'],
                 sample_counts={'sans':len(a['visual']),'avec':len(b['visual'])},

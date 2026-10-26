@@ -161,6 +161,7 @@ void nativeQuadScopeChecks(GLuint nativeProgram, GLuint otherProgram) {
 }
 
 #include "NativeVertexParityChecks.hpp"
+#include "NativeAtlasContractChecks.hpp"
 
 int main(int argc, char** argv) try {
     root = argc > 1 ? argv[1] : ".";
@@ -530,6 +531,7 @@ int main(int argc, char** argv) try {
     nativePixel = drawNativeQuads();
     require(nativePixel[0] >= 127 && nativePixel[0] <= 129,"instanced path retains native SRC_ALPHA blending without double premultiplication");
     nativeVertexParityChecks();
+    nativeAtlasContractChecks();
     glDisable(GL_BLEND); glDeleteProgram(nativeQuadDraw); glDeleteVertexArrays(1,&emptyVao);
     require(glGetError() == GL_NO_ERROR, "no OpenGL errors across shader, compute, upload and draw tests");
     glDeleteProgram(program); glDeleteProgram(drawProgram);

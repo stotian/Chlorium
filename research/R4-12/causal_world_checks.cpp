@@ -14,8 +14,28 @@ template<class F> void rejects(F function,const char* why) {
 bool same(ir::Position a,ir::Position b) {return !std::memcmp(&a,&b,sizeof(a));}
 int main(int argc,char** argv) try {
     require(argc==2,"timing output argument");std::mt19937 random(0xca05a17);
+    const auto savedCSR=_mm_getcsr();
+    for(unsigned mode=0;mode<16;++mode) {
+        const auto csr=(savedCSR&~0xe07fu)|0x1f80u|((mode&3)<<13)|((mode&4)?0x8000u:0)|((mode&8)?0x40u:0);
+        ir::World world;std::vector<ir::Handle> handles;std::vector<ir::Position> eager;
+        const std::uint32_t bits[]{0,0x80000000u,1,0x80000001u,0x7f7fffffu,0x7f800000u,0xff800000u,0x7fc12345u,0x7f812345u};
+        for(unsigned n=0;n<17;++n) {
+            eager.push_back({std::bit_cast<float>(bits[n%9]),std::bit_cast<float>(bits[(n+3)%9])});
+            handles.push_back(world.create(eager.back()));world.join(handles.back(),1);world.join(handles.back(),2);
+        }
+        const std::array<ir::Effect,3> effects{{{1,0,0,1,0,0},{.75f,-.25f,.125f,1.5f,-.0f,10},{-1,0,0,-1,4,-4}}};
+        for(unsigned n=0;n<3;++n) world.enqueue(1+n%2,effects[n],ir::Capability::PurePositionSnapshot);
+        _mm_setcsr(csr);
+        for(auto e:effects) for(auto& p:eager) p=ir::apply(p,e);
+        const auto flags=_mm_getcsr()&63;
+        _mm_setcsr(csr);world.barrier();
+        require((_mm_getcsr()&63)==flags,"SIMD settlement masked FP status matches scalar model");
+        for(unsigned n=0;n<17;++n) require(same(world.read(handles[n]),eager[n]),"SIMD tail/NaN/zero/rounding bits match scalar");
+        require(world.work().vectorLanes>0,"SIMD path actually executed");
+    }
+    _mm_setcsr(savedCSR);
     for(unsigned trial=0;trial<64;++trial) {
-        ir::World world(19);std::vector<ir::Handle> handles;
+        ir::World world(19,static_cast<ir::Drain>(trial%3));std::vector<ir::Handle> handles;
         std::vector<ir::Position> eager(128);std::vector<std::unordered_set<unsigned>> groups(128);
         for(unsigned n=0;n<128;++n) {eager[n]={float(n)*.7f,-float(n)*.3f};handles.push_back(world.create(eager[n]));}
         for(unsigned step=0;step<512;++step) {
@@ -49,6 +69,22 @@ int main(int argc,char** argv) try {
         const auto dead=handles[7];world.destroy(dead);const auto replacement=world.create({1,2});
         require(replacement.slot==dead.slot&&replacement.generation!=dead.generation,"slot reuse has fresh generation");
         rejects([&]{world.read(dead);},"destroyed handle cannot read replacement");
+    }
+    {
+        ir::World world(1024);std::vector<ir::Handle> handles;std::vector<ir::Position> eager(512);
+        for(unsigned n=0;n<512;++n) {
+            eager[n]={float(n),-float(n)};handles.push_back(world.create(eager[n]));
+            for(unsigned g=0;g<10;++g) if((n+1)&(1u<<g)) world.join(handles.back(),g);
+        }
+        std::uint64_t operations=0;
+        for(unsigned n=0;n<32;++n) for(unsigned g=0;g<10;++g) {
+            const ir::Effect e{1.001f,.002f,-.003f,.999f,float(g),-float(n)};
+            world.enqueue(g,e,ir::Capability::PurePositionSnapshot);
+            for(unsigned k=0;k<512;++k) if((k+1)&(1u<<g)) {eager[k]=ir::apply(eager[k],e);++operations;}
+        }
+        world.barrier();require(world.work().compileFallbacks==1,"cohort compile budget forces bounded reference fallback");
+        require(world.work().applied==operations,"completed cohorts not applied twice on fallback");
+        for(unsigned n=0;n<512;++n) require(same(world.read(handles[n]),eager[n]),"diverse cohort fallback state exact");
     }
     // Dense group events and sparse readers: count eliminated immediate work,
     // then charge the full deferred debt at the final explicit barrier.

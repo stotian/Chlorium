@@ -1,5 +1,6 @@
 #pragma once
 #include "renderer/NativeVertexSubmission.hpp"
+#include "renderer/AdaptiveUpload.hpp"
 
 // Include after this fixture's require()/link() helpers and OpenGL headers.
 void nativeVertexParityChecks() {
@@ -40,6 +41,8 @@ out vec4 frag;void main(){frag=color*texture(CC_Texture0,uv)*native_effect;})")}
     using Pixels=std::array<unsigned char,64*64*4>;
     auto read=[] {Pixels p{};glReadPixels(0,0,64,64,GL_RGBA,GL_UNSIGNED_BYTE,p.data());return p;};
     unsigned scenarios=0;
+    chlorium::snapshot::AdaptiveUpload upload;
+    std::array<unsigned,4> modes{};
     for (unsigned first : {0u,1u}) for(bool blend : {false,true}) for(bool cull : {false,true})
         for(bool clipped : {false,true}) for(bool dark : {false,true}) {
         glm::mat4 matrix(1);matrix[3][0]=clipped?5.f:.025f;matrix[0][1]=.15f;
@@ -49,6 +52,8 @@ out vec4 frag;void main(){frag=color*texture(CC_Texture0,uv)*native_effect;})")}
         glBlendFuncSeparate(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA,GL_ONE,GL_ZERO);
         if(cull) glEnable(GL_CULL_FACE);else glDisable(GL_CULL_FACE);
         glCullFace(GL_BACK);glFrontFace(GL_CCW);
+        if(scenarios%4==0) quads[0].corners[0].color^=0x00000100u;
+        glBindBuffer(GL_ARRAY_BUFFER,stores[0]);glBufferSubData(GL_ARRAY_BUFFER,0,sizeof(quads),quads.data());
         glClear(GL_COLOR_BUFFER_BIT);
         glBindVertexArray(vaos[0]);glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,stores[2]);
         glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_SHORT,reinterpret_cast<void*>(first*12));
@@ -57,6 +62,12 @@ out vec4 frag;void main(){frag=color*texture(CC_Texture0,uv)*native_effect;})")}
         glClear(GL_COLOR_BUFFER_BIT);
         {
             const auto state=GLStateSnapshot::capture(GLStateScope::NativeVertex);
+            const auto source=std::as_bytes(std::span<const chlorium::snapshot::NativeQuadState>(quads.data(),first+1));
+            const auto work=upload.update(source,quads.size(),[&](std::size_t offset,std::size_t count,const void* data){
+                glBindBuffer(GL_ARRAY_BUFFER,stores[1]);
+                glBufferSubData(GL_ARRAY_BUFFER,offset*sizeof(quads[0]),count*sizeof(quads[0]),data);
+            });
+            ++modes[static_cast<unsigned>(work.mode)];
             chlorium::snapshot::submitNativeVertices(vaos[1],stores[2],texture,1,first);
             state.restore();
         }
@@ -70,6 +81,7 @@ out vec4 frag;void main(){frag=color*texture(CC_Texture0,uv)*native_effect;})")}
         require(!std::memcmp(uniform.data(),&matrix[0][0],sizeof(matrix)),"native MVP uniform is never rewritten");
         ++scenarios;
     }
+    require(modes[1]&&modes[2]&&modes[3],"real GPU parity exercised direct, seed and sparse adaptive uploads");
     // Negative control: a guessed, zero MVP erases visible geometry. The
     // full-pixel comparator must reject it rather than accepting a black draw.
     glDisable(GL_CULL_FACE);glDisable(GL_BLEND);glUseProgram(program);

@@ -1,0 +1,99 @@
+{
+  "experiment": "R4-13",
+  "status": "research_only",
+  "model_checks": 106212,
+  "rejected_mutations": [
+    "event_order",
+    "missing_barrier",
+    "SIMD_corruption"
+  ],
+  "benchmarks": [
+    {
+      "objects": "4096",
+      "strategy": "merge",
+      "batches": "9",
+      "eager_median_us": "656.2",
+      "reads_median_us": "167.6",
+      "debt_median_us": "2460",
+      "total_median_us": "2627.6",
+      "total_max_us": "3021.7",
+      "applied_ops": "278528",
+      "compiled_commands": "0",
+      "cohorts": "0",
+      "vector_lanes": "0"
+    },
+    {
+      "objects": "4096",
+      "strategy": "cohort_scalar",
+      "batches": "9",
+      "eager_median_us": "648.1",
+      "reads_median_us": "171.3",
+      "debt_median_us": "1380.2",
+      "total_median_us": "1546.9",
+      "total_max_us": "1755.4",
+      "applied_ops": "278528",
+      "compiled_commands": "160",
+      "cohorts": "4",
+      "vector_lanes": "0"
+    },
+    {
+      "objects": "4096",
+      "strategy": "cohort_simd",
+      "batches": "9",
+      "eager_median_us": "642",
+      "reads_median_us": "177.5",
+      "debt_median_us": "588.4",
+      "total_median_us": "767.9",
+      "total_max_us": "1038.9",
+      "applied_ops": "278528",
+      "compiled_commands": "160",
+      "cohorts": "4",
+      "vector_lanes": "261120"
+    },
+    {
+      "objects": "32768",
+      "strategy": "merge",
+      "batches": "9",
+      "eager_median_us": "5890.9",
+      "reads_median_us": "200.5",
+      "debt_median_us": "22115.9",
+      "total_median_us": "22316.4",
+      "total_max_us": "28537.4",
+      "applied_ops": "2228224",
+      "compiled_commands": "0",
+      "cohorts": "0",
+      "vector_lanes": "0"
+    },
+    {
+      "objects": "32768",
+      "strategy": "cohort_scalar",
+      "batches": "9",
+      "eager_median_us": "5369.4",
+      "reads_median_us": "185.3",
+      "debt_median_us": "12063.9",
+      "total_median_us": "12237.5",
+      "total_max_us": "22248.1",
+      "applied_ops": "2228224",
+      "compiled_commands": "160",
+      "cohorts": "4",
+      "vector_lanes": "0"
+    },
+    {
+      "objects": "32768",
+      "strategy": "cohort_simd",
+      "batches": "9",
+      "eager_median_us": "5411.7",
+      "reads_median_us": "199.8",
+      "debt_median_us": "5644.8",
+      "total_median_us": "5834",
+      "total_max_us": "6918.4",
+      "applied_ops": "2228224",
+      "compiled_commands": "160",
+      "cohorts": "4",
+      "vector_lanes": "2210816"
+    }
+  ],
+  "native_GD_semantics_verified": false,
+  "GD_FPS_gain_verified": false,
+  "timings_sha256": "40fa989b70e22e0a0f7b7f4706466e6c9fd76553527d11a9fa817af82cde493b"
+}

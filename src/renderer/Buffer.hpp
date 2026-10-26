@@ -26,6 +26,9 @@ public:
     void read(void* data, usize size, usize offset = 0);
 
     void write(void* data, usize size, usize offset = 0);
+    // Explicit ownership transfer after a complete GPU replacement is built.
+    // Cocos takes our populated store; this Buffer takes its former store.
+    void exchangeNativeStore(u32& nativeStore,usize nativeBytes);
 
     inline void bindAs(GLenum binding) {
         requireContext();

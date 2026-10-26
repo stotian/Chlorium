@@ -25,6 +25,10 @@ profiles = {
     "--area-census-visible": "measurement-area-visible-v5",
     "--area-census-frames": "measurement-area-frames-v5",
     "--pose-census": "measurement-pose-census-v6",
+    "--adaptive-upload": "native-adaptive-upload-v6",
+    "--upload-measure": "measurement-upload-v6",
+    "--native-bridge": "native-draw-bridge-v7",
+    "--gpu-exchange": "native-gpu-exchange-v8",
 }
 if len(sys.argv) > 2 or (len(sys.argv) == 2 and sys.argv[1] not in profiles):
     raise SystemExit("Choose exactly one explicit research build profile")
@@ -32,7 +36,10 @@ selected = sys.argv[1] if len(sys.argv) == 2 else ""
 profile = profiles[selected]
 measurement = profile.startswith("measurement-")
 native_audit = selected == "--native-audit"
-native_vertex = profile == "native-vertex-black-v5"
+native_vertex = profile in ("native-vertex-black-v5", "native-adaptive-upload-v6", "native-draw-bridge-v7", "native-gpu-exchange-v8")
+native_exchange = profile == "native-gpu-exchange-v8"
+native_bridge = profile in ("native-draw-bridge-v7", "native-gpu-exchange-v8")
+adaptive_upload = profile in ("native-adaptive-upload-v6", "native-draw-bridge-v7", "native-gpu-exchange-v8")
 visible_census = selected == "--area-census-visible"
 frame_census = selected == "--area-census-frames"
 area_census = selected in ("--area-census", "--area-census-visible", "--area-census-frames")
@@ -76,6 +83,12 @@ if measurement:
 sources = [root / name for name in source_names]
 if native_vertex:
     flags += ["/DCHLORIUM_NATIVE_VERTEX_PARITY=1"]
+if adaptive_upload:
+    flags += ["/DCHLORIUM_NATIVE_ADAPTIVE_UPLOAD_V6=1"]
+if native_exchange:
+    flags += ["/DCHLORIUM_NATIVE_GPU_EXCHANGE_V8=1"]
+if native_bridge:
+    flags += ["/DCHLORIUM_NATIVE_DRAW_BRIDGE_V7=1"]
 if native_audit:
     flags = [flag for flag in flags if not flag.startswith(("/DCHLORIUM_EXPERIMENTAL_NATIVE_", "/DCHLORIUM_NATIVE_SNAPSHOTS="))]
     flags += ["/analyze"]
@@ -99,8 +112,8 @@ out = root / "build-research" / profile
 out.mkdir(parents=True, exist_ok=True)
 fingerprint = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
 manifest = {"schema_version": 1, "revision": profile,
-            "backend": "NATIVE_TRANSFORM_CACHE_STATIC_ANALYSIS" if native_audit else "CHLORIUM_READBACK_STATE_GUARDS_V5" if measurement else "CHLORIUM_NATIVE_VERTEX_BACKEND_V5" if native_vertex else "CHLORIUM_NATIVE_QUAD_BACKEND_V4",
-            "mod_id": "local.chlorium.audit" if measurement else "local.chlorium", "version": "v0.2.0-alpha.6" if measurement or native_audit else json.loads((root / "mod.json").read_text(encoding="utf-8"))["version"] if native_vertex else "v0.2.0-alpha.610",
+            "backend": "NATIVE_TRANSFORM_CACHE_STATIC_ANALYSIS" if native_audit else "CHLORIUM_READBACK_STATE_GUARDS_V5" if measurement else "CHLORIUM_NATIVE_GPU_EXCHANGE_V8" if native_exchange else "CHLORIUM_NATIVE_DRAW_BRIDGE_V7" if native_bridge else "CHLORIUM_NATIVE_ADAPTIVE_UPLOAD_V6" if adaptive_upload else "CHLORIUM_NATIVE_VERTEX_BACKEND_V5" if native_vertex else "CHLORIUM_NATIVE_QUAD_BACKEND_V4",
+            "mod_id": "local.chlorium.audit" if measurement else "local.chlorium", "version": "v0.2.0-alpha.6" if measurement or native_audit else "v0.3.0-alpha.4" if native_exchange else "v0.3.0-alpha.3" if native_bridge else "v0.3.0-alpha.2" if adaptive_upload else json.loads((root / "mod.json").read_text(encoding="utf-8"))["version"] if native_vertex else "v0.2.0-alpha.610",
             "compile_status": "not_run", "link_status": "not_run",
             "game_status": "not_run", "flags": flags, "sources": [], "libraries": [], "headers": [], "resources": []}
 for source in sources:

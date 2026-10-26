@@ -19,8 +19,8 @@ alpha.6, centré sur des caches mathématiques, est arrêté et rangé dans
 
 Le renderer V5 garde la préparation native, le programme graphique actif et
 ses uniformes. Il soumet les sommets natifs complets depuis un stockage propre
-et réutilise les indices natifs sans les modifier. Il conserve le contexte,
-les bindings, la texture, le blending, la profondeur et les sous-plages.
+et réutilise les indices natifs sans les modifier. Il vise � conserver le contexte,
+la texture, le blending, la profondeur et les sous-plages.
 Un autre hook d'atlas ou un contrat moteur inconnu impose le chemin natif.
 
 Les tests GPU reproduisent les pixels de référence dans 32 scénarios contrôlés.

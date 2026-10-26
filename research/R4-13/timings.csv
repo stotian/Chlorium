@@ -1,0 +1,7 @@
+objects,strategy,batches,eager_median_us,reads_median_us,debt_median_us,total_median_us,total_max_us,applied_ops,compiled_commands,cohorts,vector_lanes
+4096,merge,9,656.2,167.6,2460,2627.6,3021.7,278528,0,0,0
+4096,cohort_scalar,9,648.1,171.3,1380.2,1546.9,1755.4,278528,160,4,0
+4096,cohort_simd,9,642,177.5,588.4,767.9,1038.9,278528,160,4,261120
+32768,merge,9,5890.9,200.5,22115.9,22316.4,28537.4,2228224,0,0,0
+32768,cohort_scalar,9,5369.4,185.3,12063.9,12237.5,22248.1,2228224,160,4,0
+32768,cohort_simd,9,5411.7,199.8,5644.8,5834,6918.4,2228224,160,4,2210816

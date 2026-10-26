@@ -258,3 +258,55 @@ ne pas prÃ©senter le dÃ©placement du travail comme une accÃ©lÃ©ration. Ã‰tape
 suivante : rÃ¨glement/publication bornÃ©s et barriÃ¨res natives prouvÃ©es. Les effets
 Area complets, collisions, champs observables et rendu restent Ã  intÃ©grer.
 L'objectif global n'est pas satisfait ; aucune nouvelle installation ni run GD.
+
+## 2026-10-26 â€” R4-13 : rÃ¨glement groupÃ© de la dette
+
+Compilation bornÃ©e par signatures exactes groupes/curseurs, programme partagÃ©
+par cohorte, exÃ©cution scalaire ou SSE quatre positions. Ordre conservÃ© par
+objet, aucun produit de matrices prÃ©composÃ©. Repli de rÃ©fÃ©rence aprÃ¨s 65 536
+rÃ©fÃ©rences de commandes ; les cohortes dÃ©jÃ  exÃ©cutÃ©es ne sont pas rejouÃ©es.
+BarriÃ¨re vide en temps constant. **106 212 contrÃ´les** : appartenance, durÃ©e de
+vie, checkpoints, repli bornÃ©, queues SIMD, NaN/Inf, zÃ©ros et 16 contrÃ´les SSE.
+Trois mutations (ordre, barriÃ¨re, SIMD) rejetÃ©es.
+
+Comparaison appariÃ©e, neuf lots : dette 22 115,9 Âµs en fusion par objet, contre
+5 644,8 Âµs en cohortes SIMD pour 32 768 objets. Total SIMD 5 834,0 Âµs, maximum
+6 918,4 Âµs ; rÃ©fÃ©rence immÃ©diate 5 411,7 Âµs. **GARDER EN RECHERCHE** : la dette
+est amÃ©liorÃ©e mais le rÃ¨glement complet reste plus lent que le modÃ¨le immÃ©diat.
+Aucun gain FPS ni couverture native GD ne sont dÃ©duits de ces noyaux.
+
+## 2026-10-26 â€” R4-14 : transport adaptatif des quads natifs
+
+Candidate v0.3.0-alpha.2 isolÃ©e : en animation dense, envoi du prÃ©fixe natif
+complet sans recopier tous les quads dans un shadow CPU. Transition stable avec
+rÃ©initialisation complÃ¨te ; cas sparse comparÃ© intÃ©gralement. Ã‰chantillonnage
+uniquement pour choisir le transport, jamais pour supprimer une mise Ã  jour.
+Repli natif prÃ©servÃ©, taille du stockage vÃ©rifiÃ©e, invalidation aprÃ¨s Ã©chec.
+**2 530 contrÃ´les CPU et 219 GPU**, dont 32 scÃ©narios pixels natifs identiques,
+et corruption d'un objet non Ã©chantillonnÃ© rejetÃ©e. Installation V5 inchangÃ©e.
+Comparaison visuelle appariÃ©e Grief auto 0â€“40 %, dÃ©tails complets, sans shake
+ni noclip : preuves consignÃ©es aprÃ¨s clÃ´ture des deux passages.
+
+
+## 2026-10-26 — R4-15/16 : contrat Cocos réel et autorité GPU
+
+L’oracle appelle le véritable dessin d’atlas Cocos supporté. Il reproduit
+un écart V5/V6 dans l’état GL final malgré des pixels courants identiques.
+V7 remet le dessin à Cocos, mais un second témoin démontre que son envoi CPU
+inconditionnel écrase des données GPU valides d’un atlas propre. Grief V7
+0–40 % atteint avec les deux modes : 3 247/3 426 captures, zéro mort ; deux
+épisodes noirs non appariés restent non résolus. Aucune promotion ni gain FPS.
+
+V8 reconstruit un stockage complet dans un spare distinct : intervalle CPU
+sale exact, tête/queue conservées par copies GPU, puis transfert de propriété.
+Les dessins propres gardent le stockage canonique. Dessin Cocos original et
+repli natif sans dette de réhydratation. **250 contrôles GPU**, dont les deux
+témoins négatifs précédents et la conservation des données GPU seules ;
+**41 contrôles buffers**, y compris propriété, rejet mappé et destruction unique.
+V8 compilée, isolée ; vérifications étendues à **636 contrôles GPU**.
+Grief 0–40 % avec mods : 3 182/2 971 échantillons, six épisodes noirs non
+appariés tous également observés dans des références natives précédentes ;
+attribution non résolue. Heliopolis 74–78 % isolé : 212/202 échantillons,
+aucun noir supplémentaire détecté. Le premier essai Heliopolis avec mods
+est invalide (pause 11,43 s et sondes manquantes), jamais compté comme réussi.
+Installation V5 inchangée. Mesures de fidélité distinctes des performances.

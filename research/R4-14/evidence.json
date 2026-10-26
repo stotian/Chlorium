@@ -1,0 +1,134 @@
+{
+  "experiment": "R4-14",
+  "status": "not_promoted",
+  "comparison_sha256": "9a94352a3544d049969ea28000fd9be2c3244d25557f6884116e91fd400743bf",
+  "production_sha256": "27046359A29186A240AAF37D1F2F952A4B8C72D64002BD1C7F9BAA0509A745B1",
+  "measurement_sha256": "151F07F5E028EB7F36355216B1B20AC531178C562F94F242DCE501010BF23C39",
+  "dll_sha256": "f4bb07b340e819a22eebbb3bab554c779fe9dfe8c897ee5ffcce5a64b4c6c86a",
+  "source_archive_sha256": "45d0d4fd5285eea4c082e9f32991c683dbc581ec4a71d7d5adde5283f39d7f7e",
+  "level": 88952972,
+  "range": [
+    0,
+    40
+  ],
+  "conditions_verified": true,
+  "sample_counts": {
+    "sans": 3621,
+    "avec": 3406
+  },
+  "excluded_visual_frames": {
+    "sans": 35,
+    "avec": 28
+  },
+  "coverage": {
+    "sans": {
+      "event": "coverage",
+      "completed": false,
+      "targeted": true,
+      "target_completed": true,
+      "target_from": 0,
+      "target_to": 40,
+      "deaths": 0,
+      "observed_frames": 3621,
+      "excluded_frames": 3621,
+      "gpu_pending": 0,
+      "renderer_inactive_frames": 0,
+      "cpu_profile": ""
+    },
+    "avec": {
+      "event": "coverage",
+      "completed": false,
+      "targeted": true,
+      "target_completed": true,
+      "target_from": 0,
+      "target_to": 40,
+      "deaths": 0,
+      "observed_frames": 3406,
+      "excluded_frames": 3406,
+      "gpu_pending": 0,
+      "renderer_inactive_frames": 0,
+      "cpu_profile": ""
+    }
+  },
+  "classes": {
+    "full": {
+      "native_episodes": 15,
+      "candidate_episodes": 15,
+      "unmatched_candidate_episodes": 2,
+      "unmatched_details": [
+        {
+          "start_percent": 12.7818,
+          "start_elapsed": 23.3267,
+          "start_game_time": 24.6667,
+          "start_frame": 1653,
+          "frames": 13,
+          "end_percent": 12.9019,
+          "end_elapsed": 23.5366,
+          "end_frame": 1665,
+          "duration_s": 0.23680000000000234,
+          "coverage_gap_at_end": false
+        },
+        {
+          "start_percent": 12.992,
+          "start_elapsed": 23.6833,
+          "start_game_time": 25.0167,
+          "start_frame": 1673,
+          "frames": 5,
+          "end_percent": 13.0421,
+          "end_elapsed": 23.7731,
+          "end_frame": 1677,
+          "duration_s": 0.11200000000000188,
+          "coverage_gap_at_end": false
+        }
+      ]
+    },
+    "left": {
+      "native_episodes": 1,
+      "candidate_episodes": 2,
+      "unmatched_candidate_episodes": 0,
+      "unmatched_details": []
+    },
+    "right": {
+      "native_episodes": 0,
+      "candidate_episodes": 1,
+      "unmatched_candidate_episodes": 1,
+      "unmatched_details": [
+        {
+          "start_percent": 27.2552,
+          "start_elapsed": 47.417,
+          "start_game_time": 48.7667,
+          "start_frame": 2944,
+          "frames": 1,
+          "end_percent": 27.2552,
+          "end_elapsed": 47.417,
+          "end_frame": 2944,
+          "duration_s": 0.017499999999998295,
+          "coverage_gap_at_end": false
+        }
+      ]
+    },
+    "bottom": {
+      "native_episodes": 0,
+      "candidate_episodes": 0,
+      "unmatched_candidate_episodes": 0,
+      "unmatched_details": []
+    },
+    "top": {
+      "native_episodes": 0,
+      "candidate_episodes": 0,
+      "unmatched_candidate_episodes": 0,
+      "unmatched_details": []
+    },
+    "repeated_signature": {
+      "native_episodes": 0,
+      "candidate_episodes": 0,
+      "unmatched_candidate_episodes": 0,
+      "unmatched_details": []
+    }
+  },
+  "visual_pass": false,
+  "performance_comparison": false,
+  "FPS_gain_verified": false,
+  "main_package_unchanged": true,
+  "profile_restore_status": "restored_and_sha256_verified"
+}

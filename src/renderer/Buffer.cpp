@@ -43,6 +43,12 @@ void Buffer::write(void* data, usize size, usize offset) {
 
     glBindBuffer(GL_ARRAY_BUFFER, previouslyBoundBuffer);
 }
+void Buffer::exchangeNativeStore(u32& nativeStore,usize nativeBytes) {
+    requireContext();
+    if(mappedData || !id || !nativeStore || nativeStore==id || !nativeBytes)
+        throw std::invalid_argument("invalid native buffer ownership exchange");
+    std::swap(id,nativeStore);size=nativeBytes;
+}
 
 void* Buffer::map(i32 type) {
     if (mappedData) return nullptr;

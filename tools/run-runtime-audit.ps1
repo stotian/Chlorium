@@ -1,3 +1,4 @@
+#Requires -Version 7.0
 param([switch]$Native, [switch]$VisualWatch, [switch]$WithUserMods, [switch]$AtlasStorageRegression, [string]$GameDirectory, [string]$Package, [string]$ProductionPackage, [string]$ReportDirectory,
     [string]$UserGameDirectory = 'C:\Program Files (x86)\Steam\steamapps\common\Geometry Dash',
     [ValidateSet(0,133260800,129598490,88952972)][int]$FetchLevel = 0,
