@@ -413,3 +413,11 @@ variantes precedentes regressait aussi ; preuves conservees dans R4-20.
 Ce sont des timings de fixture native relocalisee, pas des FPS GD. Aucun jeu
 lance ni paquet installe. Garder l'oracle pour etudier un programme de groupes
 qui retire les parcours de validation repetes avec invalidation reellement prouvee.
+
+Diagnostic R4-20 separe, macro privee inactive par defaut : 327427 controles
+natifs passent avec cinq chronos entiers par phase. Sur neuf lots denses,
+validation = 42,12 % median du temps candidat ; medianes par etape : 5499,5 us
+de validation, 7383,8 us de boucle objets, 19,2 us de compilation constante.
+Ces medianes distinctes ne forment pas une paire additive ni un gain FPS.
+Prochaine preuve discriminante : groupe possede, suite synchrone bornee et
+empreinte d'ecriture des callbacks stable pour valider une seule fois.

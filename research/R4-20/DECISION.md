@@ -72,3 +72,20 @@ repeated eligibility traversals with a demonstrated mutation/invalidation
 contract. A cheap counter or user-declared token alone cannot certify real GD
 objects against unknown hooks, checkpoints or membership changes. Do not repeat
 this helper specialization in GD hoping the measured regression disappears.
+
+## Discriminating stage diagnostic
+
+One separately instrumented build, still passing 327427 native checks, records
+integer clock spans around validation, constant compilation, preparation,
+object execution and publication. This is diagnostic instrumentation, not a
+repeat intended to find a favorable speedup. Raw per-batch rows are retained.
+For 4096 objects/16 phases, validation's median share of measured candidate
+time is 42.12%; its median cost is 5499.5 us versus 7383.8 us in the object loop.
+Constant compilation costs only 19.2 us (stage medians are not additive pairs).
+
+This evidence motivates a bounded synchronous group program that validates an
+owned membership/linear footprint once, then executes several phases while
+known callbacks cannot invalidate that footprint. No such stability certificate
+has been implemented or measured here. Unknown callbacks, lifetime/checkpoint
+changes or a phase that can write the certified fields must break the program.
+Removing guards from arbitrary GD memory would not constitute that proof.

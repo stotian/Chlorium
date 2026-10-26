@@ -1,8 +1,16 @@
 #pragma once
 #include "TransformWorld.hpp"
 #include <cerrno>
+#ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
+#include <chrono>
+#endif
 
 namespace chlorium::research::transform_shadow {
+#ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
+struct StageAudit {std::int64_t validation=0,compilation=0,preparation=0,objects=0,publication=0;unsigned phases=0;};
+inline StageAudit stageAudit;
+using AuditClock=std::chrono::steady_clock;
+#endif
 inline bool finitePosition(const area::Object& o) {
     for(unsigned at:{0x3b8u,0x3c0u})
         if((o.get<std::uint64_t>(at)&0x7fffffffffffffffull)>0x4270000000000000ull)return false;
@@ -27,6 +35,9 @@ inline pose::Matrix materializeIdentityHelper(Node& child,Point p) {
 // order remain native. Private identity helpers are materialized directly and
 // constant linear decomposition is compiled once. No GD hook uses this code.
 inline bool identityLinearPhase(World& w,const OwnedTransformOracle& oracle,float sx=1,float sy=1,bool resetVisual=true) {
+#ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
+    const auto audit0=AuditClock::now();
+#endif
     const auto control=_mm_getcsr();
     if((control&0x7f80u)!=0x1f80u||std::bit_cast<std::uint32_t>(sx)!=0x3f800000u||
        std::bit_cast<std::uint32_t>(sy)!=0x3f800000u||w.unknownObserver||!finitePosition(w.center))return false;
@@ -55,6 +66,9 @@ inline bool identityLinearPhase(World& w,const OwnedTransformOracle& oracle,floa
     if(w.parent.get<void*>(0xd8))return false;
     const auto childParent=w.child.get<void*>(0xd8);
     if(childParent&&childParent!=w.parent.data.data())return false;
+#ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
+    const auto audit1=AuditClock::now();
+#endif
     const auto trig=oracle.atan2();
     if(!trig)return false;
     const auto previousErrno=errno;
@@ -64,6 +78,9 @@ inline bool identityLinearPhase(World& w,const OwnedTransformOracle& oracle,floa
     const auto linearFlags=_mm_getcsr()&63;
     _mm_setcsr(control);errno=previousErrno;
     if(linear.scaleX!=1.f||linear.scaleY!=1.f||linear.rotationX!=0.f||linear.rotationY!=0.f)return false;
+#ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
+    const auto audit2=AuditClock::now();
+#endif
     World::active=&w;
     void* layer=w.state.layer.data.data();void* center=w.center.data.data();
     const auto reset=oracle.reset();
@@ -74,6 +91,9 @@ inline bool identityLinearPhase(World& w,const OwnedTransformOracle& oracle,floa
     nodeCall<0xf0>(parent,0.f);nodeCall<0x100>(parent,0.f);nodeCall<0x150>(parent,0.f);
     oracle.retain(child);nodeCall<0x1f8>(child,false);nodeCall<0x1c0>(parent,child);oracle.release(child);
     pose::Matrix parentMatrix{};nodeCall<0x320,pose::Matrix*>(parent,&parentMatrix);
+#ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
+    const auto audit3=AuditClock::now();
+#endif
     bool flagsPublished=false;
     for(const auto p:w.members) {
         if(!p)break;
@@ -99,7 +119,17 @@ inline bool identityLinearPhase(World& w,const OwnedTransformOracle& oracle,floa
         if(moved)World::section(layer,p);
 #endif
     }
+#ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
+    const auto audit4=AuditClock::now();
+#endif
     World::disabled(layer,w.group.data.data());World::active=nullptr;
+#ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
+    const auto audit5=AuditClock::now();
+    const auto ns=[](auto span){return std::chrono::duration_cast<std::chrono::nanoseconds>(span).count();};
+    stageAudit.validation+=ns(audit1-audit0);stageAudit.compilation+=ns(audit2-audit1);
+    stageAudit.preparation+=ns(audit3-audit2);stageAudit.objects+=ns(audit4-audit3);
+    stageAudit.publication+=ns(audit5-audit4);++stageAudit.phases;
+#endif
     (void)resetVisual;return true;
 }
 }

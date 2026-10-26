@@ -118,11 +118,18 @@ void correctness(const OwnedTransformOracle& oracle) {
 }
 void benchmark(const OwnedTransformOracle& oracle,const char* output) {
     std::ofstream csv(output);csv<<"objects,phases,batches,native_median_us,compiled_median_us,native_max_us,compiled_max_us\n";
+#ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
+    std::ofstream stages(std::string(output)+".stages.csv");
+    stages<<"objects,batch,phases,validation_ns,compilation_ns,preparation_ns,object_loop_ns,publication_ns,candidate_total_us\n";
+#endif
     for(unsigned count:{4u,4096u}) {
         std::vector<double> nativeTimes,candidateTimes;
         for(unsigned batch=0;batch<9;++batch) {
             auto a=std::make_unique<World>(oracle,count),b=std::make_unique<World>(oracle,count);
             a->capture=b->capture=false;
+#ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
+            stageAudit={};
+#endif
             const auto run=[&](World& w,bool fast) {
                 bool accepted=true;_mm_setcsr(0x1f80);errno=1177;
                 const auto start=std::chrono::steady_clock::now();
@@ -136,6 +143,9 @@ void benchmark(const OwnedTransformOracle& oracle,const char* output) {
             double nativeTime,candidateTime;
             if(batch%2){candidateTime=run(*b,true);nativeTime=run(*a,false);}else{nativeTime=run(*a,false);candidateTime=run(*b,true);}
             equivalent(*a,*b);nativeTimes.push_back(nativeTime);candidateTimes.push_back(candidateTime);
+#ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
+            stages<<count<<','<<batch<<','<<stageAudit.phases<<','<<stageAudit.validation<<','<<stageAudit.compilation<<','<<stageAudit.preparation<<','<<stageAudit.objects<<','<<stageAudit.publication<<','<<candidateTime<<'\n';
+#endif
         }
         std::sort(nativeTimes.begin(),nativeTimes.end());std::sort(candidateTimes.begin(),candidateTimes.end());
         csv<<count<<",16,9,"<<nativeTimes[4]<<','<<candidateTimes[4]<<','<<nativeTimes.back()<<','<<candidateTimes.back()<<'\n';

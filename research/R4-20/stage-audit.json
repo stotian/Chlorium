@@ -1,0 +1,14 @@
+{
+  "validation_median_us": 5499.5,
+  "compilation_median_us": 19.2,
+  "preparation_median_us": 34.8,
+  "object_loop_median_us": 7383.8,
+  "publication_median_us": 6.9,
+  "validation_median_fraction": 0.42122499420715226,
+  "instrumented_candidate": true,
+  "batches": 9,
+  "objects": 4096,
+  "phases_per_batch": 16,
+  "gd_fps_claimed": false,
+  "no_extra_independent_agent": "diagnostic-only instrumentation; no runtime promotion or candidate semantic change"
+}
