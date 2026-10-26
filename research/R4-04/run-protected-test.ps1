@@ -188,7 +188,7 @@ try {
     }
     if ($Mode -eq 'native') { $taskParameters.Native=$true }
     if ($WithUserMods) { $taskParameters.WithUserMods=$true }
-    if (!$AreaCensus) { $taskParameters.CapturePercent = switch ($Level) { 88952972 { @(24.9,25.2) } 129598490 { @(76.99,77.17) } 133260800 { @(89.5,96.5) } } }
+    if ($taskParameters.VisualWatch) { $taskParameters.CapturePercent = switch ($Level) { 88952972 { @(24.9,25.2) } 129598490 { @(76.99,77.17) } 133260800 { @(89.5,96.5) } } }
     & (Join-Path $taskRoot 'tools/run-runtime-audit.ps1') @taskParameters
 } catch {
     $taskFailure = $_

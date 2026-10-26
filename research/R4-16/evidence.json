@@ -1,6 +1,6 @@
 {
   "experiment": "R4-16",
-  "status": "research_only_not_promoted",
+  "status": "reject_V8_transport_for_promotion",
   "profile": "native-gpu-exchange-v8",
   "version": "v0.3.0-alpha.4",
   "dll_sha256": "1bff37fc88d53ac001ceed7fb729563a77107e24fc21c9df96f739e4684d9331",
@@ -243,5 +243,181 @@
     },
     "universal_visual_pass": false,
     "performance_comparison": false
+  },
+  "orbit_isolated": {
+    "conditions_verified": true,
+    "samples": {
+      "sans": 292,
+      "avec": 234
+    },
+    "unmatched_candidate_episodes": {
+      "full": 1,
+      "left": 0,
+      "right": 0,
+      "bottom": 0,
+      "top": 0,
+      "repeated_signature": 0
+    },
+    "unmatched_full_intervals": [
+      {
+        "start_percent": 97.3372,
+        "start_elapsed": 135.477,
+        "start_game_time": 133.368,
+        "start_frame": 4681,
+        "frames": 1,
+        "end_percent": 97.3372,
+        "end_elapsed": 135.477,
+        "end_frame": 4681,
+        "duration_s": 0.39799999999999613,
+        "coverage_gap_at_end": false
+      }
+    ],
+    "coverage": {
+      "sans": {
+        "event": "coverage",
+        "completed": false,
+        "targeted": true,
+        "target_completed": true,
+        "target_from": 83,
+        "target_to": 100,
+        "deaths": 0,
+        "observed_frames": 292,
+        "excluded_frames": 292,
+        "gpu_pending": 0,
+        "renderer_inactive_frames": 0,
+        "cpu_profile": ""
+      },
+      "avec": {
+        "event": "coverage",
+        "completed": false,
+        "targeted": true,
+        "target_completed": true,
+        "target_from": 83,
+        "target_to": 100,
+        "deaths": 0,
+        "observed_frames": 234,
+        "excluded_frames": 234,
+        "gpu_pending": 0,
+        "renderer_inactive_frames": 0,
+        "cpu_profile": ""
+      }
+    },
+    "status": "unresolved; native sampling too sparse near 97.34 percent",
+    "universal_visual_pass": false,
+    "performance_comparison": false
+  },
+  "performance_grief": {
+    "level": 88952972,
+    "sans": {
+      "samples": 3926,
+      "fps": 59.11802962046684,
+      "p95_ms": 20.2174,
+      "p99_ms": 21.9728,
+      "worst_ms": 70.8778,
+      "slow_frames": 2024,
+      "slow_frame_percent": 51.553744268976054,
+      "slow_time_percent": 55.18399052437067,
+      "update_mean_ms": 3.8198233061640345,
+      "visibility_mean_ms": 2.1165615384615384,
+      "cpu_mean_ms": 7.926849668874172,
+      "scene_mean_ms": 7.825950280183393,
+      "commands_mean_ms": 0.014369943963321447,
+      "move_mean_ms": 0.42620364238410596,
+      "rotation_mean_ms": 0.2874936576668365,
+      "transform_mean_ms": 0.0036002037697401936,
+      "area_mean_ms": 0.002623841059602649,
+      "follow_mean_ms": 0.023645058583800307,
+      "collisions_mean_ms": 0.17451016301579214,
+      "particles_mean_ms": 0.08631329597554763
+    },
+    "avec": {
+      "samples": 2792,
+      "fps": 43.91120845391419,
+      "p95_ms": 31.9221,
+      "p99_ms": 39.1145,
+      "worst_ms": 1783.9092,
+      "slow_frames": 1804,
+      "slow_frame_percent": 64.61318051575931,
+      "slow_time_percent": 76.29076832111423,
+      "update_mean_ms": 5.802404369627507,
+      "visibility_mean_ms": 2.9490210601719196,
+      "cpu_mean_ms": 21.257411568767907,
+      "scene_mean_ms": 21.106319340974213,
+      "commands_mean_ms": 0.02496769340974212,
+      "move_mean_ms": 0.5818853151862464,
+      "rotation_mean_ms": 0.607595164756447,
+      "transform_mean_ms": 0.006119663323782235,
+      "area_mean_ms": 0.0048293696275071634,
+      "follow_mean_ms": 0.037230121776504296,
+      "collisions_mean_ms": 0.3232660100286533,
+      "particles_mean_ms": 0.10237825931232092
+    },
+    "resources_sans": {
+      "samples": 69,
+      "available_physical_mib_min": 264.7578125,
+      "private_mib_max": 1948.04296875,
+      "working_set_mib_max": 1728.51953125,
+      "page_fault_count_delta": 4154
+    },
+    "resources_avec": {
+      "samples": 67,
+      "available_physical_mib_min": 478.40234375,
+      "private_mib_max": 1886.875,
+      "working_set_mib_max": 1688.4453125,
+      "page_fault_count_delta": 114608
+    },
+    "work_sans": {
+      "adjacent_samples": 3925,
+      "simulated_ms": 66600.004,
+      "cpu_ms_per_sim_ms": 0.4672298398060156,
+      "update_ms_per_sim_ms": 0.22517447296249413,
+      "move_ms_per_sim_ms": 0.025124255247792476,
+      "rotation_ms_per_sim_ms": 0.016947447931084207,
+      "transform_ms_per_sim_ms": 0.00021222821548178884,
+      "area_ms_per_sim_ms": 0.00015467266338302322
+    },
+    "work_avec": {
+      "adjacent_samples": 2785,
+      "simulated_ms": 63783.335,
+      "cpu_ms_per_sim_ms": 0.9260875524931395,
+      "update_ms_per_sim_ms": 0.2517222954867443,
+      "move_ms_per_sim_ms": 0.02525733406696279,
+      "rotation_ms_per_sim_ms": 0.026319605269934536,
+      "transform_ms_per_sim_ms": 0.0002629824859424488,
+      "area_ms_per_sim_ms": 0.0002088554949345311
+    },
+    "coverage_sans": {
+      "event": "coverage",
+      "completed": false,
+      "targeted": true,
+      "target_completed": true,
+      "target_from": 0,
+      "target_to": 40,
+      "deaths": 0,
+      "observed_frames": 4042,
+      "excluded_frames": 116,
+      "gpu_pending": 0,
+      "renderer_inactive_frames": 0,
+      "cpu_profile": "CCDirector::drawScene: 7.82595ms\nGJBaseGameLayer::update: 3.81982ms\nPlayLayer::updateVisibility: 2.11656ms\narea: 0.00262ms\ncollisions: 0.17451ms\ncommands: 0.01437ms\nfollow: 0.02365ms\nmove: 0.42620ms\nparticles: 0.08631ms\nrotation: 0.28749ms\ntransform: 0.00360ms\n"
+    },
+    "coverage_avec": {
+      "event": "coverage",
+      "completed": false,
+      "targeted": true,
+      "target_completed": true,
+      "target_from": 0,
+      "target_to": 40,
+      "deaths": 0,
+      "observed_frames": 2886,
+      "excluded_frames": 94,
+      "gpu_pending": 0,
+      "renderer_inactive_frames": 0,
+      "cpu_profile": "CCDirector::drawScene: 21.10632ms\nGJBaseGameLayer::update: 5.80240ms\nPlayLayer::updateVisibility: 2.94902ms\narea: 0.00483ms\ncollisions: 0.32327ms\ncommands: 0.02497ms\nfollow: 0.03723ms\nmove: 0.58189ms\nparticles: 0.10238ms\nrotation: 0.60760ms\ntransform: 0.00612ms\n"
+    },
+    "production_sha256": "4BE271217052E03A343114C419630DF9B30E529026FF09E967CB04E9D0B96202",
+    "measurement_sha256": "151F07F5E028EB7F36355216B1B20AC531178C562F94F242DCE501010BF23C39",
+    "limitation": "One paired run; small differences require repeat runs.",
+    "comparison_sha256": "f59fb2f717e76b78a0ca55cb42596215e2b279bbec7d58f251ad7be9edfcf32d",
+    "single_pair_causal_gain_claim": false
   }
 }

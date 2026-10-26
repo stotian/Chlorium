@@ -288,25 +288,36 @@ Comparaison visuelle appariÃ©e Grief auto 0â€“40 %, dÃ©tails complets, sans shak
 ni noclip : preuves consignÃ©es aprÃ¨s clÃ´ture des deux passages.
 
 
-## 2026-10-26 — R4-15/16 : contrat Cocos réel et autorité GPU
+## 2026-10-26 â€” R4-15/16 : contrat Cocos rÃ©el et autoritÃ© GPU
 
-L’oracle appelle le véritable dessin d’atlas Cocos supporté. Il reproduit
-un écart V5/V6 dans l’état GL final malgré des pixels courants identiques.
-V7 remet le dessin à Cocos, mais un second témoin démontre que son envoi CPU
-inconditionnel écrase des données GPU valides d’un atlas propre. Grief V7
-0–40 % atteint avec les deux modes : 3 247/3 426 captures, zéro mort ; deux
-épisodes noirs non appariés restent non résolus. Aucune promotion ni gain FPS.
+Lâ€™oracle appelle le vÃ©ritable dessin dâ€™atlas Cocos supportÃ©. Il reproduit
+un Ã©cart V5/V6 dans lâ€™Ã©tat GL final malgrÃ© des pixels courants identiques.
+V7 remet le dessin Ã  Cocos, mais un second tÃ©moin dÃ©montre que son envoi CPU
+inconditionnel Ã©crase des donnÃ©es GPU valides dâ€™un atlas propre. Grief V7
+0â€“40 % atteint avec les deux modes : 3 247/3 426 captures, zÃ©ro mort ; deux
+Ã©pisodes noirs non appariÃ©s restent non rÃ©solus. Aucune promotion ni gain FPS.
 
 V8 reconstruit un stockage complet dans un spare distinct : intervalle CPU
-sale exact, tête/queue conservées par copies GPU, puis transfert de propriété.
+sale exact, tÃªte/queue conservÃ©es par copies GPU, puis transfert de propriÃ©tÃ©.
 Les dessins propres gardent le stockage canonique. Dessin Cocos original et
-repli natif sans dette de réhydratation. **250 contrôles GPU**, dont les deux
-témoins négatifs précédents et la conservation des données GPU seules ;
-**41 contrôles buffers**, y compris propriété, rejet mappé et destruction unique.
-V8 compilée, isolée ; vérifications étendues à **636 contrôles GPU**.
-Grief 0–40 % avec mods : 3 182/2 971 échantillons, six épisodes noirs non
-appariés tous également observés dans des références natives précédentes ;
-attribution non résolue. Heliopolis 74–78 % isolé : 212/202 échantillons,
-aucun noir supplémentaire détecté. Le premier essai Heliopolis avec mods
-est invalide (pause 11,43 s et sondes manquantes), jamais compté comme réussi.
-Installation V5 inchangée. Mesures de fidélité distinctes des performances.
+repli natif sans dette de rÃ©hydratation. **250 contrÃ´les GPU**, dont les deux
+tÃ©moins nÃ©gatifs prÃ©cÃ©dents et la conservation des donnÃ©es GPU seules ;
+**41 contrÃ´les buffers**, y compris propriÃ©tÃ©, rejet mappÃ© et destruction unique.
+V8 compilÃ©e, isolÃ©e ; vÃ©rifications Ã©tendues Ã  **636 contrÃ´les GPU**.
+Grief 0â€“40 % avec mods : 3 182/2 971 Ã©chantillons, six Ã©pisodes noirs non
+appariÃ©s tous Ã©galement observÃ©s dans des rÃ©fÃ©rences natives prÃ©cÃ©dentes ;
+attribution non rÃ©solue. Heliopolis 74â€“78 % isolÃ© : 212/202 Ã©chantillons,
+aucun noir supplÃ©mentaire dÃ©tectÃ©. Le premier essai Heliopolis avec mods
+est invalide (pause 11,43 s et sondes manquantes), jamais comptÃ© comme rÃ©ussi.
+Installation V5 inchangÃ©e. Mesures de fidÃ©litÃ© distinctes des performances.
+
+
+R4-16, verdict apres mesure : **REJETER LE TRANSPORT V8 POUR INSTALLATION**.
+Grief 0-40 % avec mods, mesures sans captures : 59,118 -> 43,911 FPS ; p99
+21,973 -> 39,114 ms ; pire image 70,878 -> 1 783,909 ms. Un seul appariement,
+charge de fond variable, mais aucune base pour promouvoir cette version.
+3926/2792 images acceptees, zero mort ; donnees de chaque pourcentage conservees.
+Orbit isole 83-100 % : 292/234 captures, un noir non apparie a 97,3372 %,
+reference native trop espacee pour attribuer la cause. L'objectif n'est pas atteint.
+Conserver les oracles de contrat et les preuves negatives ; comparer un ring
+de transfert persistant sans remplacement du stockage canonique avant integration.

@@ -1,6 +1,6 @@
-# R4-16 � Canonical GPU replacement, native draw
+# R4-16 — Canonical GPU replacement, native draw
 
-**Isolated V8 prototype, v0.3.0-alpha.4. No FPS or universal visual claim.**
+**REJECT V8 transport for promotion. Keep contract oracles. No universal visual claim.**
 
 Native quads become authoritative only for the exact dirty draw subrange.
 Clean atlas calls go directly through the original draw. For dirty calls a
@@ -38,13 +38,13 @@ The PowerShell 5 startup attempt failed before gameplay and restored all 90
 shared files; the guarded retry uses PowerShell 7. Entry points now require 7.
 
 
-Grief full-mod 0�40%: 3182/2971 visual samples, zero deaths, both targets
+Grief full-mod 0–40%: 3182/2971 visual samples, zero deaths, both targets
 reached and profiles restored. Six unmatched full-dark episodes in this pair
 all have supporting native intervals in the earlier native reference corpus.
 No episode tolerance was changed. Attribution remains unresolved across runs.
 Heliopolis full-mod reference is invalid: an 11.43 s wall-clock interruption
 (with only ~0.42 s game CPU time) skipped the required probes. No verdict.
-An isolated 74�78% pair reached its target with 212/202 samples and zero
+An isolated 74–78% pair reached its target with 212/202 samples and zero
 additional dark episodes. This does not establish full-mod compatibility.
 
 The visual comparator originally required a full-mod debug-disable request
@@ -53,3 +53,30 @@ production/audit package hashes with only loader, node-ids, audit and optional
 production loaded. Unknown binaries, external loaded mods and mismatched
 profiles remain rejected; adversarial tests cover these cases. Source HUD is
 outside the measured ROI. Existing episode and coverage checks are unchanged.
+
+
+Orbit isolated 83–100% reaches the requested window with 292/234 visual
+samples, zero deaths. One unmatched single full-dark frame at 97.3372% remains
+unresolved: the native trace has only one sample in 97.0–97.7%, at 97.4133%.
+Do not call this a visual pass. All passes restore 90 shared profile files.
+
+## Actual performance pair — reject
+
+Grief 0–40%, all user mods, no visual readback/probes, full detail, no shake,
+no noclip, zero deaths, active candidate with zero inactive renderer frames.
+3926/2792 accepted samples: native 59.118 FPS, V8 43.911 FPS; p95 20.217/31.922
+ms, p99 21.973/39.114 ms, worst 70.878/1783.909 ms. Native 2024 and V8 1804
+frames exceed 16.667 ms (51.55% / 64.61% of accepted frames). Mean drawScene
+7.826/21.106 ms; update 3.820/5.802 ms. Per-percent results retain every slow
+section in performance-grief.csv. No claim of a controlled 3x or of meeting 60.
+A single ordered pair and background/RAM variation limit attribution; it is
+already enough to reject this candidate. V8 has 114608 process page faults
+versus 4154 natively; that counter does not distinguish disk-backed faults.
+
+The complete-store rebuild/orphan/copy protocol adds work to native preparation
+and cannot be retained on the installed path. Its value is the native-contract
+oracle and authority witnesses. Next candidate must preserve the canonical
+store while avoiding per-draw allocation and unchanged-range GPU copies; a
+bounded persistent transfer ring is a competing architecture, not a proven fix.
+The initial performance startup requested probes without visual mode and was
+rejected before gameplay. Profile restored; retry excludes probes by construction.

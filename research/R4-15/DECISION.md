@@ -1,4 +1,4 @@
-# R4-15 — Native draw contract and GPU authority
+# R4-15 â€” Native draw contract and GPU authority
 
 **V7 remains isolated; not promoted.**
 
@@ -17,7 +17,7 @@ the original store dirty on release. This changes authority. The oracle
 reproduces the difference; it is not proved to cause the observed GD blacks.
 241 GPU checks passed at this stage, including explicit negative witnesses.
 
-Grief 0–40%, full user mods/detail, no shake/noclip: both targets reached,
+Grief 0â€“40%, full user mods/detail, no shake/noclip: both targets reached,
 zero deaths, 3247/3426 visual samples, 90 shared files restored each pass.
 Two unmatched full-dark episodes remain near 12.53% and 12.78%. A separate
 native run contains the same 12.53% episode; undersampling prevents attribution.

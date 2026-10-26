@@ -27,7 +27,7 @@ These are correctness checks, not proof of a GD FPS gain. Grief auto 0–40%
 paired visual validation reached 40% in both modes with all user mods, full
 detail, shake off, no noclip, zero deaths. 3621/3406 visual samples, complete
 readback coverage. The comparator reports two unmatched full-dark episodes
-near 12.8�13.0% and one right-dark episode near 27.25%. These are unresolved,
+near 12.8–13.0% and one right-dark episode near 27.25%. These are unresolved,
 not proven renderer faults: the native trace has gaps/pulse sampling issues.
 No FPS comparison is valid in this visual diagnostic. Both passes restored
 90 shared files and left the installed V5 package unchanged.
