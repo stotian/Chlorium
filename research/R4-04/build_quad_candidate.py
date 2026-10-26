@@ -29,6 +29,9 @@ profiles = {
     "--upload-measure": "measurement-upload-v6",
     "--native-bridge": "native-draw-bridge-v7",
     "--gpu-exchange": "native-gpu-exchange-v8",
+    "--persistent-transfer": "native-persistent-transfer-v9",
+    "--transfer-measure": "measurement-transfer-v9",
+    "--transfer-measure-r2": "measurement-transfer-v9-r2",
 }
 if len(sys.argv) > 2 or (len(sys.argv) == 2 and sys.argv[1] not in profiles):
     raise SystemExit("Choose exactly one explicit research build profile")
@@ -36,7 +39,8 @@ selected = sys.argv[1] if len(sys.argv) == 2 else ""
 profile = profiles[selected]
 measurement = profile.startswith("measurement-")
 native_audit = selected == "--native-audit"
-native_vertex = profile in ("native-vertex-black-v5", "native-adaptive-upload-v6", "native-draw-bridge-v7", "native-gpu-exchange-v8")
+native_persistent = profile == "native-persistent-transfer-v9"
+native_vertex = native_persistent or profile in ("native-vertex-black-v5", "native-adaptive-upload-v6", "native-draw-bridge-v7", "native-gpu-exchange-v8")
 native_exchange = profile == "native-gpu-exchange-v8"
 native_bridge = profile in ("native-draw-bridge-v7", "native-gpu-exchange-v8")
 adaptive_upload = profile in ("native-adaptive-upload-v6", "native-draw-bridge-v7", "native-gpu-exchange-v8")
@@ -81,6 +85,10 @@ if measurement:
         flags += ["/DCHLORIUM_AREA_WORK_CENSUS=1", "/DCHLORIUM_POSE_CENSUS=1"]
         source_names.append("research/R4-11/PoseCensus.cpp")
 sources = [root / name for name in source_names]
+if selected=="--transfer-measure-r2":
+    flags += ["/DCHLORIUM_TRANSFER_HYBRID_AUDIT_V9=1"]
+if native_persistent:
+    flags += ["/DCHLORIUM_NATIVE_PERSISTENT_TRANSFER_V9=1"]
 if native_vertex:
     flags += ["/DCHLORIUM_NATIVE_VERTEX_PARITY=1"]
 if adaptive_upload:
@@ -112,8 +120,8 @@ out = root / "build-research" / profile
 out.mkdir(parents=True, exist_ok=True)
 fingerprint = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
 manifest = {"schema_version": 1, "revision": profile,
-            "backend": "NATIVE_TRANSFORM_CACHE_STATIC_ANALYSIS" if native_audit else "CHLORIUM_READBACK_STATE_GUARDS_V5" if measurement else "CHLORIUM_NATIVE_GPU_EXCHANGE_V8" if native_exchange else "CHLORIUM_NATIVE_DRAW_BRIDGE_V7" if native_bridge else "CHLORIUM_NATIVE_ADAPTIVE_UPLOAD_V6" if adaptive_upload else "CHLORIUM_NATIVE_VERTEX_BACKEND_V5" if native_vertex else "CHLORIUM_NATIVE_QUAD_BACKEND_V4",
-            "mod_id": "local.chlorium.audit" if measurement else "local.chlorium", "version": "v0.2.0-alpha.6" if measurement or native_audit else "v0.3.0-alpha.4" if native_exchange else "v0.3.0-alpha.3" if native_bridge else "v0.3.0-alpha.2" if adaptive_upload else json.loads((root / "mod.json").read_text(encoding="utf-8"))["version"] if native_vertex else "v0.2.0-alpha.610",
+            "backend": "NATIVE_TRANSFORM_CACHE_STATIC_ANALYSIS" if native_audit else "CHLORIUM_READBACK_STATE_GUARDS_V5" if measurement else "CHLORIUM_NATIVE_PERSISTENT_TRANSFER_V9" if native_persistent else "CHLORIUM_NATIVE_GPU_EXCHANGE_V8" if native_exchange else "CHLORIUM_NATIVE_DRAW_BRIDGE_V7" if native_bridge else "CHLORIUM_NATIVE_ADAPTIVE_UPLOAD_V6" if adaptive_upload else "CHLORIUM_NATIVE_VERTEX_BACKEND_V5" if native_vertex else "CHLORIUM_NATIVE_QUAD_BACKEND_V4",
+            "mod_id": "local.chlorium.audit" if measurement else "local.chlorium", "version": "v0.2.0-alpha.6" if measurement or native_audit else "v0.3.0-alpha.5" if native_persistent else "v0.3.0-alpha.4" if native_exchange else "v0.3.0-alpha.3" if native_bridge else "v0.3.0-alpha.2" if adaptive_upload else json.loads((root / "mod.json").read_text(encoding="utf-8"))["version"] if native_vertex else "v0.2.0-alpha.610",
             "compile_status": "not_run", "link_status": "not_run",
             "game_status": "not_run", "flags": flags, "sources": [], "libraries": [], "headers": [], "resources": []}
 for source in sources:
@@ -137,7 +145,7 @@ save()
 # SDK/static dependency identities remain in the fingerprint; no GD binary,
 # save data, private logs or credentials enter this source archive.
 snapshot_files = set()
-for folder in ("src", "legacy", "tests", "research/R4-08", "research/R4-11"):
+for folder in ("src", "legacy", "tests", "research/R4-08", "research/R4-11", "research/R4-17"):
     for pattern in ("*.cpp", "*.hpp", "*.h"):
         snapshot_files.update((root / folder).rglob(pattern))
 snapshot_files.update(root / resource["path"] for resource in manifest["resources"])

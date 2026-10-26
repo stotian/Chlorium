@@ -321,3 +321,30 @@ Orbit isole 83-100 % : 292/234 captures, un noir non apparie a 97,3372 %,
 reference native trop espacee pour attribuer la cause. L'objectif n'est pas atteint.
 Conserver les oracles de contrat et les preuves negatives ; comparer un ring
 de transfert persistant sans remplacement du stockage canonique avant integration.
+
+
+## 2026-10-26 - R4-17 : ring persistant sans remplacement du VBO natif
+
+Nouveau concurrent V9 : trois pages coherentes, copie de la seule plage CPU
+sale dans le stockage natif canonique, fences et repli natif si une page reste
+occupee (poll timeout zero). Aucun VAO/programme de remplacement, aucune copie
+de tete/queue inchangee, aucune reallocation par dessin. Les dessins natifs et
+leurs postconditions restent originaux. 1162 controles GPU, dont 256 transferts
+aleatoires et le dessin Cocos reel ; corruption volontaire de reutilisation
+refusee par le test. Candidate alpha.5 et audit independant compiles, versions
+et sources figees. Mesure en jeu distincte ; aucun gain ni installation annonces.
+
+
+Premier passage V9 Grief atteint 40 %, zero mort, 80 357 transferts et
+18 replis natifs pour pages occupees, aucune image avec moteur inactif. Le
+validateur historique a rejete les replis : ce passage reste invalide pour une
+conclusion de performances. Audit R2 distinct, politique hybride typee et
+13 controles CPU ; aucun resultat brut reecrit. Nouvel appariement en cours.
+
+
+R4-17 R2 : paire Grief avec mods valide, 3805/3749 images acceptees, zero mort,
+15 replis occupes comptes et zero image avec moteur inactif. 57,539 -> 56,626
+FPS ; p99 23,288 -> 28,913 ms. Pire natif 999,632 ms contre 36,778 ms, mais
+incident natif ponctuel : aucun gain de stabilite prouve. **NE PAS PROMOUVOIR**.
+Conserver les preuves ; cesser les variantes de transport seules et supprimer
+du travail de preparation dans la prochaine architecture.

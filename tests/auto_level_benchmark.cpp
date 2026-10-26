@@ -164,11 +164,26 @@ bool recordNativeSnapshotStats(float percent) {
     if(readUpload&&readUpload(&upload,sizeof(upload))&&upload.version==6)
         line(fmt::format("{{\"event\":\"adaptive_upload_v6\",\"percent\":{},\"direct\":{},\"seed\":{},\"sparse\":{},\"compared_records\":{},\"copied_records\":{},\"uploaded_records\":{}}}",
             percent,upload.direct,upload.seed,upload.sparse,upload.compared,upload.copied,upload.uploaded));
+    using Transfer=chlorium::snapshot::TransferStatsV9;
+    using ReadTransfer=bool(*)(Transfer*,std::size_t);
+    static const auto readTransfer=[] {
+        auto module=GetModuleHandleW(L"local.chlorium.dll");
+        return module?reinterpret_cast<ReadTransfer>(GetProcAddress(module,"ChloriumReadTransferStatsV9")):nullptr;
+    }();
+    Transfer transfer;
+    const bool transferAvailable=readTransfer&&readTransfer(&transfer,sizeof(transfer))&&transfer.version==9;
+    if(transferAvailable)
+        line(fmt::format("{{\"event\":\"persistent_transfer_v9\",\"percent\":{},\"uploads\":{},\"bytes\":{},\"native_fallbacks\":{},\"clean_draws\":{},\"busy_fallbacks\":{},\"fences\":{}}}",
+            percent,transfer.uploads,transfer.bytes,transfer.nativeFallbacks,transfer.cleanDraws,transfer.busyFallbacks,transfer.fences));
     if (available)
         line(fmt::format("{{\"event\":\"native_snapshot_stats\",\"percent\":{},\"active\":{},\"frames\":{},\"sprites\":{},\"uploaded_bytes\":{},\"fallbacks\":{},\"capture_ms\":{}}}",
             percent, stats.active != 0, stats.frames, stats.sprites, stats.uploadedBytes, stats.fallbacks, stats.captureMilliseconds));
+    bool hybrid=false;
+#ifdef CHLORIUM_TRANSFER_HYBRID_AUDIT_V9
+    hybrid=true;
+#endif
     return !std::getenv("CHLORIUM_REQUIRE_NATIVE_SNAPSHOTS") ||
-        (available && stats.active && stats.frames && stats.sprites && !stats.fallbacks);
+        chlorium::snapshot::validSubmissionStats(stats,available,transferAvailable?&transfer:nullptr,hybrid);
 }
 bool recordMathPatchState(float percent) {
     using namespace chlorium::native;

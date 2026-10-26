@@ -143,6 +143,12 @@ in vec4 c;out vec4 fragment;void main(){fragment=c;})")});
     require(mapped!=nullptr,"mapped authority witness available");
     require(!rebuildNativeGpuStore(atlas.vertex,spare,0,1,cpu.data()).bytes,"mapped canonical store rejected before replacement");
     glUnmapBuffer(GL_ARRAY_BUFFER);
+    auto transfer=chlorium::research::PersistentTransfer::create(sizeof(quads));
+    const auto canonicalId=atlas.vertex;
+    require(transfer&&transfer->upload(atlas.vertex,sizeof(quad),sizeof(quad),&quads[1]),"persistent transfer fills exact native draw range");
+    atlas.dirty=false;glClear(GL_COLOR_BUFFER_BIT);native(&atlas,1,1);
+    require(pixel()[2]>250&&atlas.vertex==canonicalId&&!atlas.dirty,"persistent source keeps native VBO identity and actual draw pixels");
+    transfer.reset();
     require(!hydrateNativeVertexStore(atlas.vertex,quads.data(),sizeof(quads)+1),"oversized hydration rejected");
     bool rejected=false;try {chlorium::snapshot::NativeVertexLease lease(atlas.vertex,atlas.dirty,0);}catch(const std::invalid_argument&){rejected=true;}
     require(rejected&&atlas.vertex==buffers[0],"empty store cannot mutate native ownership");

@@ -6,6 +6,9 @@
 #include "Shader.hpp"
 #include "GLState.hpp"
 #include "NativeVertexSubmission.hpp"
+#ifdef CHLORIUM_NATIVE_PERSISTENT_TRANSFER_V9
+#include "../../research/R4-17/PersistentTransfer.hpp"
+#endif
 #ifdef CHLORIUM_NATIVE_ADAPTIVE_UPLOAD_V6
 #include "AdaptiveUpload.hpp"
 #include "NativeVertexLease.hpp"
@@ -31,6 +34,10 @@ static_assert(offsetof(cocos2d::ccV3F_C4B_T2F_Quad,tl) == 0 && offsetof(cocos2d:
 
 namespace chlorium::snapshot {
 Stats stats;
+#ifdef CHLORIUM_NATIVE_PERSISTENT_TRANSFER_V9
+thread_local std::unique_ptr<chlorium::research::PersistentTransfer> transfer;
+TransferStatsV9 transferStats;
+#endif
 #ifdef CHLORIUM_NATIVE_ADAPTIVE_UPLOAD_V6
 UploadStatsV6 uploadStats;
 #endif
@@ -96,14 +103,14 @@ bool otherAtlasHooks() {
     checked=frame; conflict=false;
     const auto address=reinterpret_cast<std::uintptr_t>(GetProcAddress(GetModuleHandleW(L"libcocos2d.dll"),
         "?drawNumberOfQuads@CCTextureAtlas@cocos2d@@QEAAXII@Z"));
-#ifdef CHLORIUM_NATIVE_GPU_EXCHANGE_V8
+#if defined(CHLORIUM_NATIVE_GPU_EXCHANGE_V8) || defined(CHLORIUM_NATIVE_PERSISTENT_TRANSFER_V9)
     const auto cocos=reinterpret_cast<std::uintptr_t>(GetModuleHandleW(L"libcocos2d.dll"));
 #endif
     for (const auto mod : Loader::get()->getAllMods()) {
         if (mod==Mod::get()) continue;
         for (const auto hook : mod->getHooks())
             if (hook->isEnabled() && (hook->getAddress()==address
-#ifdef CHLORIUM_NATIVE_GPU_EXCHANGE_V8
+#if defined(CHLORIUM_NATIVE_GPU_EXCHANGE_V8) || defined(CHLORIUM_NATIVE_PERSISTENT_TRANSFER_V9)
                 // Moving the upload ahead of the native call requires its
                 // preceding texture getter/bind to have no foreign callback.
                 || hook->getAddress()==cocos+0x10760 || hook->getAddress()==cocos+0x87fe0
@@ -145,6 +152,41 @@ struct QuadBatch {
         return false;
     }
     template<class Forward> bool draw(CCTextureAtlas* atlas, unsigned amount, unsigned first,Forward&& native) {
+#ifdef CHLORIUM_NATIVE_PERSISTENT_TRANSFER_V9
+        if(failed) return false;
+        if(!amount) {native();return true;}
+        if(!atlas->getTexture()||first>atlas->getCapacity()||amount>atlas->getCapacity()-first||!atlas->m_pQuads)
+            return fail("invalid persistent native atlas bounds");
+        SubmissionTimer timer;
+        if(atlas->m_bDirty) {
+            const auto cocos=reinterpret_cast<const unsigned char*>(GetModuleHandleW(L"libcocos2d.dll"));
+            const auto table=*reinterpret_cast<const std::uintptr_t* const*>(atlas->getTexture());
+            const unsigned char pureGetter[]{0x8b,0x41,0x48,0xc3};
+            if(table[12]!=reinterpret_cast<std::uintptr_t>(cocos+0x10760)||
+                std::memcmp(cocos+0x10760,pureGetter,sizeof(pureGetter))) return fail("foreign persistent texture getter");
+            if(!transfer) transfer=chlorium::research::PersistentTransfer::create();
+            if(!transfer) return fail("persistent native transfer unavailable");
+            const auto before=transfer->work;
+            const auto bytes=static_cast<std::size_t>(amount)*sizeof(NativeQuadState);
+            const bool uploaded=transfer->upload(atlas->m_pBuffersVBO[0],static_cast<std::size_t>(first)*sizeof(NativeQuadState),bytes,atlas->m_pQuads+first);
+            transferStats.busyFallbacks+=transfer->work.busy-before.busy;
+            transferStats.fences+=transfer->work.fences-before.fences;
+            if(uploaded) {
+                atlas->m_bDirty=false;stats.uploadedBytes+=bytes;
+                ++transferStats.uploads;transferStats.bytes+=bytes;
+            } else {
+                ++stats.fallbacks;++transferStats.nativeFallbacks;
+                if(!transfer->current()) transfer.reset();
+            }
+        } else ++transferStats.cleanDraws;
+        // No manual VAO/program/texture handling and no native-store ownership
+        // change. On a refused transfer the original dirty upload still runs.
+        native();
+        const auto frame=CCDirector::get()->getTotalFrames();
+        if(frame!=lastFrame) {lastFrame=frame;++stats.frames;stats.sprites=0;}
+        stats.sprites+=amount;stats.active=1;timer.committed=true;
+        return true;
+#else
         if (failed) return false;
         if (!amount) return true;
         if (!atlas->getTexture()) return false;
@@ -323,9 +365,16 @@ struct QuadBatch {
         stats.active = 1;
         submissionTimer.committed = true;
         return true;
+#endif
     }
 };
 }
+#ifdef CHLORIUM_NATIVE_PERSISTENT_TRANSFER_V9
+extern "C" __declspec(dllexport) bool ChloriumReadTransferStatsV9(chlorium::snapshot::TransferStatsV9* output,std::size_t size) {
+    if(!output||size!=sizeof(*output)) return false;
+    *output=chlorium::snapshot::transferStats;return true;
+}
+#endif
 extern "C" __declspec(dllexport) bool ChloriumReadNativeSnapshotStats(
     chlorium::snapshot::Stats* output,std::size_t size) {
     if (!output || size != sizeof(*output)) return false;
@@ -391,6 +440,8 @@ class $modify(ChloriumNativeQuadAtlas,CCTextureAtlas) {
             forwardNative(); return;
         }
 #endif
+        if(batch->getTextureAtlas()!=this) {forwardNative();return;}
+#ifndef CHLORIUM_NATIVE_PERSISTENT_TRANSFER_V9
         auto stock = CCShaderCache::sharedShaderCache()->programForKey(kCCShader_PositionTextureColor);
         GLint currentProgram = 0;
         if (batch && batch->getTextureAtlas() == this && stock && batch->getShaderProgram() == stock)
@@ -401,6 +452,7 @@ class $modify(ChloriumNativeQuadAtlas,CCTextureAtlas) {
             static_cast<GLuint>(currentProgram) != stock->getProgram()) {
             forwardNative(); return;
         }
+#endif
         try {
             if (cache->draw(this,amount,first,forwardNative)) return;
         } catch (const std::exception& error) {
@@ -416,6 +468,10 @@ class $modify(ChloriumNativeQuadAtlas,CCTextureAtlas) {
 class $modify(ChloriumNativeQuadLevel,PlayLayer) {
     void setupHasCompleted() {
         chlorium::snapshot::stats = {};
+#ifdef CHLORIUM_NATIVE_PERSISTENT_TRANSFER_V9
+        chlorium::snapshot::transferStats={};
+        if(chlorium::snapshot::transfer) chlorium::snapshot::transfer->work={};
+#endif
 #ifdef CHLORIUM_NATIVE_ADAPTIVE_UPLOAD_V6
         chlorium::snapshot::uploadStats={};
 #endif

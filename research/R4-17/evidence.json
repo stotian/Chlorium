@@ -1,0 +1,188 @@
+{
+  "experiment": "R4-17",
+  "status": "do_not_promote_no_measured_gain",
+  "version": "v0.3.0-alpha.5",
+  "first_GPU_fixture_checks": 1162,
+  "random_transfer_trials": 256,
+  "reuse_mutant": "rejected: unsignalled page reuse refused without blocking",
+  "GPU_gain_verified": false,
+  "GD_FPS_gain_verified": false,
+  "global_visual_pass": false,
+  "installed": false,
+  "candidate": {
+    "profile": "native-persistent-transfer-v9",
+    "dll_sha256": "9515d085d4664dd7b431dd523d517d7469df2effaf6aeb1391c3532502b9402b",
+    "source_archive_sha256": "cd27aba0e23369b102a3ab49bb76c10fe8eeb5717f73736ff476ebdff81b6878",
+    "package_sha256": "40b7472ec4417e4f85efff32756b9702ab71b5d63fb81866656a79d8cee8e37d",
+    "compile_status": "passed",
+    "link_status": "passed"
+  },
+  "audit": {
+    "profile": "measurement-transfer-v9",
+    "dll_sha256": "20f8790fca21a9660affaf4db2bf1762bd2a9c2e54b4538bacffbed2ea3c49a9",
+    "source_archive_sha256": "cd27aba0e23369b102a3ab49bb76c10fe8eeb5717f73736ff476ebdff81b6878",
+    "package_sha256": "2c3fb062bafea627bb772e8d350b2ad240f8999614b8a5ca7840646b57f0d6ce",
+    "compile_status": "passed",
+    "link_status": "passed"
+  },
+  "positive_gpu_exe_sha256": "f306027da835b6cf4f5c2d48580f2ff1f02e4064efdd0c4c46a1b23f47c62417",
+  "positive_gpu_log_sha256": "25e42978efb44c97dad620677d8b9a7885225db73d2fac7dd638e42f3bfc9410",
+  "negative_gpu_exe_sha256": "9b00feadbe08f923fae23c2c6516bf04d0af6c1b3a62710d89d84845ef3a05e7",
+  "negative_gpu_log_sha256": "0758eb149921e9ea63660be7cb24fe803a3832f8c2366250aad57989aec478fc",
+  "hybrid_audit_r2": {
+    "dll_sha256": "6c36dbcd9675bb93532dd1e7088a3655dae8aaf71d29eb0b71f4ad4181d86add",
+    "source_archive_sha256": "037de28d00da00b6fa339dd597f9fbc655a97908f77ce1deb967ca99cff18537",
+    "package_sha256": "6dda4efb80983e63df89c0498f1e0d84f2a87c483f808a73c52cbf2efa6f8690",
+    "identity": "CHLORIUM_TRANSFER_HYBRID_AUDIT_V9",
+    "policy_CPU_checks": 13
+  },
+  "initial_game_attempt": {
+    "status": "validator_rejected_not_a_performance_pass",
+    "final_events": [
+      {
+        "event": "coverage",
+        "completed": false,
+        "targeted": true,
+        "target_completed": true,
+        "target_from": 0,
+        "target_to": 40,
+        "deaths": 0,
+        "observed_frames": 3910,
+        "excluded_frames": 114,
+        "gpu_pending": 0,
+        "renderer_inactive_frames": 0,
+        "cpu_profile": "CCDirector::drawScene: 10.17030ms\nGJBaseGameLayer::update: 3.43205ms\nPlayLayer::updateVisibility: 1.99057ms\narea: 0.00223ms\ncollisions: 0.14487ms\ncommands: 0.01092ms\nfollow: 0.01556ms\nmove: 0.34331ms\nparticles: 0.06154ms\nrotation: 0.25417ms\ntransform: 0.00276ms\n"
+      },
+      {
+        "event": "persistent_transfer_v9",
+        "percent": 40.007008,
+        "uploads": 80357,
+        "bytes": 1126264512,
+        "native_fallbacks": 18,
+        "clean_draws": 14785,
+        "busy_fallbacks": 18,
+        "fences": 1095
+      },
+      {
+        "event": "finished",
+        "success": false,
+        "reason": "Native snapshot renderer did not stay active; no GPU batching performance verdict is valid"
+      }
+    ],
+    "shared_files_restored": 90,
+    "limitation": "Old zero-fallback policy rejects the 18 explicitly accounted nonblocking native fallbacks; original failed trace is retained unchanged"
+  },
+  "performance_grief_r2": {
+    "level": 88952972,
+    "sans": {
+      "samples": 3805,
+      "fps": 57.539086827170074,
+      "p95_ms": 19.9852,
+      "p99_ms": 23.2881,
+      "worst_ms": 999.6321,
+      "slow_frames": 1900,
+      "slow_frame_percent": 49.93429697766097,
+      "slow_time_percent": 55.2311225276254,
+      "update_mean_ms": 4.132743153745072,
+      "visibility_mean_ms": 2.384328278580815,
+      "cpu_mean_ms": 9.020679237844941,
+      "scene_mean_ms": 8.91129406044678,
+      "commands_mean_ms": 0.0137180814717477,
+      "move_mean_ms": 0.4566352168199737,
+      "rotation_mean_ms": 0.2667886990801577,
+      "transform_mean_ms": 0.003492904073587385,
+      "area_mean_ms": 0.0027036793692509853,
+      "follow_mean_ms": 0.022720998685939554,
+      "collisions_mean_ms": 0.18912094612352168,
+      "particles_mean_ms": 0.08993747700394218
+    },
+    "avec": {
+      "samples": 3749,
+      "fps": 56.62598820713423,
+      "p95_ms": 25.8291,
+      "p99_ms": 28.913,
+      "worst_ms": 36.7777,
+      "slow_frames": 2180,
+      "slow_frame_percent": 58.148839690584154,
+      "slow_time_percent": 63.13950208229347,
+      "update_mean_ms": 3.705251373699653,
+      "visibility_mean_ms": 2.113566497732729,
+      "cpu_mean_ms": 10.788133715657509,
+      "scene_mean_ms": 10.679514163777007,
+      "commands_mean_ms": 0.012953907708722326,
+      "move_mean_ms": 0.38202085889570553,
+      "rotation_mean_ms": 0.27605641504401174,
+      "transform_mean_ms": 0.0032543878367564684,
+      "area_mean_ms": 0.002392931448386236,
+      "follow_mean_ms": 0.021256121632435315,
+      "collisions_mean_ms": 0.16815260069351828,
+      "particles_mean_ms": 0.07168399573219525
+    },
+    "resources_sans": {
+      "samples": 69,
+      "available_physical_mib_min": 399.26953125,
+      "private_mib_max": 1946.5859375,
+      "working_set_mib_max": 1768.48828125,
+      "page_fault_count_delta": 18708
+    },
+    "resources_avec": {
+      "samples": 69,
+      "available_physical_mib_min": 578.8828125,
+      "private_mib_max": 1870.0078125,
+      "working_set_mib_max": 1693.9609375,
+      "page_fault_count_delta": 6210
+    },
+    "work_sans": {
+      "adjacent_samples": 3801,
+      "simulated_ms": 66333.337,
+      "cpu_ms_per_sim_ms": 0.5167332769644922,
+      "update_ms_per_sim_ms": 0.2369053934373903,
+      "move_ms_per_sim_ms": 0.02618231011052557,
+      "rotation_ms_per_sim_ms": 0.01529899211915119,
+      "transform_ms_per_sim_ms": 0.0002002537577749179,
+      "area_ms_per_sim_ms": 0.00015499597133188098
+    },
+    "work_avec": {
+      "adjacent_samples": 3747,
+      "simulated_ms": 66466.669,
+      "cpu_ms_per_sim_ms": 0.6081882680174631,
+      "update_ms_per_sim_ms": 0.20893181362827137,
+      "move_ms_per_sim_ms": 0.021542362834520865,
+      "rotation_ms_per_sim_ms": 0.01557071409731696,
+      "transform_ms_per_sim_ms": 0.00018350250108065445,
+      "area_ms_per_sim_ms": 0.0001349353011808069
+    },
+    "coverage_sans": {
+      "event": "coverage",
+      "completed": false,
+      "targeted": true,
+      "target_completed": true,
+      "target_from": 0,
+      "target_to": 40,
+      "deaths": 0,
+      "observed_frames": 3913,
+      "excluded_frames": 108,
+      "gpu_pending": 0,
+      "renderer_inactive_frames": 0,
+      "cpu_profile": "CCDirector::drawScene: 8.91129ms\nGJBaseGameLayer::update: 4.13274ms\nPlayLayer::updateVisibility: 2.38433ms\narea: 0.00270ms\ncollisions: 0.18912ms\ncommands: 0.01372ms\nfollow: 0.02272ms\nmove: 0.45664ms\nparticles: 0.08994ms\nrotation: 0.26679ms\ntransform: 0.00349ms\n"
+    },
+    "coverage_avec": {
+      "event": "coverage",
+      "completed": false,
+      "targeted": true,
+      "target_completed": true,
+      "target_from": 0,
+      "target_to": 40,
+      "deaths": 0,
+      "observed_frames": 3865,
+      "excluded_frames": 116,
+      "gpu_pending": 0,
+      "renderer_inactive_frames": 0,
+      "cpu_profile": "CCDirector::drawScene: 10.67951ms\nGJBaseGameLayer::update: 3.70525ms\nPlayLayer::updateVisibility: 2.11357ms\narea: 0.00239ms\ncollisions: 0.16815ms\ncommands: 0.01295ms\nfollow: 0.02126ms\nmove: 0.38202ms\nparticles: 0.07168ms\nrotation: 0.27606ms\ntransform: 0.00325ms\n"
+    },
+    "production_sha256": "40B7472EC4417E4F85EFFF32756B9702AB71B5D63FB81866656A79D8CEE8E37D",
+    "measurement_sha256": "6DDA4EFB80983E63DF89C0498F1E0D84F2A87C483F808A73C52CBF2EFA6F8690",
+    "limitation": "One paired run; small differences require repeat runs.",
+    "comparison_sha256": "60300ef528898285c921cde5723cf78678df9b4723439bad812218181ea31acc"
+  }
+}

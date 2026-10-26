@@ -1,5 +1,11 @@
 // Read as data by the packager; never load a DLL to determine its build type.
 extern "C" {
+#ifdef CHLORIUM_TRANSFER_HYBRID_AUDIT_V9
+__declspec(dllexport) extern const char chloriumTransferPolicyIdentity[] = "CHLORIUM_TRANSFER_HYBRID_AUDIT_V9";
+#endif
+#ifdef CHLORIUM_NATIVE_PERSISTENT_TRANSFER_V9
+__declspec(dllexport) extern const char chloriumPersistentTransferIdentity[] = "CHLORIUM_NATIVE_PERSISTENT_TRANSFER_V9";
+#endif
 #ifdef CHLORIUM_NATIVE_GPU_EXCHANGE_V8
 __declspec(dllexport) extern const char chloriumNativeExchangeIdentity[] = "CHLORIUM_NATIVE_GPU_EXCHANGE_V8";
 #endif
