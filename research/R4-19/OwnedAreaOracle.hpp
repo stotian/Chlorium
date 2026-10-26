@@ -84,6 +84,8 @@ public:
         }
     }
     ~OwnedAreaOracle() { if(code_) VirtualFree(code_,0,MEM_RELEASE); }
+    void* resetEntry() const {return code_;}
+    void* moveEntry() const {return code_+0x600;}
     void move(void* layer,void* object,float dx,float dy) const {
         reinterpret_cast<void(*)(void*,void*,float,float)>(code_+0x600)(layer,object,dx,dy);
     }

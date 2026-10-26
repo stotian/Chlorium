@@ -1,0 +1,3 @@
+loop_checks.cpp
+PASS 322043 complete native loop identity checks, native_flags=32
+PASS alternating full-phase fixture timings; no GD FPS claim

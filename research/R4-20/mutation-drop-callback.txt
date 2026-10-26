@@ -1,0 +1,3 @@
+loop_checks.cpp
+C:\Users\stoti\Chlorium-v5-research\research\R4-20\IdentityLinearPhase.hpp(82): warning C4189: 'moved' : variable locale initialisée mais non référencée
+FAIL native callback order, state, helper caches and FP flags after 410

@@ -390,3 +390,26 @@ et appels de transformAreaObjects ; lecteurs indirects et effets reels de
 updateObjectSection encore ouverts. Aucun lancement GD, aucune installation,
 aucun benchmark/FPS revendique. Suite : producteur reel des operands par objet
 et barrières du helper-transform avant suppression des parcours.
+
+## 2026-10-26 - R4-20 : boucle native complete et helpers compiles
+
+Oracle isole du corps complet transformAreaObjects et de getRealPosition,
+21 relocalisations explicites, vrais CCNode Cocos et callbacks temoins. Candidat
+ferme pour decorations a lineaire identite : materialisation des champs/caches
+des helpers et decomposition constante par phase, vrais getters/reset/move et
+ordre de publication conserves. Le recentrage flottant natif peut deplacer
+X=.25 vers 0 autour du centre 16777216, meme a echelle 1. Mutation delta nul rejetee.
+
+327427 controles : octets objets, ownership/slots, etats des callbacks,
+caches helpers, flags/errno, bornes/subnormaux et resetVisual=false. Mutations
+flags supprimes et callback supprime rejetees aussi. Inspecteur initial REWORK :
+garde des tables de callbacks et normalisation des pointeurs etrangers corrigees ;
+contre-verification ciblee ACCEPT. Aucun vrai handler collision/section prouve.
+
+REJETER le candidat runtime : neuf lots alternes, cout complet de validation,
+compilation et publication compris, 4096 objets/16 phases : medianes natives
+15675,3 us contre 19767,2 ; maxima 19134,0 / 23885,3. Chaque paire dense des
+variantes precedentes regressait aussi ; preuves conservees dans R4-20.
+Ce sont des timings de fixture native relocalisee, pas des FPS GD. Aucun jeu
+lance ni paquet installe. Garder l'oracle pour etudier un programme de groupes
+qui retire les parcours de validation repetes avec invalidation reellement prouvee.

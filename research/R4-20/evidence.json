@@ -1,0 +1,80 @@
+{
+  "experiment": "R4-20",
+  "decision": "reject_runtime_candidate_keep_native_oracle",
+  "runtime_integration": false,
+  "game_launched": false,
+  "gd_fps_gain_claimed": false,
+  "positive_native_checks": 327427,
+  "complete_new_native_bodies": 2,
+  "explicit_relocations": 21,
+  "pinned_cocos_helper_bodies": 6,
+  "fp_domain": "nearest_rounding_masked_exceptions_four_DAZ_FTZ_combinations",
+  "mutants": [
+    {
+      "name": "zero_delta",
+      "exit_code": 1,
+      "rejected_at_check": 82
+    },
+    {
+      "name": "drop_flags",
+      "exit_code": 1,
+      "rejected_at_check": 2
+    },
+    {
+      "name": "drop_callback",
+      "exit_code": 1,
+      "rejected_at_check": 410
+    }
+  ],
+  "final_dense_fixture": {
+    "objects": 4096,
+    "phases": 16,
+    "alternating_batches": 9,
+    "native_median_us": 15675.3,
+    "candidate_median_us": 19767.2,
+    "native_max_us": 19134.0,
+    "candidate_max_us": 23885.3,
+    "includes_validation_compilation_publication": true,
+    "callbacks_are_fixture_spies": true,
+    "native_calls_are_relocated": true,
+    "intermediate_snapshots_at_large_count": false,
+    "complete_final_object_comparison": true
+  },
+  "native_identity_witness": {
+    "center_x": 16777216.0,
+    "before_x": 0.25,
+    "after_x": 0.0,
+    "offset_x": -0.25
+  },
+  "first_variant_private_source_archive_sha256": "333c9659d89883e02261ffc51c608e9edd01f05acfbec40722df98f51b25b113",
+  "conditional_flags_csv_provenance": "transcribed_from_actual_tool_output_after_working_csv_overwrite",
+  "inspection": {
+    "initial_verdict": "REWORK",
+    "p1_callback_table_guard_fixed": true,
+    "p2_foreign_tracking_identity_fixed": true,
+    "targeted_followup_verdict": "ACCEPT_for_these_fixes",
+    "independent_read_only_agent": true,
+    "full_audit_repeated": false,
+    "record": "inspection.md"
+  },
+  "unproven": [
+    "GD_eligibility_distribution",
+    "real_section_and_visual_callbacks",
+    "external_mod_hooks",
+    "checkpoint_and_lifetime_invalidation",
+    "arbitrary_Cocos_fields",
+    "non_nearest_or_unmasked_FP",
+    "GD_visual_fidelity",
+    "GD_FPS_or_blackscreen_improvement"
+  ],
+  "additional_tests": [
+    "all_four_foreign_callback_entries_rejected_before_mutation",
+    "foreign_tracking_pointer_rejected",
+    "subnormal_and_binade_boundaries",
+    "reset_visual_false",
+    "preexisting_sticky_flags",
+    "subnormal_boundaries_with_both_clear_and_preexisting_flags"
+  ],
+  "positive_log": "cpu-pass.txt",
+  "timed_check_log": "cpu-measured-reviewed.txt"
+}

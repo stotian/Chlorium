@@ -1,0 +1,4 @@
+loop_checks.cpp
+C:\Users\stoti\Chlorium-v5-research\research\R4-20\IdentityLinearPhase.hpp(77): warning C4189: 'flagsPublished' : variable locale initialisée mais non référencée
+C:\Users\stoti\Chlorium-v5-research\research\R4-20\IdentityLinearPhase.hpp(64): warning C4189: 'linearFlags' : variable locale initialisée mais non référencée
+FAIL native callback order, state, helper caches and FP flags after 2

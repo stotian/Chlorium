@@ -1,0 +1,3 @@
+objects,phases,batches,native_median_us,compiled_median_us,native_max_us,compiled_max_us
+4,16,9,12.8,12.8,29.1,14
+4096,16,9,19041.6,24560.8,21721,26338.2

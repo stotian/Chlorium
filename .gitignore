@@ -25,6 +25,7 @@
 !/research/R4-17/
 !/research/R4-18/
 !/research/R4-19/
+!/research/R4-20/
 **/*.local.json
 **/*.local.txt
 !/LICENSE.md
