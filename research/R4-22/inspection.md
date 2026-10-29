@@ -12,3 +12,8 @@ Requested load coverage: added final-state native comparisons for 64 and 4096
 objects over 16 phases, with snapshot capture disabled explicitly. Timing and
 every dense intermediate state remain unproven. No follow-up inspection for
 these P2 test additions. Final positive count: 26053.
+
+Measurement follow-up: one short read-only inspector ACCEPT for isolated scope.
+P2: ratio-of-medians versus paired-ratio dispersion now explicitly distinguished.
+Dense one-phase regression and lack of real GD ownership contract recorded.
+No test execution or GD validation performed by this inspector.

@@ -8,7 +8,7 @@
     4096
   ],
   "dense_steps": 16,
-  "performance_measured": false,
+  "performance_measured": true,
   "gd_launched": false,
   "installation_changed": false,
   "inspector": "accept_closed_fixture_P2_capacity_test_fixed",
@@ -22,5 +22,104 @@
     "mutation-no-validation.txt": "be5587831c7d5fc8dce2c98e1dabe1ebb79c111856aca43fde39efa22b0b1fc4",
     "r420-regression.txt": "6969b489dc556f06ac8aa4f785745b76d33d59f806298dd064a889e4debd75e6",
     "stage-compile.txt": "6984e212d907b86bc35c24830a00c79d32bf58af7d29b84099eabcf59bba9598"
+  },
+  "measured_assertions": 712179,
+  "benchmark": {
+    "batches": 9,
+    "objects": [
+      4,
+      64,
+      4096
+    ],
+    "phases": [
+      1,
+      16,
+      64
+    ],
+    "three_way_order": "rotated per batch",
+    "includes": "copy, validation, constant compilation, preparation, object loop, publication",
+    "dense_callbacks": "counted; intermediate full-state snapshots disabled",
+    "native_program_paired_ratios": [
+      {
+        "objects": 4,
+        "phases": 1,
+        "median": 0.6666666666666666,
+        "min": 0.18918918918918917,
+        "max": 1.65,
+        "wins": 7
+      },
+      {
+        "objects": 4,
+        "phases": 16,
+        "median": 0.5700000000000001,
+        "min": 0.5416666666666666,
+        "max": 0.7155963302752293,
+        "wins": 9
+      },
+      {
+        "objects": 4,
+        "phases": 64,
+        "median": 0.5201072386058981,
+        "min": 0.4067796610169491,
+        "max": 0.5925925925925926,
+        "wins": 9
+      },
+      {
+        "objects": 64,
+        "phases": 1,
+        "median": 0.6179775280898876,
+        "min": 0.5274725274725275,
+        "max": 0.725925925925926,
+        "wins": 9
+      },
+      {
+        "objects": 64,
+        "phases": 16,
+        "median": 0.3789954337899544,
+        "min": 0.32901296111665007,
+        "max": 0.6040992448759439,
+        "wins": 9
+      },
+      {
+        "objects": 64,
+        "phases": 64,
+        "median": 0.3452099349497339,
+        "min": 0.20637184973846884,
+        "max": 0.49093572605749863,
+        "wins": 9
+      },
+      {
+        "objects": 4096,
+        "phases": 1,
+        "median": 1.4899289099526067,
+        "min": 1.3548840477863668,
+        "max": 1.8426020408163264,
+        "wins": 0
+      },
+      {
+        "objects": 4096,
+        "phases": 16,
+        "median": 0.609113116383728,
+        "min": 0.3616450658862514,
+        "max": 0.8726124466150427,
+        "wins": 9
+      },
+      {
+        "objects": 4096,
+        "phases": 64,
+        "median": 0.6820316879401549,
+        "min": 0.35338584060248485,
+        "max": 0.9162095566387557,
+        "wins": 9
+      }
+    ]
+  },
+  "runtime_promotion": "not_authorized_by_fixture_ownership_proof",
+  "measured_sources": {
+    "research/R4-22/program_checks.cpp": "df6cba47cddd1bb3bc8e522dd130e417f220de4697b141f1532940a028a107ac",
+    "research/R4-22/run-cpu.cmd": "6fc6538f1b4cb59f2c716e04446ea79456b26e9b4b7836d636f4372bc1492553",
+    "research/R4-22/OwnedIdentityProgram.hpp": "28d3115715e4b792e6004f5d831c7bb9896115add3371edeb78a02138dedba2c",
+    "research/R4-20/IdentityLinearPhase.hpp": "494eeeac9daf2ef9a452b5bb3fff6dfb413903e287e7ce9ac69430ebedc211a8",
+    "research/R4-20/TransformWorld.hpp": "f4e82ce359f57e56f6466258d2c59f6c3d318036de54a4b2e15339493b532849"
   }
 }

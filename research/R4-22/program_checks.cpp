@@ -1,6 +1,8 @@
 #include "OwnedIdentityProgram.hpp"
 #include "../R4-20/LoopComparison.hpp"
 #include <climits>
+#include <chrono>
+#include <fstream>
 using namespace chlorium::research::transform_shadow;
 
 void rejected(World& w,const OwnedTransformOracle& oracle,std::span<const IdentityStep> steps) {
@@ -130,11 +132,52 @@ void correctness(const OwnedTransformOracle& oracle) {
         require(borrowed[1].stamp!=2,"native producer really overwrote the borrowed input");
     }
 }
-int main() try {
+void benchmark(const OwnedTransformOracle& oracle,const char* output) {
+    std::ofstream summary(output),raw(std::string(output)+".batches.csv");
+    require(bool(summary)&&bool(raw),"program timing outputs opened");
+    summary<<"objects,phases,batches,native_median_us,single_median_us,program_median_us\n";
+    raw<<"objects,phases,batch,native_us,single_us,program_us\n";
+    for(unsigned count:{4u,64u,4096u})for(unsigned phases:{1u,16u,64u}) {
+        std::array<std::vector<double>,3> times;
+        std::vector<IdentityStep> steps(phases);
+        for(unsigned n=0;n<phases;++n)steps[n]={static_cast<int>(n+1),true,n%2!=0};
+        for(unsigned batch=0;batch<9;++batch) {
+            std::array<std::unique_ptr<World>,3> worlds;
+            for(auto& world:worlds){world=std::make_unique<World>(oracle,count);world->capture=false;}
+            std::array<double,3> elapsed{};std::array<unsigned,3> flags{};std::array<int,3> errors{};
+            for(unsigned order=0;order<3;++order) {
+                const auto kind=(order+batch)%3;auto& w=*worlds[kind];bool accepted=true;
+                _mm_setcsr(0x1f80);errno=1177;
+                const auto begin=std::chrono::steady_clock::now();
+                if(kind==2)accepted=ownedIdentityProgram(w,oracle,steps);
+                else for(const auto step:steps) {
+                    w.state.layer.put(0x3e0,step.stamp);if(step.clearTracking)w.state.layer.put(0xee4,0);
+                    if(kind==1)accepted&=identityLinearPhase(w,oracle,1,1,step.resetVisual);
+                    else w.native(oracle,1,1,step.resetVisual);
+                }
+                const auto end=std::chrono::steady_clock::now();flags[kind]=_mm_getcsr();errors[kind]=errno;
+                elapsed[kind]=std::chrono::duration<double,std::micro>(end-begin).count();
+                require(accepted,"timed program/single phase accepted");
+            }
+            require(flags[0]==flags[1]&&flags[0]==flags[2]&&errors[0]==errors[1]&&errors[0]==errors[2],"timed native/single/program FP and errno");
+            equivalent(*worlds[0],*worlds[1]);equivalent(*worlds[0],*worlds[2]);
+            raw<<count<<','<<phases<<','<<batch;
+            for(unsigned k=0;k<3;++k){times[k].push_back(elapsed[k]);raw<<','<<elapsed[k];}
+            raw<<'\n';
+        }
+        summary<<count<<','<<phases<<",9";
+        for(auto& samples:times){std::sort(samples.begin(),samples.end());summary<<','<<samples[4];}
+        summary<<'\n';
+    }
+    summary.flush();raw.flush();require(bool(summary)&&bool(raw),"complete program timing outputs");
+}
+int main(int argc,char** argv) try {
     const auto saved=_mm_getcsr();_mm_setcsr(0x1f80);
     // Keep these isolated functional checks below the user's game priority.
     if(!SetPriorityClass(GetCurrentProcess(),BELOW_NORMAL_PRIORITY_CLASS))throw std::runtime_error("fixture priority");
     OwnedTransformOracle oracle;correctness(oracle);
+    if(argc==3&&std::string(argv[1])=="--benchmark")benchmark(oracle,argv[2]);
+    else require(argc==1,"optional --benchmark output.csv");
     chlorium::test::SystemInputGuard::assertNoGeode();
     std::cout<<"PASS "<<checks<<" synchronous owned-group checks; native callbacks/state/FP compared\n";
     _mm_setcsr(saved);return 0;

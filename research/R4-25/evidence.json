@@ -1,0 +1,13 @@
+{
+  "runtime_integration": "not_promoted",
+  "gd_launched": false,
+  "algorithm": "integer_SIMD_identity_only",
+  "correctness_assertions": 189571,
+  "mutant_rejected_at": 11817,
+  "timings": "earlier pre-alias-check fixture; same active SIMD algorithm",
+  "sources_at_review": {
+    "IdentityNode.hpp": "dfdb707649d0675f9937bd1b03be85acb1cfde3426955e93c62598635c6e59da",
+    "node_checks.cpp": "cb245dee12448bf5939092f68d1b2fbf237b968baa56d33fb67d18dbe91e10cb",
+    "run-cpu.cmd": "fc069f88a3798d577e08c4ba6d06f09cd698b8b473608ca235bfe8b5ac3813b2"
+  }
+}

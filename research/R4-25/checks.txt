@@ -1,0 +1,2 @@
+PASS 189571 direct identity node checks; full node/FP/errno compared
+PASS guard-removal mutant rejected at assertion 11817

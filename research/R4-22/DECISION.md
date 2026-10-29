@@ -80,3 +80,22 @@ is an alternating native/single-phase/program full-cost comparison on a quiet
 machine, including program copy, validation, compilation and publication.
 Even a positive fixture result cannot justify suppressing real GD callbacks
 without establishing their write/lifetime barriers.
+
+## 2026-10-29 - Full-cost isolated measurements
+
+The machine had no GD process. Nine batches rotate native, validated single
+phase and synchronous program order. Timers include command copying, eligibility,
+constant compilation, preparation, all object work and publication; world
+construction is outside all three. Final complete normalized state, callback
+counts/order and full MXCSR/errno agree; 712179 total assertions pass. Dense
+intermediate callback snapshots remain disabled.
+
+4096 objects/16 phases: medians 26969.3 / 22022.5 / 12315.6 us. The ratio of
+medians (2.19x native/program) overstates the typical paired result: paired
+program/native median 0.609, range 0.362-0.873, nine wins of nine. At 64 phases
+the paired median is 0.682, range 0.353-0.916, nine wins. One dense phase loses
+all nine pairs (paired median 1.490, range 1.355-1.843). Raw rows retained.
+
+KEEP as evidence that synchronous ownership can amortize repeated guards; no
+universal speedup or GD integration. The real producer/callback/lifetime contract
+and a sufficiently long safe sequence must be established before deployment.

@@ -517,3 +517,27 @@ avant ecriture ; fixture de preservation passe. Installation principale inchange
 Inspecteur export REWORK P2 puis ACCEPT cible : sources assemblees/relues en
 staging avant remplacement ; README manquant preserve les deux anciens hashes.
 Les trois deplacements finaux ne constituent pas une transaction disque atomique.
+
+## 2026-10-29 - R4-25 : specialisation directe du helper CCNode
+
+189571 assertions natives passent (etat complet/FP/errno, alias compris), mutant
+sans garde rejete a 11817. SIMD entier, aucun cache/hook de jeu. Mesure deja
+faite : 4096 identites 2633,3 -> 1795,9 us, mais melange 25% 2843,8 -> 3173,7
+et 75% 2667,0 -> 2779,3. REFUSER integration : distribution reelle inconnue.
+Ancien recensement pose Orbit ne mesure pas cette eligibilite. Pas de gain FPS.
+
+Graphify reutilise dans son environnement installe : graphe structurel des 90
+fichiers src, 1464 noeuds/2659 liens, sans agents semantiques ni cout LLM. Deux
+fichiers a macros Geode partiellement extraits : graphe de navigation, pas preuve
+de graphe d'appels complet. Cache prive exclu de Git et exports. Headroom utilise
+en compression locale (proxy indisponible), chiffres/preuves conserves intacts.
+
+### 2026-10-29 - R4-22 : cout complet du programme de groupes
+
+712179 assertions passent, Geode absent du processus Cocos isole. Neuf lots,
+ordre natif/phase/programme tournant, tous couts du programme inclus. Dense
+4096 objets/16 phases : medianes 26969,3 / 22022,5 / 12315,6 us ; ratio median
+des paires programme/natif 0,609 (0,362-0,873), 9/9 favorables. A une phase,
+9/9 defavorables (ratio median 1,490). Pas de multiplicateur stable de FPS.
+Inspecteur ACCEPT, dispersion ajoutee ; GARDER composant de recherche uniquement.
+Possession des objets/barrieres reelles GD non prouvees ; pas d'installation.

@@ -1,0 +1,1 @@
+Read-only CPU evidence inspector: ACCEPT for isolated scope. Integer guards, alias checks and complete comparisons appear coherent. Runtime integration remains rejected for mixed-workload regressions. Tests, final assembly and GD not executed by inspector.
