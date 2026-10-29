@@ -541,3 +541,16 @@ des paires programme/natif 0,609 (0,362-0,873), 9/9 favorables. A une phase,
 9/9 defavorables (ratio median 1,490). Pas de multiplicateur stable de FPS.
 Inspecteur ACCEPT, dispersion ajoutee ; GARDER composant de recherche uniquement.
 Possession des objets/barrieres reelles GD non prouvees ; pas d'installation.
+
+## 2026-10-29 - R4-26 : programme d'echelles Area possede
+
+Copie/validation une fois, concat lineaire et decomposition une fois par phase.
+Echelles dyadiques positives [1/16,16], membres uniques initialement identite,
+stamps nouveaux stricts ; resets/mouvements/champs/callbacks natifs conserves.
+110202 assertions finales, mutant d'emprunt rejete a3, regressions R4-20 327427
+et R4-22 26054 passent. Inspecteur ACCEPT ; P2 reset du centre couvert ensuite.
+Dense 4096/16 phases : ratio median des paires 0,759 (0,682-0,820), 9/9 gains ;
+64 phases 0,660 (0,591-0,791), 9/9. Une phase perd 8/9. Chronos avant derniers
+cas de couverture, algorithme inchange. GARDER prototype ferme, pas FPS/GD.
+La plupart des barrières de jeu restent inconnues ; ne pas fusionner des ticks
+physiques sur la foi du benchmark. Meme-stamp cumulatif encore rejete ici.

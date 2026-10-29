@@ -1,0 +1,4 @@
+PASS 110202 native scale-group assertions; states/callbacks/FP/errno compared
+PASS borrowed-command mutant rejected at assertion 3
+PASS R4-20 regression 327427 checks
+PASS R4-22 regression 26054 checks

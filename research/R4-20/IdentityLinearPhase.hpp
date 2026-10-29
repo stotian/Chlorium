@@ -78,7 +78,8 @@ inline unsigned identityFlags(const OwnedTransformOracle& oracle) {
         throw std::runtime_error("unsupported identity decomposition");
     return linearFlags;
 }
-inline void executeIdentity(World& w,const OwnedTransformOracle& oracle,unsigned linearFlags,float sx,float sy,bool resetVisual) {
+template<bool ScaleUpdates=false>
+inline void executeIdentity(World& w,const OwnedTransformOracle& oracle,unsigned linearFlags,float sx,float sy,bool resetVisual,float compiledX=1,float compiledY=1) {
 #ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
     const auto audit2=AuditClock::now();
 #endif
@@ -117,6 +118,19 @@ inline void executeIdentity(World& w,const OwnedTransformOracle& oracle,unsigned
         if(!flagsPublished||w.observerClearsFlags){_mm_setcsr(_mm_getcsr()|linearFlags);flagsPublished=true;}
 #endif
 #ifndef CHLORIUM_TRANSFORM_DROP_CALLBACK_MUTANT
+        if constexpr(ScaleUpdates) {
+            const auto read=[o](unsigned at){float value;std::memcpy(&value,o+at,4);return value;};
+            const auto x=read(0x488),y=read(0x48c);
+            const auto dxScale=pose::sub(compiledX,x),dyScale=pose::sub(compiledY,y);
+            if(dxScale!=0.f||dyScale!=0.f) {
+                o[0x350]=o[0x368]=1;
+                const auto store=[o](unsigned at,float value){std::memcpy(o+at,&value,4);};
+                store(0x488,pose::add(x,dxScale));store(0x48c,pose::add(y,dyScale));
+                store(0x2b8,pose::add(read(0x2b8),dxScale));store(0x2c0,pose::add(read(0x2c0),dxScale));
+                store(0x2bc,pose::add(read(0x2bc),dyScale));store(0x2c4,pose::add(read(0x2c4),dyScale));
+                if(resetVisual)World::scale(p,1.f);
+            }
+        }
         if(moved)World::section(layer,p);
 #endif
     }

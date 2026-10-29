@@ -1,0 +1,1 @@
+One read-only inspector: ACCEPT for closed prototype, no P0/P1. P2 center initial stamp always maximal: added old center stamp with nonzero offsets and actual center section callback assertions; tests pass. No execution by inspector, no GD validation, dense intermediate callback states and real barriers unproven.
