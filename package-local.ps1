@@ -75,9 +75,10 @@ if (!$binaryText.Contains($identity)) {
     throw 'The DLL build identity does not match this package: a fresh build is required'
 }
 if (!$Audit -and !$Experimental -and
-    (!$binaryText.Contains('CHLORIUM_NATIVE_VERTEX_BACKEND_V5') -or
+    (!$binaryText.Contains('CHLORIUM_NATIVE_CANONICAL_BACKEND_V10') -or
+      !$binaryText.Contains('CHLORIUM_CANONICAL_AREA_QUOTIENTS_V10') -or
       $binaryText.Contains('CHLORIUM_NATIVE_ATLAS_CACHE_IMPLEMENTATION_V1'))) {
-    throw 'The base renderer requires native-vertex V5 identity and no retired atlas cache'
+    throw 'The base renderer requires canonical V10 identity and no retired atlas cache'
 }
 if ($streaming -ne $binaryText.Contains('CHLORIUM_EXPERIMENTAL_NATIVE_STREAMING_V1')) {
     throw 'Streaming build identity mismatch: rebuild before packaging'
@@ -93,7 +94,8 @@ if ($pipeline -ne $binaryText.Contains('CHLORIUM_EXPERIMENTAL_MATH_PIPELINE_V1')
 if ($heap -ne $binaryText.Contains('CHLORIUM_EXPERIMENTAL_HEAP_RELEASE_V1')) { throw 'Heap release identity mismatch' }
 if ($snapshots -ne $binaryText.Contains('CHLORIUM_EXPERIMENTAL_NATIVE_SNAPSHOTS_V1')) { throw 'Native snapshot build identity mismatch' }
 if ($snapshots -and $binaryText.Contains('CHLORIUM_NATIVE_ATLAS_CACHE_IMPLEMENTATION_V1')) { throw 'Snapshot builds must not include the retired atlas cache' }
-if ($nativeQuads -and !$binaryText.Contains($(if ($nativeVertex) {'CHLORIUM_NATIVE_VERTEX_BACKEND_V5'} else {'CHLORIUM_NATIVE_QUAD_BACKEND_V4'}))) { throw 'Native renderer backend identity mismatch' }
+if ($nativeQuads -and (!$binaryText.Contains('CHLORIUM_NATIVE_CANONICAL_BACKEND_V10') -or !$binaryText.Contains('CHLORIUM_CANONICAL_AREA_QUOTIENTS_V10'))) { throw 'Canonical renderer identity mismatch: rebuild before packaging' }
+if ($baseRenderer -and $binaryText.Contains('CHLORIUM_NATIVE_VERTEX_BACKEND_V5')) { throw 'Retired V5 renderer cannot be packaged as the canonical renderer' }
 $binaryText = $null
 $package = Join-Path $out "$id.geode"
 if (Test-Path -LiteralPath $package) { Remove-Item -LiteralPath $package }

@@ -1,0 +1,4 @@
+PASS canonical V10 accepted in normal packaging mode
+PASS V5, mixed V5/V10 and incomplete V10 rejected; prior package unchanged
+PASS real source exporter accepts canonical V10 and rejects the same invalid identities before replacing files
+PASS missing source rejects export, preserves prior package/archive hashes and cleans staging

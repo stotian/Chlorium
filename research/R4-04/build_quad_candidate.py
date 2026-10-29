@@ -9,6 +9,7 @@ import shlex
 import subprocess
 import sys
 import zipfile
+from build_history import preserve_previous
 
 root = Path(__file__).resolve().parents[2]
 profiles = {
@@ -30,6 +31,8 @@ profiles = {
     "--native-bridge": "native-draw-bridge-v7",
     "--gpu-exchange": "native-gpu-exchange-v8",
     "--persistent-transfer": "native-persistent-transfer-v9",
+    "--canonical": "native-canonical-v10",
+    "--canonical-measure": "measurement-canonical-v10",
     "--transfer-measure": "measurement-transfer-v9",
     "--transfer-measure-r2": "measurement-transfer-v9-r2",
 }
@@ -39,8 +42,9 @@ selected = sys.argv[1] if len(sys.argv) == 2 else ""
 profile = profiles[selected]
 measurement = profile.startswith("measurement-")
 native_audit = selected == "--native-audit"
+canonical = profile == "native-canonical-v10"
 native_persistent = profile == "native-persistent-transfer-v9"
-native_vertex = native_persistent or profile in ("native-vertex-black-v5", "native-adaptive-upload-v6", "native-draw-bridge-v7", "native-gpu-exchange-v8")
+native_vertex = canonical or native_persistent or profile in ("native-vertex-black-v5", "native-adaptive-upload-v6", "native-draw-bridge-v7", "native-gpu-exchange-v8")
 native_exchange = profile == "native-gpu-exchange-v8"
 native_bridge = profile in ("native-draw-bridge-v7", "native-gpu-exchange-v8")
 adaptive_upload = profile in ("native-adaptive-upload-v6", "native-draw-bridge-v7", "native-gpu-exchange-v8")
@@ -84,7 +88,12 @@ if measurement:
     if pose_census:
         flags += ["/DCHLORIUM_AREA_WORK_CENSUS=1", "/DCHLORIUM_POSE_CENSUS=1"]
         source_names.append("research/R4-11/PoseCensus.cpp")
+if canonical:
+    flags += ["/DCHLORIUM_NATIVE_CANONICAL_V10=1"]
+    source_names = ["src/renderer/NativeAreaDivisions.cpp", "src/renderer/NativeAtlasStatsEmpty.cpp", "src/renderer/NativePauseGuard.cpp", "src/BuildIdentity.cpp"]
 sources = [root / name for name in source_names]
+if selected=="--canonical-measure":
+    flags += ["/DCHLORIUM_CANONICAL_AUDIT_V10=1"]
 if selected=="--transfer-measure-r2":
     flags += ["/DCHLORIUM_TRANSFER_HYBRID_AUDIT_V9=1"]
 if native_persistent:
@@ -118,10 +127,11 @@ for name in shlex.split(libraries_text, posix=False):
         libraries.append(name)
 out = root / "build-research" / profile
 out.mkdir(parents=True, exist_ok=True)
+preserve_previous(out)
 fingerprint = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
 manifest = {"schema_version": 1, "revision": profile,
-            "backend": "NATIVE_TRANSFORM_CACHE_STATIC_ANALYSIS" if native_audit else "CHLORIUM_READBACK_STATE_GUARDS_V5" if measurement else "CHLORIUM_NATIVE_PERSISTENT_TRANSFER_V9" if native_persistent else "CHLORIUM_NATIVE_GPU_EXCHANGE_V8" if native_exchange else "CHLORIUM_NATIVE_DRAW_BRIDGE_V7" if native_bridge else "CHLORIUM_NATIVE_ADAPTIVE_UPLOAD_V6" if adaptive_upload else "CHLORIUM_NATIVE_VERTEX_BACKEND_V5" if native_vertex else "CHLORIUM_NATIVE_QUAD_BACKEND_V4",
-            "mod_id": "local.chlorium.audit" if measurement else "local.chlorium", "version": "v0.2.0-alpha.6" if measurement or native_audit else "v0.3.0-alpha.5" if native_persistent else "v0.3.0-alpha.4" if native_exchange else "v0.3.0-alpha.3" if native_bridge else "v0.3.0-alpha.2" if adaptive_upload else json.loads((root / "mod.json").read_text(encoding="utf-8"))["version"] if native_vertex else "v0.2.0-alpha.610",
+            "backend": "CHLORIUM_NATIVE_CANONICAL_BACKEND_V10" if canonical else "NATIVE_TRANSFORM_CACHE_STATIC_ANALYSIS" if native_audit else "CHLORIUM_READBACK_STATE_GUARDS_V5" if measurement else "CHLORIUM_NATIVE_PERSISTENT_TRANSFER_V9" if native_persistent else "CHLORIUM_NATIVE_GPU_EXCHANGE_V8" if native_exchange else "CHLORIUM_NATIVE_DRAW_BRIDGE_V7" if native_bridge else "CHLORIUM_NATIVE_ADAPTIVE_UPLOAD_V6" if adaptive_upload else "CHLORIUM_NATIVE_VERTEX_BACKEND_V5" if native_vertex else "CHLORIUM_NATIVE_QUAD_BACKEND_V4",
+            "mod_id": "local.chlorium.audit" if measurement else "local.chlorium", "version": "v0.2.0-alpha.6" if measurement or native_audit else "v0.3.0-alpha.5" if native_persistent else "v0.3.0-alpha.4" if native_exchange else "v0.3.0-alpha.3" if native_bridge else "v0.3.0-alpha.2" if adaptive_upload else json.loads((root / "mod.json").read_text(encoding="utf-8"))["version"] if canonical else "v0.3.0-alpha.1" if native_vertex else "v0.2.0-alpha.610",
             "compile_status": "not_run", "link_status": "not_run",
             "game_status": "not_run", "flags": flags, "sources": [], "libraries": [], "headers": [], "resources": []}
 for source in sources:
@@ -129,7 +139,7 @@ for source in sources:
 for header in (root / "src" / "renderer").glob("*.hpp"):
     manifest["headers"].append({"path": header.name, "sha256": fingerprint(header)})
 if measurement:
-    for header in ("tests/FrameWatch.hpp", "tests/VisualSignature.hpp", "src/BProfiler.hpp"):
+    for header in ("tests/FrameWatch.hpp", "tests/VisualSignature.hpp", "tests/CanonicalCoreProof.hpp", "src/BProfiler.hpp"):
         manifest["headers"].append({"path": header, "sha256": fingerprint(root / header)})
 for resource in sorted((root / "resources").rglob("*")):
     if resource.is_file():
@@ -150,6 +160,7 @@ for folder in ("src", "legacy", "tests", "research/R4-08", "research/R4-11", "re
         snapshot_files.update((root / folder).rglob(pattern))
 snapshot_files.update(root / resource["path"] for resource in manifest["resources"])
 snapshot_files.add(Path(__file__).resolve())
+snapshot_files.add(root / "research/R4-04/build_history.py")
 snapshot_hashes = {path: fingerprint(path) for path in sorted(snapshot_files)}
 source_archive = out / "source-inputs.zip"
 with zipfile.ZipFile(source_archive, "w", compression=zipfile.ZIP_DEFLATED) as archive:

@@ -19,6 +19,11 @@
 #include "renderer/NativeAffinePoint.hpp"
 #include "BProfiler.hpp"
 #include "FrameWatch.hpp"
+#ifdef CHLORIUM_CANONICAL_AUDIT_V10
+#include "CanonicalCoreProof.hpp"
+#include <xmmintrin.h>
+extern "C" __declspec(dllexport) const char chloriumCanonicalAuditIdentity[]="CHLORIUM_CANONICAL_CORE_AUDIT_V10";
+#endif
 #ifdef CHLORIUM_EXPERIMENTAL_NATIVE_MOVES
 #include "renderer/NativeMovementLoop.hpp"
 #endif
@@ -145,7 +150,36 @@ std::string gapReason;
 
 void line(const std::string& text) { if (report) { report << text << '\n'; report.flush(); } }
 bool matrixSnapshot(chlorium::matrix::Snapshot& result);
+#ifdef CHLORIUM_CANONICAL_AUDIT_V10
+bool canonicalCoreActive() {
+    static const bool engine=[] {
+        MODULEINFO info{};const auto game=GetModuleHandleW(nullptr);
+        return GetModuleInformation(GetCurrentProcess(),game,&info,sizeof(info))&&
+            chlorium::test::canonicalGameImage({static_cast<const unsigned char*>(info.lpBaseOfDll),info.SizeOfImage});
+    }();
+    if(!engine)return false;
+    const bool native=chloriumAuditUseNative();
+    const auto module=GetModuleHandleW(L"local.chlorium.dll");
+    if(native) {if(module)return false;}
+    else {
+        if(!module)return false;
+        const auto core=GetProcAddress(module,"chloriumCanonicalIdentity");
+        const auto area=GetProcAddress(module,"chloriumCanonicalAreaIdentity");
+        if(!core||!area||std::strcmp(reinterpret_cast<const char*>(core),"CHLORIUM_NATIVE_CANONICAL_BACKEND_V10")||
+           std::strcmp(reinterpret_cast<const char*>(area),"CHLORIUM_CANONICAL_AREA_QUOTIENTS_V10"))return false;
+    }
+    const auto game=reinterpret_cast<const unsigned char*>(GetModuleHandleW(nullptr));
+    return (_mm_getcsr()&0x1f80u)==0x1f80u&&chlorium::test::canonicalAreaBody(
+        {game+chlorium::area::functionRva,chlorium::area::functionBytes},!native);
+}
+#endif
 bool recordNativeSnapshotStats(float percent) {
+#ifdef CHLORIUM_CANONICAL_AUDIT_V10
+    const bool active=canonicalCoreActive();
+    line(fmt::format("{{\"event\":\"canonical_core_v10\",\"percent\":{},\"native\":{},\"active\":{},\"inactive_frames\":{}}}",
+        percent,chloriumAuditUseNative(),active,rendererInactiveFrames));
+    return active&&rendererInactiveFrames==0;
+#endif
     using Stats = chlorium::snapshot::Stats;
     using Read = bool (*)(Stats*, std::size_t);
     static const auto read = [] {
@@ -753,6 +787,9 @@ void tick() {
         }
     } else deathRecorded = false;
     bool gpuActive = false, cpuOptimizations = false;
+#ifdef CHLORIUM_CANONICAL_AUDIT_V10
+    if(!canonicalCoreActive())++rendererInactiveFrames;
+#endif
 #ifdef CHLORIUM_EXPERIMENTAL_STATIC_RENDERER
     auto ren = Renderer::get();
     gpuActive = ren && ren->isEnabled(); cpuOptimizations = ren && ren->useOptimizations();

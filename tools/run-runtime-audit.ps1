@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-param([switch]$Native, [switch]$VisualWatch, [switch]$WithUserMods, [switch]$AtlasStorageRegression, [string]$GameDirectory, [string]$Package, [string]$ProductionPackage, [string]$ReportDirectory,
+param([switch]$Native, [switch]$VisualWatch, [switch]$WithUserMods, [switch]$ExternalFocus, [switch]$AtlasStorageRegression, [string]$GameDirectory, [string]$Package, [string]$ProductionPackage, [string]$ReportDirectory,
     [string]$UserGameDirectory = 'C:\Program Files (x86)\Steam\steamapps\common\Geometry Dash',
     [ValidateSet(0,133260800,129598490,88952972)][int]$FetchLevel = 0,
     [ValidateSet(133260800,129598490,88952972)][int]$Level = 133260800,
@@ -43,6 +43,7 @@ try {
     $supportsTargetedMath = $binary.Contains('CHLORIUM_TARGETED_MATH_TELEMETRY_V1')
     $supportsMathPipeline = $binary.Contains('CHLORIUM_MATH_PIPELINE_AUDIT_V1')
     $supportsNativeSnapshots = $binary.Contains('CHLORIUM_NATIVE_SNAPSHOT_AUDIT_V1')
+    $supportsCanonical = $binary.Contains('CHLORIUM_CANONICAL_CORE_AUDIT_V10')
     if ($VisualWatch -and (!$binary.Contains('CHLORIUM_VISUAL_READBACK_V2') -or
         !$binary.Contains('CHLORIUM_PRESENTED_CAPTURE_ONLY_V3') -or !$binary.Contains('CHLORIUM_READBACK_STATE_GUARDS_V5'))) {
         throw 'Rebuild visual diagnostics with presented-frame reads, scoped GL restoration, and complete probe/file coverage'
@@ -90,7 +91,9 @@ if ($measurementOnly -and !$Native) {
             if (!$supportsMathPipeline) { throw 'Rebuild the measurement module to require both active math pipeline components' }
             $requireMathPipeline = $true
         }
-        if ($binary.Contains('CHLORIUM_EXPERIMENTAL_NATIVE_SNAPSHOTS_V1')) {
+        if ($binary.Contains('CHLORIUM_NATIVE_CANONICAL_BACKEND_V10')) {
+            if (!$supportsCanonical -or !$binary.Contains('CHLORIUM_CANONICAL_AREA_QUOTIENTS_V10')) { throw 'Canonical core requires its independent V10 proof auditor' }
+        } elseif ($binary.Contains('CHLORIUM_EXPERIMENTAL_NATIVE_SNAPSHOTS_V1')) {
             if (!$supportsNativeSnapshots) { throw 'Rebuild the independent measurement module to verify native snapshot activation' }
             $requireNativeSnapshots = $true
         }
@@ -278,7 +281,7 @@ public static class ChloriumResearchFocus {
         $testProcess.Refresh()
     }
     $focusRequested = $false
-    if (!$testProcess.HasExited -and $testProcess.MainWindowHandle) {
+    if (!$ExternalFocus -and !$testProcess.HasExited -and $testProcess.MainWindowHandle) {
         [ChloriumResearchFocus]::ShowWindow($testProcess.MainWindowHandle,9) | Out-Null
         $focusRequested = [ChloriumResearchFocus]::SetForegroundWindow($testProcess.MainWindowHandle)
     }

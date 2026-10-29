@@ -1,4 +1,14 @@
-# Branche active : v0.3.0-alpha.1
+# Branche active : v0.3.0-alpha.6 (V10)
+
+Cocos garde son rendu canonique sans hook de dessin. L'optimisation active est
+la reutilisation exacte des quotients Area, avec garde de signature du moteur.
+Candidat compile/verifie hors jeu ; FPS et comportement reel restent a valider.
+Les renderers V5/V8/V9 ont des defauts ou regressions documentes et ne sont pas
+la base courante. `v0.2.0-alpha.6` designe une ancienne version differente.
+
+---
+
+## Etat historique : v0.3.0-alpha.1
 
 Le renderer V5 est la base du projet depuis le 25 octobre 2026, à la demande
 explicite de l'utilisateur. L'alpha.6 mathématique est arrêtée et archivée sous

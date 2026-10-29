@@ -13,7 +13,10 @@ try {
     $dllStream = $zip.GetEntry('local.chlorium.dll').Open()
     try { $dllStream.CopyTo($dllReader); $binary = [Text.Encoding]::ASCII.GetString($dllReader.ToArray()) }
     finally { $dllStream.Dispose(); $dllReader.Dispose() }
-    if (!$binary.Contains('CHLORIUM_NATIVE_VERTEX_BACKEND_V5') -or $binary.Contains('CHLORIUM_RUNTIME_AUDIT_BINARY_V1')) { throw 'Only the new base renderer can replace the current export; legacy packages stay archived' }
+    if (!$binary.Contains('CHLORIUM_NATIVE_CANONICAL_BACKEND_V10') -or
+        !$binary.Contains('CHLORIUM_CANONICAL_AREA_QUOTIENTS_V10') -or
+        $binary.Contains('CHLORIUM_NATIVE_VERTEX_BACKEND_V5') -or
+        $binary.Contains('CHLORIUM_RUNTIME_AUDIT_BINARY_V1')) { throw 'Only the canonical V10 renderer can replace the current export; legacy packages stay archived' }
     $sourceManifest = Get-Content -LiteralPath (Join-Path $root 'mod.json') -Raw | ConvertFrom-Json
     if ($manifest.version -ne $sourceManifest.version) { throw 'Source and package versions must match before export' }
     if ($binary.Contains('CHLORIUM_NATIVE_ATLAS_CACHE_IMPLEMENTATION_V1')) {
@@ -21,11 +24,11 @@ try {
     }
 } finally { $zip.Dispose() }
 New-Item -ItemType Directory -Force -Path $Destination | Out-Null
-Copy-Item -LiteralPath $package -Destination $Destination -Force
-Copy-Item -LiteralPath (Join-Path $root 'logo.png') -Destination $Destination -Force
-$archive = Join-Path $Destination 'chlorium-sources.zip'
-if (Test-Path -LiteralPath $archive) { Remove-Item -LiteralPath $archive }
-$zip = [IO.Compression.ZipFile]::Open($archive, [IO.Compression.ZipArchiveMode]::Create)
+$staging = Join-Path $Destination ('.chlorium-export-'+[Guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $staging | Out-Null
+try {
+$stagedArchive = Join-Path $staging 'chlorium-sources.zip'
+$zip = [IO.Compression.ZipFile]::Open($stagedArchive, [IO.Compression.ZipArchiveMode]::Create)
 try {
     # Explicit source-only roots: never walk the game fixture/Resources junction,
     # game data, build trees, personal saves or audit binaries.
@@ -35,9 +38,9 @@ try {
         ForEach-Object { Get-Item -LiteralPath (Join-Path $root $_) }
     foreach ($name in @('src','legacy','resources','docs','tests','tools','LICENSES','.github')) {
         $files += Get-ChildItem -LiteralPath (Join-Path $root $name) -File -Recurse |
-            Where-Object { $_.Extension -notin @('.pyc','.exe','.obj','.dll','.pdb','.geode') -and $_.Name -notlike '*.local.*' }
+            Where-Object { $_.Extension -notin @('.pyc','.exe','.obj','.dll','.pdb','.geode') -and $_.Name -notlike '*.local.*' -and $_.FullName -notmatch '[\\/]graphify-out[\\/]' }
     }
-    foreach ($name in @('R4-00','R4-01','R4-04','R4-06','R4-07','R4-08','R4-09','R4-10','R4-11','R4-12','R4-13','R4-14','R4-15','R4-16','R4-17','R4-18','R4-19','R4-20','R4-21','R4-22')) {
+    foreach ($name in @('R4-00','R4-01','R4-04','R4-06','R4-07','R4-08','R4-09','R4-10','R4-11','R4-12','R4-13','R4-14','R4-15','R4-16','R4-17','R4-18','R4-19','R4-20','R4-21','R4-22','R4-23')) {
         $directory = Join-Path $root "research/$name"
         if (!(Test-Path -LiteralPath $directory)) { continue }
         $files += Get-ChildItem -LiteralPath $directory -File -Recurse |
@@ -48,4 +51,25 @@ try {
         [IO.Compression.ZipFileExtensions]::CreateEntryFromFile($zip, $file.FullName, $relative) | Out-Null
     }
 } finally { $zip.Dispose() }
+$zip = [IO.Compression.ZipFile]::OpenRead($stagedArchive)
+try {
+    foreach ($entry in $zip.Entries) {
+        $stream = $entry.Open()
+        try { $stream.CopyTo([IO.Stream]::Null) } finally { $stream.Dispose() }
+    }
+} finally { $zip.Dispose() }
+Copy-Item -LiteralPath $package -Destination $staging
+Copy-Item -LiteralPath (Join-Path $root 'logo.png') -Destination $staging
+# Prepare every file before replacing any previous export.
+foreach ($name in @('chlorium-sources.zip','local.chlorium.geode','logo.png')) {
+    Move-Item -LiteralPath (Join-Path $staging $name) -Destination (Join-Path $Destination $name) -Force
+}
+} finally {
+    # Only these known staging files; never recurse into a computed directory.
+    foreach ($name in @('chlorium-sources.zip','local.chlorium.geode','logo.png')) {
+        $temporary = Join-Path $staging $name
+        if (Test-Path -LiteralPath $temporary) { Remove-Item -LiteralPath $temporary }
+    }
+    Remove-Item -LiteralPath $staging
+}
 Write-Output "Base renderer package, curated sources and logo exported to $Destination"

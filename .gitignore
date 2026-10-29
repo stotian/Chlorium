@@ -28,6 +28,7 @@
 !/research/R4-20/
 !/research/R4-21/
 !/research/R4-22/
+!/research/R4-23/
 **/*.local.json
 **/*.local.txt
 !/LICENSE.md
@@ -52,6 +53,7 @@
 !/docs/
 
 **/__pycache__/
+**/graphify-out/
 **/*.pyc
 **/*.exe
 **/*.dll

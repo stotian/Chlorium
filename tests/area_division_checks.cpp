@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <intrin.h>
 #include "renderer/AreaDivisionPatch.hpp"
+#include "CanonicalCoreProof.hpp"
 #include <algorithm>
 #include <bit>
 #include <chrono>
@@ -17,7 +18,7 @@ using namespace chlorium::area;
 using Calculate = float (*)(float, int, float);
 void require(bool ok, const char* why) { if (!ok) throw std::runtime_error(why); }
 int main(int argc, char** argv) try {
-    require(argc == 2, "pass installed GD executable path");
+    require(argc==2||(argc==3&&std::string(argv[2])=="--correctness-only"),"pass installed GD executable path and optional --correctness-only");
     std::ifstream input(argv[1], std::ios::binary);
     std::vector<unsigned char> exe{std::istreambuf_iterator<char>(input), {}};
     require(exe.size() > 0x1000, "read GD executable");
@@ -25,6 +26,14 @@ int main(int argc, char** argv) try {
     require(dos->e_magic == IMAGE_DOS_SIGNATURE && dos->e_lfanew > 0 && size_t(dos->e_lfanew) + sizeof(IMAGE_NT_HEADERS64) < exe.size(), "PE header");
     const auto pe = reinterpret_cast<const IMAGE_NT_HEADERS64*>(exe.data() + dos->e_lfanew);
     require(pe->Signature == IMAGE_NT_SIGNATURE && pe->FileHeader.TimeDateStamp == 0x69702da0, "exact GD 2.2081 build");
+    std::vector<unsigned char> mappedHeader(0xa3a000);
+    std::copy_n(exe.begin(),std::min<std::size_t>(4096,exe.size()),mappedHeader.begin());
+    require(chlorium::test::canonicalGameImage(mappedHeader),"mapped engine identity proof");
+    auto corruptHeader=mappedHeader;std::memset(corruptHeader.data()+0x3c,0xff,4);
+    require(!chlorium::test::canonicalGameImage(corruptHeader),"invalid PE offset rejected before access");
+    corruptHeader=mappedHeader;corruptHeader[dos->e_lfanew+8]^=1;
+    require(!chlorium::test::canonicalGameImage(corruptHeader),"unknown engine timestamp rejected");
+    require(!chlorium::test::canonicalGameImage(std::span<const unsigned char>(mappedHeader).first(63)),"short mapped image rejected");
     const auto sections = IMAGE_FIRST_SECTION(pe);
     const unsigned char* source = nullptr;
     for (unsigned i=0;i<pe->FileHeader.NumberOfSections;++i) {
@@ -44,10 +53,28 @@ int main(int argc, char** argv) try {
         const int displacement=2048-int(location+instruction+8);
         std::memcpy(memory+location+instruction+4,&displacement,sizeof(displacement));
     }
-    for (const auto& patch : patches) {
-        require(!std::memcmp(memory+512+patch.offset,patch.expected.data(),patch.length),"native patch bytes");
-        std::memcpy(memory+512+patch.offset,patch.replacement.data(),patch.length);
+    std::vector<unsigned char> plan(source,source+functionBytes);
+    for(const auto& patch:patches) {
+        auto corrupt=plan;corrupt[patch.offset]^=1;const auto before=corrupt;
+        require(!rewriteQuotients(corrupt)&&corrupt==before,"invalid plan is rejected before any mutation");
     }
+    require(!rewriteQuotients(std::span<unsigned char>(plan).first(functionBytes-1)),"short plan rejected");
+    require(rewriteQuotients(plan),"complete contiguous quotient plan");
+    require(chlorium::test::canonicalAreaBody({source,functionBytes},false),"baseline core proof");
+    require(chlorium::test::canonicalAreaBody(plan,true),"optimized core proof");
+    require(!chlorium::test::canonicalAreaBody(plan,false)&&!chlorium::test::canonicalAreaBody({source,functionBytes},true),"core proof distinguishes modes");
+    auto partial=plan;partial[patches[1].offset]^=1;
+    require(!chlorium::test::canonicalAreaBody(partial,true),"partial patch rejected by runtime proof");
+    partial=plan;partial[0]^=1;
+    require(!chlorium::test::canonicalAreaBody(partial,true),"foreign body mutation rejected by runtime proof");
+    require(!chlorium::test::canonicalAreaBody(std::span<const unsigned char>(plan).first(functionBytes-1),true),"short core proof rejected");
+    for(unsigned at=0;at<functionBytes;++at) {
+        bool changed=false;
+        for(const auto& patch:patches)if(at>=patch.offset&&at-patch.offset<patch.length)changed=true;
+        require(changed||plan[at]==source[at],"intervening native bytes preserved");
+    }
+    constexpr auto begin=patches.front().offset,end=patches.back().offset+patches.back().length;
+    std::memcpy(memory+512+begin,plan.data()+begin,end-begin);
     DWORD oldProtection=0;
     require(VirtualProtect(memory,4096,PAGE_EXECUTE_READ,&oldProtection),"make own comparison functions executable");
     FlushInstructionCache(GetCurrentProcess(),memory,4096);
@@ -68,15 +95,17 @@ int main(int argc, char** argv) try {
         ++checked;
     };
     const uint32_t special[]{0,0x80000000,1,0x80000001,0x00800000,0x3f800000,0xbf800000,0x7f800000,0xff800000,0x7fc12345,0x7f812345};
-    for (const unsigned rounding : {0u,0x2000u,0x4000u,0x6000u}) for (const unsigned denorm : {0u,0x8040u}) {
+    for (const unsigned rounding : {0u,0x2000u,0x4000u,0x6000u}) for (const unsigned denorm : {0u,0x40u,0x8000u,0x8040u}) {
         const auto controls=0x1f80u|rounding|denorm;
-        for (const auto d:special) for (const auto z:special) for (const int length : {0,1,-1,100,2147483647})
-            compare(std::bit_cast<float>(d),length,std::bit_cast<float>(z),controls);
+        for(unsigned initialFlags:{0u,63u})
+            for (const auto d:special) for (const auto z:special) for (const int length : {0,1,-1,100,2147483647})
+                compare(std::bit_cast<float>(d),length,std::bit_cast<float>(z),controls|initialFlags);
         for (unsigned i=0;i<100000;++i)
             compare(std::bit_cast<float>(uint32_t(random())),std::bit_cast<int32_t>(uint32_t(random())),std::bit_cast<float>(uint32_t(random())),controls);
     }
     _mm_setcsr(savedCsr);
     std::cout << "PASS " << checked << " native/patched bit and FP-flag comparisons\n";
+    if(argc==3){VirtualFree(memory,0,MEM_RELEASE);return 0;}
     std::vector<float> distances(65536);
     for (unsigned i=0;i<distances.size();++i) distances[i]=float(i%1000);
     for (const float deadzone : {0.f,.2f,.5f}) {

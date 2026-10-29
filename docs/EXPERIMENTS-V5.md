@@ -452,3 +452,68 @@ validation rejetee a 1. R4-20 : 327427 controles sans regression ; variante de
 chronos compilee seulement. Inspecteur ACCEPT pour fixture, P2 de capacite
 corrige et teste. GARDER comme prototype fonctionnel, sans gain FPS revendique.
 Aucun GD lance, aucune installation. Chronos differes pendant la partie Steam.
+
+## 2026-10-26 - R4-23 : candidat canonique V10 installable
+
+Default cible v0.3.0-alpha.6 : aucun hook de dessin, stockage GPU prive, scan ou
+copie d'atlas. Cocos conserve toute la soumission et ses donnees canoniques ;
+les mecanismes V5 aux divergences GL/autorite reproduites ne sont plus charges.
+Optimisation active : quotients Area exacts avec signature complete, plan valide
+avant ecriture et un seul patch contigu de 87 octets. Pause guard conserve.
+
+1619360 comparaisons bits/flags SSE masquees passent, plans corrompus/courts
+refuses, octets intermediaires conserves. Aucun benchmark. Packager normal
+V10 accepte ; V5, mixte et incomplet refuses sans ecraser le paquet precedent.
+Inspecteur REWORK puis ACCEPT cible apres correction P1 packaging/P2 patchs.
+Compilation/liaison manuelles serie passees, archive des entrees et dependances
+empreintees. DLL 82944 octets, contre 282112 installee : pas une mesure de RAM/FPS.
+CRC, PE x64, manifeste, licences et hashes du paquet reel verifies.
+
+Candidat versionne dans Documents/chlorium, sans remplacement de l'installation.
+La premiere config CMake a echoue apres retrait d'une source temporaire ; essai
+sur cache obsolete annule, nouvelle config sources figees reussie. Voir evidence
+pour statut final. GARDER candidat de compatibilite, sans revendiquer gain FPS,
+absence universelle de noirs ou validation GD. Aucun GD lance. Main inchangee.
+
+### R4-23 - Autorisation et premiers essais reels V10
+
+Autorisation GD renouvelee par l'utilisateur le 26 octobre. Controleur V10
+independant compile, empreinte de la routine Area verifiee a chaque image,
+compteur d'inactivite persistant. Ancien snapshot non declare actif. Inspecteur
+ACCEPT pour moteur attendu ; borne PE initialement signalee P2, corrigee ensuite
+par controle de taille ModuleInfo et en-tete PE, avec cas corrompus/courts.
+Cet auditeur corrige compile mais ne constitue pas le binaire des essais ci-dessous.
+Aucun mode de jeu, noclip ou reduction de detail active. Focus reel observe ;
+controle de fenetres indisponible (assets kernel manquants), aucune injection UI.
+
+Le premier diagnostic visuel sans Chlorium s'arrete a 39,6267 % Grief, code
+0xcfffffff, sans rapport final. Erreur GL preexistante au debut et interruptions
+longues autour des lectures/captures ; cause de l'arret non attribuee. Ce n'est
+ni une reference complete ni une preuve d'ecrans noirs corrigees.
+
+Paires sans lecture d'image, tous les mods utilisateur, details complets, sans
+shake/noclip. Grief 0-40 : sans 51,144 FPS/p99 53,213 ms ; V10 58,856/p99 23,284.
+Heliopolis 74-78, ordre inverse : V10 28,690/p99 152,826 ; sans 44,274/p99 34,792.
+Quatre passages atteignent la cible, zero mort, zero image de code inactif,
+90 fichiers partages restaures apres chaque passage, paquet principal inchange.
+Ces paires ordonnees aux nombres d'echantillons differents ne prouvent pas une
+causalite positive. Les couts Area observes de quelques microsecondes ne peuvent
+expliquer seuls ces ecarts de scene. Aucun gain FPS global revendique.
+
+REFUSER la promotion V10 comme gain de performances ; garder la correction
+structurelle du rendu. 60 FPS stables et absence de noirs non acquis. Differer
+Orbit sur cette version pour travailler une specialisation CPU sans caches ni
+balayage de validation repete, puis revenir sur les passages lourds.
+
+### 2026-10-29 - R4-23 : cloture des preuves et de l'export
+
+Exporteur encore verrouille sur V5 corrige : vrai script V10 accepte, V5/mixte/
+incomplet refuses avant remplacement, archive sources presente. Fixtures passees.
+L'archive exacte des sources de l'auditeur des essais a ete ecrasee par sa
+recompilation avec bornes PE. Son paquet/DLL et leurs hashes restent disponibles ;
+ne pas assimiler le nouvel auditeur aux essais precedents. Les prochains builds
+et packagings conservent leurs anciens fichiers et hashes dans un historique prive
+avant ecriture ; fixture de preservation passe. Installation principale inchangee.
+Inspecteur export REWORK P2 puis ACCEPT cible : sources assemblees/relues en
+staging avant remplacement ; README manquant preserve les deux anciens hashes.
+Les trois deplacements finaux ne constituent pas une transaction disque atomique.

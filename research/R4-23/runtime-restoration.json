@@ -1,0 +1,18 @@
+[
+  {
+    "run": "129598490-candidate",
+    "restoration": "restored_and_sha256_verified"
+  },
+  {
+    "run": "129598490-native",
+    "restoration": "restored_and_sha256_verified"
+  },
+  {
+    "run": "88952972-candidate",
+    "restoration": "restored_and_sha256_verified"
+  },
+  {
+    "run": "88952972-native",
+    "restoration": "restored_and_sha256_verified"
+  }
+]

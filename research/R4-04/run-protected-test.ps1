@@ -10,6 +10,8 @@ param(
     [switch]$NativeBridge,
     [switch]$GpuExchange,
     [switch]$PersistentTransfer,
+    [switch]$Canonical,
+    [switch]$ExternalFocus,
     [switch]$Performance,
     [switch]$BlackScreen,
     [ValidateSet('initial','visible','frames')][string]$CensusRevision='initial',
@@ -18,7 +20,8 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 if ($TransferRevision -ne 'initial' -and !$PersistentTransfer) { throw 'Transfer revision requires the explicit persistent profile' }
-if ($Performance -and (!($GpuExchange -or $PersistentTransfer) -or $PoseCensus -or $AreaCensus -or $BlackScreen)) { throw 'Performance transport comparison requires the explicit GPU exchange profile' }
+if ($Canonical -and ($GpuExchange -or $PersistentTransfer -or $NativeBridge -or $AdaptiveUpload -or $AreaCensus -or $PoseCensus -or $BlackScreen)) {throw 'Canonical core requires its separate comparison profile'}
+if ($Performance -and (!($GpuExchange -or $PersistentTransfer -or $Canonical) -or $PoseCensus -or $AreaCensus -or $BlackScreen)) { throw 'Performance comparison requires an explicit production profile' }
 if ($AdaptiveUpload -and ($PoseCensus -or $AreaCensus -or $BlackScreen)) { throw 'Choose one isolated experiment' }
 if ($PersistentTransfer -and ($PoseCensus -or $AreaCensus -or $BlackScreen -or $AdaptiveUpload -or $NativeBridge -or $GpuExchange)) { throw 'Choose one isolated experiment' }
 if ($GpuExchange -and ($PoseCensus -or $AreaCensus -or $BlackScreen -or $AdaptiveUpload -or $NativeBridge)) { throw 'Choose one isolated experiment' }
@@ -44,6 +47,7 @@ if ($NativeBridge) { $taskCampaign=Join-Path $taskRoot 'build-research/runtime-n
 if ($GpuExchange) { $taskCampaign=Join-Path $taskRoot 'build-research/runtime-gpu-exchange-v8'; if(!$WithUserMods){$taskCampaign+='-isolated'} }
 if ($PersistentTransfer) { $taskCampaign=Join-Path $taskRoot 'build-research/runtime-persistent-transfer-v9'; if(!$WithUserMods){$taskCampaign+='-isolated'} }
 if ($PersistentTransfer -and $TransferRevision -eq 'r2') { $taskCampaign+='-r2' }
+if ($Canonical) { $taskCampaign=Join-Path $taskRoot 'build-research/runtime-canonical-v10' }
 if ($Performance) { $taskCampaign+='-performance' }
 if ($AreaCensus -and ($Level -ne 133260800 -or $Mode -ne 'native')) { throw 'Area census is a native Orbit diagnostic only' }
 $taskRun = Join-Path $taskCampaign "$Level-$Mode"
@@ -198,6 +202,11 @@ try {
         $taskParameters.VisualWatch = $false
     }
     if ($Mode -eq 'native') { $taskParameters.Native=$true }
+    if ($Canonical) {
+        $taskParameters.Package=Join-Path $taskRoot 'build-research/measurement-canonical-v10/local.chlorium.audit.geode'
+        $taskParameters.ProductionPackage=Join-Path $taskRoot 'build-research/native-canonical-v10/local.chlorium.geode'
+    }
+    if ($ExternalFocus) {$taskParameters.ExternalFocus=$true}
     if ($WithUserMods) { $taskParameters.WithUserMods=$true }
     if ($taskParameters.VisualWatch) { $taskParameters.CapturePercent = switch ($Level) { 88952972 { @(24.9,25.2) } 129598490 { @(76.99,77.17) } 133260800 { @(89.5,96.5) } } }
     & (Join-Path $taskRoot 'tools/run-runtime-audit.ps1') @taskParameters

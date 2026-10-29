@@ -1,5 +1,9 @@
 // Read as data by the packager; never load a DLL to determine its build type.
 extern "C" {
+#ifdef CHLORIUM_NATIVE_CANONICAL_V10
+__declspec(dllexport) extern const char chloriumCanonicalIdentity[] = "CHLORIUM_NATIVE_CANONICAL_BACKEND_V10";
+__declspec(dllexport) extern const char chloriumCanonicalAreaIdentity[] = "CHLORIUM_CANONICAL_AREA_QUOTIENTS_V10";
+#endif
 #ifdef CHLORIUM_TRANSFER_HYBRID_AUDIT_V9
 __declspec(dllexport) extern const char chloriumTransferPolicyIdentity[] = "CHLORIUM_TRANSFER_HYBRID_AUDIT_V9";
 #endif
@@ -20,7 +24,9 @@ __declspec(dllexport) extern const char chloriumSnapshotIdentity[] = "CHLORIUM_E
 #endif
 #ifdef CHLORIUM_EXPERIMENTAL_NATIVE_QUADS
 #ifdef CHLORIUM_NATIVE_VERTEX_PARITY
+#ifndef CHLORIUM_NATIVE_CANONICAL_V10
 __declspec(dllexport) extern const char chloriumNativeQuadIdentity[] = "CHLORIUM_NATIVE_VERTEX_BACKEND_V5";
+#endif
 #else
 __declspec(dllexport) extern const char chloriumNativeQuadIdentity[] = "CHLORIUM_NATIVE_QUAD_BACKEND_V4";
 #endif

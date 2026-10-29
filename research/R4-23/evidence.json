@@ -1,0 +1,68 @@
+{
+  "experiment": "R4-23",
+  "version": "v0.3.0-alpha.6",
+  "candidate": "compatibility_candidate_runtime_completed_not_promoted_for_fps",
+  "manual_compile": "passed",
+  "manual_link": "passed",
+  "source_archive_sha256": "26d8faf5c06b5b4768ede5bb6950a13162504cf04d91e48449fb69f86ef34171",
+  "sources": [
+    {
+      "path": "NativeAreaDivisions.cpp",
+      "sha256": "b3deb78f8be4368b73abab1c0793638d2c018b3308c53b42bc08e8b943751a78"
+    },
+    {
+      "path": "NativeAtlasStatsEmpty.cpp",
+      "sha256": "e6e22308e1482a3d7c9ea0a2c272e7ddbe70cf47dd96ea3c78aa2159679024f7"
+    },
+    {
+      "path": "NativePauseGuard.cpp",
+      "sha256": "36e7cbd333de73fdbb1838ef1ba202c966331a4fb24391ccefbbdb003b8eb78f"
+    },
+    {
+      "path": "BuildIdentity.cpp",
+      "sha256": "8820d45fcd9b8c0544555960435260f027304ce252e10380608b615d7fe19797"
+    },
+    {
+      "path": "entry.cpp",
+      "sha256": "8fac5412ee131be989a91349ec8553fa2243834753c22a7ba46ca11db854cd2c"
+    }
+  ],
+  "dll_sha256": "09ae5486fc20519b9cd314a0786a4e34133c9d95ac2bf401349af3cf8367dbac",
+  "offline_verification": {
+    "package_sha256": "107b945ce4940d49670c1aab287411e4f10ebcf45ec52174651a0d876d7f2a71",
+    "dll_bytes": 82944,
+    "installed_v5_dll_bytes": 282112,
+    "manifest": "checked",
+    "x64_dll": "checked",
+    "crc": "passed",
+    "game_launched": false,
+    "installed": false
+  },
+  "numerical_comparisons": 1619360,
+  "benchmarks_run": false,
+  "gd_launched": false,
+  "installation_changed": false,
+  "inspector": "REWORK_then_targeted_ACCEPT",
+  "cmake_configure": "passed",
+  "cmake_build": "passed",
+  "normal_cmake_package": "passed",
+  "normal_cmake_package_sha256": "1a5a09da616c90b7d4dba9050b017823f870187db0467d89a7768d0eac8f54db",
+  "runtime_followup": {
+    "gd_launched": true,
+    "completed_passes": 4,
+    "gameplay_deaths": 0,
+    "installed": false,
+    "fps_promotion": "rejected",
+    "blackscreen_freedom": "not_proven",
+    "details": "runtime-fps.json"
+  },
+  "auditor_provenance": {
+    "runtime_dll_sha256": "0218b496fa9bb46197285e06ca887752d9eda897798324c2019a1af35fa6494e",
+    "runtime_package_sha256": "da35b246ff769d92c9ba2ae97656e9e60c168d2d7d7da0db47b8924de6e35e8f",
+    "bounds_checked_dll_sha256": "93f1f7e0a883c43f21d1e1ad3f35df1e831441cee1bc6b223fb9c0f5d54e1267",
+    "bounds_checked_auditor_gd_test": "not_run",
+    "runtime_source_archive": "overwritten_by_bounds_rebuild_not_preserved",
+    "runtime_package": "retained_in_private_campaign_auditor_used",
+    "future_rebuilds": "source_dll_and_package_bytes_archived_before_overwrite"
+  }
+}

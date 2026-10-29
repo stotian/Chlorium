@@ -1,17 +1,14 @@
-# Chlorium v0.3
+# Chlorium v0.3.0-alpha.6
 
-Renderer expérimental CPU/GPU pour GD 2.2081 Windows et Geode 5.11.2.
-Fork indépendant de Bismuth, créé par IliasHDZ.
+GD 2.2081 Windows x64, Geode 5.11.2. Fork independant de Bismuth (IliasHDZ).
 
-Le renderer expérimental est désormais la base du projet. L'ancienne alpha.6
-mathématique est archivée sous legacy-chlorium.
-Le nouveau chemin conserve le programme graphique, ses uniformes, les sommets
-complets et les indices natifs. Les effets et collisions restent natifs.
+Coeur canonique V10 : Cocos garde integralement son rendu et ses ressources GPU.
+Aucun dessin prive, copie d'atlas ou hook de soumission n'est installe.
+Reutilisation exacte des quotients Area, sous verification du corps moteur.
+Les effets, triggers, collisions et pas de simulation restent natifs.
 
-32 scénarios GPU contrôlés reproduisent les pixels de référence. La comparaison
-Heliopolis 74–78 % avec les mods personnels n'a pas détecté de noir supplémentaire.
-Cela ne prouve pas l'absence de défaut sur tous les niveaux, ni un gain FPS global.
-Les prochains gains ciblent les parcours CPU répétés et les traitements GPU par groupes.
+Candidat verifie hors jeu uniquement. Aucun gain FPS ni absence universelle
+d'ecran noir n'est certifie. Les anciens renderers et prototypes CPU/GPU
+restent en recherche. Voir README.md et docs/EXPERIMENTS-V5.md.
 
-Voir README.md, docs/EXPERIMENTS-V5.md et les licences/notices du projet.
-Chlorium n'est pas une version officielle de Bismuth et ne contient pas de code Sodium.
+Chlorium n'est pas une version officielle de Bismuth et n'integre aucun code Sodium.

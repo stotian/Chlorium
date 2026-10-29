@@ -2,7 +2,7 @@
   <img src="logo.png" width="144" alt="Logo Chlorium" />
   <h1>Chlorium</h1>
   <p>Renderer expérimental CPU/GPU pour Geometry Dash.</p>
-  <p><strong>Windows x64 · GD 2.2081 · Geode 5.11.2 · v0.3.0-alpha.1</strong></p>
+  <p><strong>Windows x64 · GD 2.2081 · Geode 5.11.2 · v0.3.0-alpha.6</strong></p>
 </div>
 
 Chlorium est un fork indépendant de [Bismuth, créé par IliasHDZ](https://github.com/iliasHDZ/Bismuth).
@@ -10,47 +10,44 @@ L'objectif est de réduire fortement le travail CPU/GPU, avec tous les effets
 visuels et le gameplay conservés. Sodium inspire l'objectif ; aucun code Sodium
 n'est intégré.
 
-**Le renderer expérimental est désormais la base du projet.** L'ancien chemin
-alpha.6, centré sur des caches mathématiques, est arrêté et rangé dans
-[legacy](legacy/README.md). Les anciennes releases alpha.6 ne correspondent pas
-à cette nouvelle base.
+**La base actuelle est le coeur canonique V10.** Les anciennes soumissions
+privees V4-V9 restent disponibles dans les experiences, hors du build courant.
+L'ancien cache mathematique `v0.2.0-alpha.6` reste archive dans
+[legacy](legacy/README.md) ; il est distinct de `v0.3.0-alpha.6`.
 
-## État réel
+## Etat reel
 
-Le renderer V5 garde la préparation native, le programme graphique actif et
-ses uniformes. Il soumet les sommets natifs complets depuis un stockage propre
-et réutilise les indices natifs sans les modifier. Il vise à conserver le contexte,
-la texture, le blending, la profondeur et les sous-plages.
-Un autre hook d'atlas ou un contrat moteur inconnu impose le chemin natif.
+Cocos conserve integralement ses dessins, shaders, uniformes, indices et buffers.
+Chlorium n'intercepte plus les dessins : aucun stockage de sommets prive, scan
+ou copie par atlas, remplacement de VAO ou restauration d'un ancien etat GL.
+Cela retire les mecanismes V5 dont les tests isoles reproduisent la divergence
+des etats GL et la perte de donnees GPU absentes de la copie CPU.
 
-Les tests GPU reproduisent les pixels de référence dans 32 scénarios contrôlés.
-Une comparaison ciblée sur Heliopolis auto, 74–78 %, avec les mods utilisateur,
-a fourni 189/183 captures valides, sans noir complet ni anomalie supplémentaire
-détectée avec V5. Le renderer était actif, sans repli natif. Ces diagnostics
-ne mesurent pas un gain FPS et ne couvrent pas tous les effets/niveaux/mods. Les écrans noirs
-restent la priorité de validation. **Ni l'absence universelle de défauts visuels,
-ni les 60 FPS stables, ni un ×3 FPS ne sont encore démontrés.**
+L'optimisation active reutilise les quotients identiques dans une routine Area
+native dont le corps complet doit correspondre a GD 2.2081. Elle ne remplace
+aucun trigger, callback de gameplay, effet, collision ou pas de simulation.
+Un corps inconnu est refuse. Les trois substitutions forment un seul patch
+contigu ; toute erreur d'installation ou de bascule est signalee.
+Le garde de pause sur PlayLayer detache est conserve.
 
-Les transports V8 et V9 ont été écartés après les comparaisons FPS sur Grief :
-aucun gain convaincant, queues de temps dégradées. Le [prototype R4-18](research/R4-18/DECISION.md) supprime
-des phases de translation dans un modèle numérique prouvé ; il n’est pas
-branché aux effets natifs et ne constitue pas un gain FPS GD.
-
-Le renderer ne réduit pas encore les grandes boucles Area/Transform du moteur.
-Les prochains gains doivent venir de programmes de groupes/poses, de traitements
-par lots et d'une sélection spatiale du travail GPU, sans supprimer de logique.
-Les noyaux expérimentaux ne constituent pas des gains FPS tant qu'ils ne sont
-pas intégrés et mesurés sur le même passage.
+Le candidat est compile et verifie hors jeu. Les comparaisons numeriques
+portent sur les bits et flags SSE avec exceptions masquees ; les traps non
+masques ne sont pas valides. Aucun gain FPS, absence universelle de noirs ou
+compatibilite avec tous les mods n'est declare sans validation en jeu.
+Les prototypes de groupes/poses restent separes du paquet faute de preuve de
+gain integre et de contrat complet pour les callbacks natifs.
 
 ## Construire
 
 Prérequis : Windows x64, MSVC 2022, CMake/Ninja et SDK Geode 5.11.2.
 Les scripts locaux indiquent les chemins du poste de développement.
 
-- `build-local.cmd` construit la nouvelle base V5 par défaut.
-- `package-local.ps1` vérifie l'identité V5 et crée le paquet dans `dist/`.
+- `build-local.cmd` construit le coeur canonique V10 par defaut.
+- `package-local.ps1` verifie l'identite canonique V10 et crée le paquet dans `dist/`.
 - `research/R4-04/build-quad.cmd --native-vertex` utilise les dépendances locales
-  déjà compilées, dans une sortie isolée avec empreintes et archive des sources.
+  deja compilees pour le V5 historique, dans une sortie isolee avec empreintes. Ce script ne construit pas V10.
+- `research/R4-04/build-quad.cmd --canonical` reutilise les dependances locales
+  avec leurs empreintes et construit V10 dans une sortie separee.
 - `test-local.cmd` et les fixtures GPU vérifient les ressources et le rendu.
 
 La compilation CMake neuve active `CHLORIUM_EXPERIMENTAL_NATIVE_QUADS` et

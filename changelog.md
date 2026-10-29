@@ -1,3 +1,13 @@
+# 26 October 2026 - v0.3.0-alpha.6: canonical rendering core V10
+
+Remove private V5 atlas draws and per-draw vertex copies from the default build.
+Cocos retains its canonical GPU data and complete draw side effects; no GL draw
+hook, private vertex storage, shader replacement or snapshot renderer is loaded.
+Reuse identical Area quotients with the existing complete-body fingerprint and
+single contiguous patch and checked setting toggle. Preserve the detached PlayLayer pause guard.
+Old V4-V9 research builds remain reproducible and are not installed.
+This is an offline-checked candidate, not a measured FPS or universal visual pass.
+
 # 25 October 2026 — v0.3.0-alpha.1: renderer becomes the project baseline
 
 Retire the alpha.6 math-only path to legacy/chlorium and preserve a local archive.
