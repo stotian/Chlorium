@@ -11,7 +11,8 @@ en visant 120 FPS stables. Aucun code Sodium n'est intégré.
 
 ## État actuel
 
-**La recherche active porte sur le renderer GPU continu R57–R61. Aucun candidat
+**La recherche active porte sur le renderer GPU continu R57–R61 et la chaîne de
+groupes GPU R62. Aucun candidat
 n'atteint encore les critères de promotion dans une version normale.**
 
 - R57 dessine réellement les lots d'objets pendant la partie avec du stockage GPU
@@ -26,6 +27,10 @@ n'atteint encore les critères de promotion dans une version normale.**
 - R61 retire le programme graphique privé inutilisé du chemin à sommets GPU.
   Les contrôles isolés passent ; son diagnostic Heliopolis atteint 78 %, mais
   ne prouve aucun gain reproductible. Il reste séparé et non promu.
+- R62 fusionne les déplacements ordonnés des groupes et la production des quads,
+  puis dessine avec le programme Cocos. Les positions restent sur le GPU : seules
+  les commandes de groupes sont transférées à chaque image. Prototype fermé hors
+  GD, non intégré au mod ; effets Area, hiérarchies et lecteurs CPU non qualifiés.
 
 Les calculs CPU natifs des objets et triggers restent exécutés. Le transfert
 complet de leur logique sur GPU, objectif de Bismuth, **n'est pas terminé**.

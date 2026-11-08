@@ -1,0 +1,53 @@
+#version 430 core
+#extension GL_ARB_gpu_shader_fp64 : require
+layout(local_size_x=64) in;
+struct State {dvec2 position;uvec2 last;uint stamp;uint flags;};
+struct Command {dvec2 delta;uvec4 control;};
+struct Geometry {uvec4 rect;uvec4 uv01;uvec4 uv23;uvec4 control;};
+struct Dynamic {uvec4 abcd;uvec4 translationZFlags;uvec4 colors;};
+layout(std430,binding=0) buffer States {State states[];};
+layout(std430,binding=1) readonly buffer Commands {Command commands[];};
+layout(std430,binding=2) readonly buffer Geometries {Geometry geometry[];};
+layout(std430,binding=3) readonly buffer Ranges {uvec2 ranges[];};
+layout(std430,binding=4) readonly buffer Indices {uint indices[];};
+layout(std430,binding=5) readonly buffer Parameters {Dynamic parameters[];};
+layout(std430,binding=6) writeonly buffer Quads {uint words[];};
+uniform uint objectCount;
+uniform uint prefixCount;
+void main(){
+    uint i=gl_GlobalInvocationID.x;if(i>=objectCount)return;
+    State state=states[i];uvec2 range=ranges[state.flags>>16u];
+    precise dvec2 position=state.position;
+    for(uint k=0u;k<range.y;++k){
+        uint index=indices[range.x+k];if(index>=prefixCount)break;
+        Command command=commands[index];
+        if((state.flags&1u)==0u && state.stamp!=command.control.x){
+            state.last=floatBitsToUint(vec2(position));state.stamp=command.control.x;state.flags|=12u;
+        }
+        if(command.delta.x!=0.0lf && (state.flags&2u)==0u)position.x=command.delta.x+position.x;
+        if(command.delta.y!=0.0lf)position.y=command.delta.y+position.y;
+        state.flags|=48u;
+    }
+    state.position=position;states[i]=state;
+    Geometry g=geometry[i];Dynamic p=parameters[i];
+    // shortcut: closed root-space fixture; qualify parents and CPU readers before a GD adapter.
+    precise float tx=float(position.x),ty=float(position.y);
+    for(uint corner=0u;corner<4u;++corner){
+        vec3 vertex=vec3(0);
+        if((p.translationZFlags.w&1u)==0u && (p.translationZFlags.w&512u)!=0u && (p.translationZFlags.w&1024u)!=0u){
+            precise float x1=uintBitsToFloat(g.rect.x),y1=uintBitsToFloat(g.rect.y);
+            precise float x=corner<2u?x1:x1+uintBitsToFloat(g.rect.z);
+            precise float y=(corner&1u)==0u?y1+uintBitsToFloat(g.rect.w):y1;
+            precise float a=uintBitsToFloat(p.abcd.x),b=uintBitsToFloat(p.abcd.y);
+            precise float nc=uintBitsToFloat(p.abcd.z^0x80000000u),d=uintBitsToFloat(p.abcd.w);
+            precise float ax=a*x,bx=b*x,cy=nc*y,dy=d*y;
+            precise float outX=(ax-cy)+tx;
+            precise float outY=(corner&1u)==0u?(dy+bx)+ty:(bx+dy)+ty;
+            vertex=vec3(outX,outY,uintBitsToFloat(p.translationZFlags.z));
+        }
+        uvec4 uv=corner<2u?g.uv01:g.uv23;uvec2 coords=(corner&1u)==0u?uv.xy:uv.zw;
+        uint at=i*24u+corner*6u;
+        words[at]=floatBitsToUint(vertex.x);words[at+1u]=floatBitsToUint(vertex.y);words[at+2u]=floatBitsToUint(vertex.z);
+        words[at+3u]=p.colors[corner];words[at+4u]=coords.x;words[at+5u]=coords.y;
+    }
+}

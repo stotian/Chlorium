@@ -1,4 +1,4 @@
-# Recherche active : renderer continu R57–R61
+# Recherche active : renderer continu R57–R61 et chaîne GPU R62
 
 État au 8 novembre 2026, branche `research/area-pose-v6`.
 
@@ -9,6 +9,7 @@
 | v0.4.0-alpha.59 | Transfert natif différé R59 | Contrôles isolés et Heliopolis 74–78 % ; 120 FPS non atteint |
 | v0.4.0-alpha.60 | Mesures CPU par étape R60 | Contrôles isolés ; passage interrompu vers 51,6 %, cible non couverte |
 | v0.4.0-alpha.61 | Stockage natif sans programme graphique privé | 345 cas GPU hérités + nouveaux gardes ; Heliopolis 74–78 % diagnostiqué, aucun gain qualifié |
+| Prototype R62 hors mod | Groupes → quads → dessin, sans positions rapatriées | 266304 états/quads et128 images comparés aux fonctions natives ; pas encore intégré à GD |
 
 Ces versions restent expérimentales et séparées du build V10 historique ci-dessous.
 Le journal distingue les binaires effectivement testés et les modifications ultérieures.

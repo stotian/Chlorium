@@ -1391,3 +1391,52 @@ suppression aveugle casserait le contrat. Le speedup du noyau R42 à64 commandes
 représente pas les7–10 répétitions observées en jeu. Aucun multiplicateur annoncé.
 
 Contre-vérification après modification des headers partagés : chemin R60 sans R61,345 cas GPU et contrats R59 passent ; bookkeeping CPU R60, gardes de profils/plans et syntaxe Python passent. Aucun nouvel essai de FPS requis pour ces contrôles. Nouveau libellé R61 de l'auditeur modifié mais pas encore exécuté.
+
+
+### R62 — chaîne groupes → quads → dessin GPU, hors GD (8 novembre)
+
+Hypothèse : le GPU doit conserver les positions des décors et recevoir des
+commandes de groupes, plutôt qu'une copie des positions calculées par le CPU.
+Le compute R62 fusionne le programme ordonné R42 et l'arithmétique de coins R33 :
+état FP64 résident, estampilles/verrous/lastPosition, sortie native96 octets et
+VAO consommé par le même programme Cocos que la référence. Un dispatch par image,
+aucun download de position/quad avant dessin, aucune publication de position par
+objet à chaque image. Transfert variable limité à7/10 commandes,224/320 octets,
+indépendamment des65/4096 objets. Huit combinaisons ; huit images consécutives
+sans réensemencer les états. Ce n'est pas la somme des deltas en float de Bismuth.
+
+Contrôles :266304 états et quads comparés bit à bit à moveObjects GD2.2081 et
+updateTransform Cocos exacts,128 comparaisons d'images non vides en1280×720,
+quatre contrôles DAZ/FTZ masqués/arrondi nearest, signed-zero, verrous et invisibilité.
+112 refus de paquets/commandes invalides ;16 callbacks natifs modifiant un futur
+objet produisent bien des différences. Ces contre-exemples interdisent d'inférer
+la propriété GPU depuis la seule équivalence arithmétique. Deux shaders mutants
+privés sont détectés : déplacement faux par image, état non retenu par comparaison
+d'état. Les téléchargements diagnostiques ont lieu après le dessin, jamais entre
+le compute et ce dessin. Aucun processus GD/Geode lancé, aucune installation changée.
+
+Intervalle GPU isolé (28 échantillons chauds par configuration, pas des frametimes
+GD ni du temps GPU actif pur) :4096 objets/10 commandes, médiane0.634618ms,
+p950.663336ms,pire0.669063ms. Avec7 commandes :médiane0.624326ms,
+p950.671719ms,pire1.14714ms. Les intervalles comprennent les bulles de soumission.
+La scène, ses petites textures et son overdraw sont synthétiques ; aucun ratio
+FPS ni coût de niveau complet ne peut en être déduit. Dernier log local :
+build-research/fused-group-quads-r62/checks.local.txt ; entrées et binaire dans le
+reçu local associé. Reproduction :R4-62/build.cmd, puis gpu_checks.exe avec les
+images GD/Cocos possédées,group_quads.comp et les deux shaders natifs capturés.
+
+Lecture des captures V3 existantes uniquement, premier de deux échantillons :
+Helio74.001%10246/10597 quads rattachés à une décoration ; Grief64.004%1745/2633 ;
+Orbit83.030%1513/1741 ; Society0%1352/1365. Ce sont des proportions de quads,
+pas des coûts CPU ou des admissibilités. Les sprites racines eux-mêmes ne couvrent
+respectivement que8128,691,920,603 quads ; hiérarchies importantes. Les captures
+Orbit83% et Society0% ne décrivent pas leurs sections lourdes ultérieures.
+
+Critique/décision : garder cette architecture isolée ; aucune activation native,
+aucun .geode R62. Racines fermées seulement : transformation locale statique,
+translation issue de l'état d'objet, UV/couleurs statiques. Pas de rotation dynamique,
+Area, follow, parent dynamique, mutation de topologie ou lecteur CPU arbitraire
+qualifié. Le domaine des poses finales est vérifié par l'oracle avant dispatch dans
+cette fixture, pas résolu pour des commandes futures arbitraires. L'adaptateur réel
+doit préserver sections, ancres, callbacks et lecteurs avant de retirer les boucles
+CPU. Le résultat montre une chaîne sans copie CPU intermédiaire, pas un gain en jeu.
