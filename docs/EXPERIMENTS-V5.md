@@ -1348,3 +1348,46 @@ Reprise utilisateur du8novembre :mise à jour du dépôt explicitement demandée
 Visibilité origin constatée publique,puis corrigée en privée selon la demande
 initiale. Checkpoint de recherche seulement,pas de merge/release ni installation.
 Jeu fermé et profils restaurés lors de cette reprise. Cible120FPS toujours ouverte.
+
+
+### R61 — retirer le programme graphique qui ne dessine jamais (8 novembre)
+
+Hypothèse : le chemin NativeVertexStream compile aussi un programme vertex/fragment
+privé, prépare son VAO/indices et écrit ses uniforms, puis dessine avec le programme
+natif et le VAO du stream. Cette préparation peut être retirée sans changer le dessin.
+Initialisation stream-only explicite, réservée au profil --resident-direct ; sources
+revues, contexte, domaine, états, callbacks, checkpoint et retour natif conservés.
+L'endpoint direct refuse un stockage stream-only, même avec zéro objet.
+
+Contrôle avant correction : le compteur de créations observe des shaders graphiques
+et échoue. Après correction : zéro shader graphique et deux compute pour le premier
+stream ; le chemin direct normal crée toujours deux shaders graphiques, y compris
+après fermeture d'un stockage stream-only. Sources inconnues refusées. Les345 cas
+GPU hérités et les contrats de transfert R59 passent. Ce ne sont pas des FPS en jeu.
+Build GD2.2081/Geode5.11.2 compile/link et paquet privé passent. DLL effectivement
+exécutée71a8ac8294ae32c6bf99ec4e5ff45cce0fa2ea06e225dbe02530aac697718a30,
+paquet5337200df9711fe4778bb8d1423ddb39ebaa8619696be0be03cc821bed86270d.
+
+Premier lancement isolé : sortie1 avant harness, aucune donnée de niveau. Diagnostic
+avec logs loader : Heliopolis0–78.013%, cible74–78 atteinte, zéro mort ; 56933 lots
+GPU engagés,14152116 quads, zéro rollback/fatal et zéro refus hors lots ponctuels.
+Les deux sorties restaurent et vérifient les92 fichiers ; installation inchangée.
+81 frames incluses toutes au premier plan :14.600FPS, moyenne68.492ms,
+p95124.495ms, pire179.337ms. Une frame exclue à la frontière de couverture.
+Mise à jour native18.695ms en moyenne. Aucun contrôle sans mod, aucune paire
+R60/R61 équilibrée : diagnostic instrumenté et logs détaillés, PAS preuve de gain.
+L'auditeur gelé affichait R60/DIAGNOSTIC ; le hash du candidat identifie R61.
+Le prochain build de l'auditeur distingue maintenant R61 dans l'overlay.
+Pas de contrôle visuel intégral en jeu : zéro rollback ne prouve pas zéro écran noir.
+
+Décision : garder le prototype isolé, NE PAS promouvoir et NE PAS considérer cette
+économie comme une voie de gain massif. Les sources par objet, calculs natifs et
+sauvegardes framebuffer dominent toujours ; objectif120FPS non atteint. Éviter les
+nouveaux ajustements marginaux et les campagnes sans hypothèse discriminante.
+Prochaine voie architecturale : séparation simulation/décoration avec données GPU
+résidentes, effets par groupes et visibilité spatiale. Les lecteurs CPU, callbacks,
+sections et ancres restent une frontière obligatoire : R42 montre déjà que leur
+suppression aveugle casserait le contrat. Le speedup du noyau R42 à64 commandes ne
+représente pas les7–10 répétitions observées en jeu. Aucun multiplicateur annoncé.
+
+Contre-vérification après modification des headers partagés : chemin R60 sans R61,345 cas GPU et contrats R59 passent ; bookkeeping CPU R60, gardes de profils/plans et syntaxe Python passent. Aucun nouvel essai de FPS requis pour ces contrôles. Nouveau libellé R61 de l'auditeur modifié mais pas encore exécuté.

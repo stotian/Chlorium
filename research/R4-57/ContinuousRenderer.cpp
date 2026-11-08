@@ -13,6 +13,9 @@
 #include "../R4-58/NativeDrawSuppression.hpp"
 extern "C" __declspec(dllexport) const char chloriumFastIdentity[]="CHLORIUM_RESIDENT_FAST_R58";
 #endif
+#ifdef CHLORIUM_NATIVE_STREAM_DIRECT_R61
+extern "C" __declspec(dllexport) const char chloriumNativeStreamDirectIdentity[]="CHLORIUM_NATIVE_STREAM_DIRECT_R61";
+#endif
 #ifdef CHLORIUM_RENDERER_TIMING_R60
 extern "C" __declspec(dllexport) const char chloriumRendererTimingIdentity[]="CHLORIUM_RENDERER_TIMING_R60";
 #endif

@@ -93,7 +93,11 @@ public:
         if(!retained){
             const auto capacity=std::min<std::size_t>(16384,std::max<std::size_t>(256,count*2));
             sources_.emplace(capacity);gate="resident_program";
+#ifdef CHLORIUM_NATIVE_STREAM_DIRECT_R61
+            if(!renderer_.initializeReviewed(capacity,residentSource_,vertex,fragment,error,nativeStreamRequested_))return false;
+#else
             if(!renderer_.initializeReviewed(capacity,residentSource_,vertex,fragment,error))return false;
+#endif
             if(nativeStreamRequested_ && !renderer_.nativeStream_.initialize(capacity,residentSource_)){gate="resident_native_stream_program";return false;}
         }
 #ifdef CHLORIUM_RENDERER_TIMING_R60

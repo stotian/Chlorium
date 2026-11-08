@@ -912,7 +912,7 @@ void tick() {
         const bool continuous=continuousModule && GetProcAddress(continuousModule,"chloriumContinuousIdentity");
         const auto label=continuous?
 #ifdef CHLORIUM_EXTENDED_RESIDENT_STATS_R59
-            (GetProcAddress(continuousModule,"chloriumRendererTimingIdentity")?"CHLORIUM R60 / DIAGNOSTIC":GetProcAddress(continuousModule,"chloriumUploadDeferralIdentity")?"AVEC CHLORIUM GPU R59":"AVEC CHLORIUM GPU R57"):
+            (GetProcAddress(continuousModule,"chloriumNativeStreamDirectIdentity")?"CHLORIUM R61 / DIAGNOSTIC":GetProcAddress(continuousModule,"chloriumRendererTimingIdentity")?"CHLORIUM R60 / DIAGNOSTIC":GetProcAddress(continuousModule,"chloriumUploadDeferralIdentity")?"AVEC CHLORIUM GPU R59":"AVEC CHLORIUM GPU R57"):
 #else
             "AVEC CHLORIUM GPU CONTINU":
 #endif

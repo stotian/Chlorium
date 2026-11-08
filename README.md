@@ -11,7 +11,7 @@ en visant 120 FPS stables. Aucun code Sodium n'est intégré.
 
 ## État actuel
 
-**La recherche active porte sur le renderer GPU continu R57–R60. Aucun candidat
+**La recherche active porte sur le renderer GPU continu R57–R61. Aucun candidat
 n'atteint encore les critères de promotion dans une version normale.**
 
 - R57 dessine réellement les lots d'objets pendant la partie avec du stockage GPU
@@ -23,6 +23,9 @@ n'atteint encore les critères de promotion dans une version normale.**
   à jour reste armé pour que le retour natif rétablisse les données nécessaires.
 - R60 mesure séparément la préparation, les sources, les transferts, les sauvegardes
   et les dessins. C'est un diagnostic, pas un résultat de performance comparable.
+- R61 retire le programme graphique privé inutilisé du chemin à sommets GPU.
+  Les contrôles isolés passent ; son diagnostic Heliopolis atteint 78 %, mais
+  ne prouve aucun gain reproductible. Il reste séparé et non promu.
 
 Les calculs CPU natifs des objets et triggers restent exécutés. Le transfert
 complet de leur logique sur GPU, objectif de Bismuth, **n'est pas terminé**.
@@ -62,7 +65,8 @@ python research\R4-04\package_private_fixture.py native-resident-deferred-r59
 
 Le paquet privé est créé sous `build-research/native-resident-deferred-r59/`.
 `--resident-timed` construit le diagnostic R60 ; `--continuous-measure-r60`
-construit son auditeur indépendant. Les essais en jeu utilisent le wrapper protégé
+construit son auditeur indépendant. `--resident-direct` construit le diagnostic
+R61 (`native-stream-direct-r61`). Les essais en jeu utilisent le wrapper protégé
 et un plan local explicite avec empreintes, sauvegarde et restauration vérifiée.
 
 `build-local.cmd`, `package-local.ps1` et `--canonical` conservent le V10 historique

@@ -43,6 +43,7 @@ profiles = {
     "--resident-fast": "native-resident-fast-r58",
     "--resident-deferred": "native-resident-deferred-r59",
     "--resident-timed": "native-resident-timed-r60",
+    "--resident-direct": "native-stream-direct-r61",
     "--continuous-measure": "measurement-resident-continuous-r57",
     "--continuous-measure-r59": "measurement-resident-deferred-r59",
     "--continuous-measure-r60": "measurement-resident-timed-r60",
@@ -108,16 +109,18 @@ if canonical:
     flags += ["/DCHLORIUM_NATIVE_CANONICAL_V10=1"]
     source_names = ["src/renderer/NativeAreaDivisions.cpp", "src/renderer/NativeAtlasStatsEmpty.cpp", "src/renderer/NativePauseGuard.cpp", "src/BuildIdentity.cpp"]
 sources = [root / name for name in source_names]
-if selected in ("--resident-continuous", "--resident-fast", "--resident-deferred", "--resident-timed"):
+if selected in ("--resident-continuous", "--resident-fast", "--resident-deferred", "--resident-timed", "--resident-direct"):
     flags = [flag for flag in flags if not flag.startswith(("/DCHLORIUM_EXPERIMENTAL_NATIVE_", "/DCHLORIUM_NATIVE_SNAPSHOTS="))]
     flags += ["/DCHLORIUM_RESIDENT_CONTINUOUS_R57=1", "/fp:strict"]
     sources = [root/"research/R4-57/ContinuousRenderer.cpp",root/"src/BuildIdentity.cpp"]
-    if selected in ("--resident-fast", "--resident-deferred", "--resident-timed"):
+    if selected in ("--resident-fast", "--resident-deferred", "--resident-timed", "--resident-direct"):
         flags += ["/DCHLORIUM_RESIDENT_FAST_R58=1"]
-    if selected in ("--resident-deferred", "--resident-timed"):
+    if selected in ("--resident-deferred", "--resident-timed", "--resident-direct"):
         flags += ["/DCHLORIUM_NATIVE_UPLOAD_DEFERRAL_R59=1"]
-    if selected=="--resident-timed":
+    if selected in ("--resident-timed", "--resident-direct"):
         flags += ["/DCHLORIUM_RENDERER_TIMING_R60=1"]
+    if selected=="--resident-direct":
+        flags += ["/DCHLORIUM_NATIVE_STREAM_DIRECT_R61=1"]
 if selected=="--opacity-hash":
     flags += ["/DCHLORIUM_NATIVE_OPACITY_HASH_R36=1"]
     sources.append(root / "research/R4-36/NativeOpacityHashPatch.cpp")
@@ -185,6 +188,8 @@ if selected=="--resident-deferred":
     manifest.update(backend="CHLORIUM_NATIVE_UPLOAD_DEFERRAL_R59",version="v0.4.0-alpha.59")
 if selected=="--resident-timed":
     manifest.update(backend="CHLORIUM_RENDERER_TIMING_R60",version="v0.4.0-alpha.60")
+if selected=="--resident-direct":
+    manifest.update(backend="CHLORIUM_NATIVE_STREAM_DIRECT_R61",version="v0.4.0-alpha.61")
 for source in sources:
     manifest["sources"].append({"path": source.name, "sha256": fingerprint(source)})
 for header in (root / "src" / "renderer").glob("*.hpp"):
@@ -214,6 +219,7 @@ for pattern in ("*.cpp", "*.hpp"):
     snapshot_files.update((root / "research/R4-58").rglob(pattern))
     snapshot_files.update((root / "research/R4-59").rglob(pattern))
     snapshot_files.update((root / "research/R4-60").rglob(pattern))
+    snapshot_files.update((root / "research/R4-61").rglob(pattern))
 for folder in ("src", "legacy", "tests", "research/R4-08", "research/R4-11", "research/R4-17", "research/R4-30", "research/R4-32", "research/R4-33", "research/R4-34", "research/R4-35", "research/R4-36", "research/R4-37", "research/R4-41", "research/R4-42", "research/R4-43", "research/R4-44", "research/R4-45", "research/R4-46", "research/R4-47", "research/R4-48", "research/R4-49", "research/R4-54"):
     for pattern in ("*.cpp", "*.hpp", "*.h"):
         snapshot_files.update((root / folder).rglob(pattern))

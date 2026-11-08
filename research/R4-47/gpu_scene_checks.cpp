@@ -18,6 +18,20 @@ struct BarrierObserver {
     BarrierObserver(){driverBarrier=saved;glMemoryBarrier=observeBarrier;}
     ~BarrierObserver(){glMemoryBarrier=saved;}
 };
+#ifdef CHLORIUM_NATIVE_STREAM_DIRECT_R61
+static PFNGLCREATESHADERPROC driverCreateShader=nullptr;
+static unsigned graphicsShaders=0,computeShaders=0;
+static GLuint APIENTRY observeCreateShader(GLenum stage){
+    if(stage==GL_VERTEX_SHADER || stage==GL_FRAGMENT_SHADER)++graphicsShaders;
+    if(stage==0x91b9)++computeShaders;
+    return driverCreateShader(stage);
+}
+struct ShaderObserver {
+    PFNGLCREATESHADERPROC saved=glCreateShader;
+    ShaderObserver(){driverCreateShader=saved;graphicsShaders=computeShaders=0;glCreateShader=observeCreateShader;}
+    ~ShaderObserver(){glCreateShader=saved;}
+};
+#endif
 
 static std::string source(const std::filesystem::path& path){
     std::ifstream file(path,std::ios::binary);require(bool(file),"read resident source");
@@ -175,7 +189,24 @@ int main(int argc,char** argv)try{
         require(!renderer.initializeReviewed(8,resident+"\n",nativeVertex,nativeFragment,error) && !renderer.identity(),"changed resident shader rejects before allocation");
         require(!renderer.initializeReviewed(8,resident,nativeVertex+"\n",nativeFragment,error) && !renderer.identity(),"unknown native vertex rejects before allocation");
         require(!renderer.initializeReviewed(8,resident,nativeVertex,nativeFragment+"\n",error) && !renderer.identity(),"unknown native fragment rejects before allocation");
+#ifdef CHLORIUM_NATIVE_STREAM_DIRECT_R61
+        require(!renderer.initializeReviewed(8,resident,nativeVertex+"\n",nativeFragment,error,true) && !renderer.identity(),"stream-only initialization still rejects unknown native source");
+        {
+            ShaderObserver shadersCreated;
+            require(renderer.initializeReviewed(8,resident,nativeVertex,nativeFragment,error,true),error.c_str());
+            require(!graphicsShaders && !computeShaders,"stream-only storage does not create a graphics program");
+            const auto before=image();
+            require(renderer.draw(scene,0,0,textures[1],framebuffer,matrix,effect)==Renderer::Draw::nativeRequired && image()==before,"stream-only storage cannot use the direct draw endpoint");
+        }
+        renderer.close();
+        {
+            ShaderObserver shadersCreated;
+            initialized=renderer.initializeReviewed(8,resident,nativeVertex,nativeFragment,error);
+            require(graphicsShaders==2 && !computeShaders,"normal reviewed renderer still creates its graphics program after stream-only close");
+        }
+#else
         initialized=renderer.initializeReviewed(8,resident,nativeVertex,nativeFragment,error);
+#endif
         require(initialized,error.c_str());effect={1,1,1,1};
         // Finite RGBA8 fixture: the reference's extra multiplication by one is
         // exact here. This is not a comparison against the native linked binary.
@@ -237,7 +268,15 @@ int main(int argc,char** argv)try{
         const auto indexOutputRange=GLStateSnapshot::captureIndexed(GLStateSnapshot::storageBinding,GLStateSnapshot::storageStart,GLStateSnapshot::storageSize,4);
         NativeReplay streamReplay;streamReplay.requestNativeStream(true);
         const auto beforeSeedBarriers=overwriteBarriers;
+#ifdef CHLORIUM_NATIVE_STREAM_DIRECT_R61
+        {
+        ShaderObserver shadersCreated;
+#endif
         require(streamReplay.seed(vertices,indexBytes,replaySources,legacy),streamReplay.gate);
+#ifdef CHLORIUM_NATIVE_STREAM_DIRECT_R61
+        require(graphicsShaders==0 && computeShaders==2,"native stream creates only its two compute shaders");
+        }
+#endif
         require(overwriteBarriers==beforeSeedBarriers,"fresh output has no prior readers to wait for");
         require(image()==nativeImage,"native stream seed does not draw");
         require(streamReplay.prepare(vertices,indexBytes,replaySources,legacy),streamReplay.gate);

@@ -50,6 +50,7 @@ class Renderer {
     std::uint64_t identity_=0, owner_=0, revision_=0;
     std::array<std::uint64_t,4> uploaded_{};
     NativeVertexStream nativeStream_;
+    bool nativeStreamOnly_=false;
     static constexpr std::array<std::size_t,4> strides{
         sizeof(Geometry),sizeof(Parameters),sizeof(std::uint32_t),sizeof(NativeQuadState)};
     bool current() const noexcept { return epoch_ && epoch_->isCurrent(); }
@@ -76,7 +77,7 @@ class Renderer {
     bool seedNativeStream(Scene& scene){
         if(!matches(scene.identity(),scene.revision()) || !scene.usable() ||
            glIsEnabled(GL_RASTERIZER_DISCARD) || !observationsIdle())return false;
-        State saved;glBindVertexArray(vao_);
+        State saved;if(!nativeStreamOnly_)glBindVertexArray(vao_);
         for(unsigned lane=0;lane<4;++lane)glBindBufferBase(GLStateSnapshot::storageTarget,lane,buffers_[lane]);
         return glGetError()==GL_NO_ERROR && nativeStream_.materialize(scene.orderedCount());
     }
@@ -109,55 +110,62 @@ public:
         }
         std::fill(std::begin(buffers_),std::end(buffers_),0);
         indices_=vao_=program_=0; identity_=owner_=revision_=0; capacity_=orderCount_=0;
-        mvp_=sampler_=effect_=-1; epoch_.reset();
+        mvp_=sampler_=effect_=-1; nativeStreamOnly_=false;epoch_.reset();
     }
     bool initialize(std::size_t capacity,std::string_view vertex,std::string_view fragment,std::string& error) {
-        return initializeProgram(capacity,vertex,fragment,true,error);
+        return initializeProgram(capacity,vertex,fragment,true,error,false);
     }
     bool initializeReviewed(std::size_t capacity,std::string_view residentVertex,
-                            std::string_view nativeVertex,std::string_view nativeFragment,std::string& error) {
+                            std::string_view nativeVertex,std::string_view nativeFragment,std::string& error,bool nativeStreamOnly=false) {
         auto sources=reviewedNativeSources(residentVertex,nativeVertex,nativeFragment,error);
-        return sources && initializeProgram(capacity,sources->vertex,sources->fragment,false,error);
+        return sources && initializeProgram(capacity,sources->vertex,sources->fragment,false,error,nativeStreamOnly);
     }
 private:
     bool initializeProgram(std::size_t capacity,std::string_view vertex,std::string_view fragment,
-                           bool requireFixtureEffect,std::string& error) {
+                           bool requireFixtureEffect,std::string& error,bool nativeStreamOnly) {
         error.clear();
         if(epoch_ || !capacity || capacity>65536 || vertex.empty() || fragment.empty() ||
            vertex.size()>65536 || fragment.size()>65536 || !wglGetCurrentContext())return false;
         GLint major=0,minor=0;glGetIntegerv(GL_MAJOR_VERSION,&major);glGetIntegerv(GL_MINOR_VERSION,&minor);
         if(major<4 || (major==4 && minor<3))return false;
-        std::vector<std::uint32_t> indices(capacity*6);
-        constexpr std::uint32_t topology[]{0,1,2,3,2,1};
-        for(std::size_t n=0;n<capacity;++n)for(unsigned c=0;c<6;++c)indices[n*6+c]=static_cast<std::uint32_t>(n*4+topology[c]);
         // shortcut: isolated owner supplies a clean GL error boundary; native integration
         // needs an explicit error/state contract before this renderer can replace GD.
         State saved;
         epoch_=gl::ContextEpoch<>::capture(); if(!epoch_)return false;
-        const auto vs=compile(GL_VERTEX_SHADER,vertex,error);
-        if(!vs){close();return false;}
-        const auto fs=compile(GL_FRAGMENT_SHADER,fragment,error);
-        if(!fs){glDeleteShader(vs);close();return false;}
-        program_=glCreateProgram();
-        if(program_){glAttachShader(program_,vs);glAttachShader(program_,fs);glLinkProgram(program_);}
-        glDeleteShader(vs);glDeleteShader(fs);
-        GLint linked=0;if(program_)glGetProgramiv(program_,GL_LINK_STATUS,&linked);
-        if(!linked){char log[4096]{};if(program_)glGetProgramInfoLog(program_,sizeof(log),nullptr,log);error=log;close();return false;}
-        mvp_=glGetUniformLocation(program_,"CC_MVPMatrix");
-        sampler_=glGetUniformLocation(program_,"CC_Texture0"); effect_=glGetUniformLocation(program_,"native_effect");
-        if(mvp_<0 || sampler_<0 || (requireFixtureEffect && effect_<0)){error="owned shader interface";close();return false;}
-        glGenBuffers(4,buffers_);glGenBuffers(1,&indices_);glGenVertexArrays(1,&vao_);
-        if(!indices_ || !vao_ || std::find(std::begin(buffers_),std::end(buffers_),GLuint{0})!=std::end(buffers_)){
+        // Native-stream draws use the already linked native program and their own VAO.
+        if(!nativeStreamOnly){
+            const auto vs=compile(GL_VERTEX_SHADER,vertex,error);
+            if(!vs){close();return false;}
+            const auto fs=compile(GL_FRAGMENT_SHADER,fragment,error);
+            if(!fs){glDeleteShader(vs);close();return false;}
+            program_=glCreateProgram();
+            if(program_){glAttachShader(program_,vs);glAttachShader(program_,fs);glLinkProgram(program_);}
+            glDeleteShader(vs);glDeleteShader(fs);
+            GLint linked=0;if(program_)glGetProgramiv(program_,GL_LINK_STATUS,&linked);
+            if(!linked){char log[4096]{};if(program_)glGetProgramInfoLog(program_,sizeof(log),nullptr,log);error=log;close();return false;}
+            mvp_=glGetUniformLocation(program_,"CC_MVPMatrix");
+            sampler_=glGetUniformLocation(program_,"CC_Texture0"); effect_=glGetUniformLocation(program_,"native_effect");
+            if(mvp_<0 || sampler_<0 || (requireFixtureEffect && effect_<0)){error="owned shader interface";close();return false;}
+            glGenBuffers(1,&indices_);glGenVertexArrays(1,&vao_);
+            if(!indices_ || !vao_){error="resident draw allocation";close();return false;}
+        }
+        glGenBuffers(4,buffers_);
+        if(std::find(std::begin(buffers_),std::end(buffers_),GLuint{0})!=std::end(buffers_)){
             error="resident allocation";close();return false;
         }
         for(unsigned lane=0;lane<4;++lane){
             glBindBuffer(GLStateSnapshot::storageTarget,buffers_[lane]);
             glBufferData(GLStateSnapshot::storageTarget,static_cast<GLsizeiptr>(capacity*strides[lane]),nullptr,GL_DYNAMIC_DRAW);
         }
-        glBindVertexArray(vao_);glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,indices_);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER,static_cast<GLsizeiptr>(indices.size()*sizeof(indices[0])),indices.data(),GL_STATIC_DRAW);
+        if(!nativeStreamOnly){
+            std::vector<std::uint32_t> indices(capacity*6);
+            constexpr std::uint32_t topology[]{0,1,2,3,2,1};
+            for(std::size_t n=0;n<capacity;++n)for(unsigned c=0;c<6;++c)indices[n*6+c]=static_cast<std::uint32_t>(n*4+topology[c]);
+            glBindVertexArray(vao_);glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,indices_);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER,static_cast<GLsizeiptr>(indices.size()*sizeof(indices[0])),indices.data(),GL_STATIC_DRAW);
+        }
         if(glGetError()!=GL_NO_ERROR){error="resident buffer initialization";close();return false;}
-        identity_=nextIdentity();capacity_=capacity;
+        identity_=nextIdentity();capacity_=capacity;nativeStreamOnly_=nativeStreamOnly;
         if(!identity_){error="resident identity exhausted";close();return false;}
         return true;
     }
@@ -197,7 +205,7 @@ private:
     Draw drawTarget(Scene& scene,std::size_t first,std::size_t count,GLuint texture,GLuint ownedTarget,
                     const std::array<float,16>& matrix,const std::array<float,4>& effect,bool checkedNativeReplay,GLuint nativeProgram=0,
                     bool(*beforeSubmit)(void*)=nullptr,void* checkpoint=nullptr) {
-        if(!current() || !identity_ || !texture || !glIsTexture(texture) ||
+        if(!current() || !identity_ || (nativeStreamOnly_ && !nativeProgram) || !texture || !glIsTexture(texture) ||
            (_mm_getcsr()&0x7f80u)!=0x1f80u || !scene.usable() || first>scene.orderedCount() ||
            count>scene.orderedCount()-first)return Draw::nativeRequired;
         // The R4-33 fixture shaders do not implement native clip/depth/feedback
@@ -223,10 +231,12 @@ private:
         if(nativeProgram && (!checkedNativeReplay || first || !nativeStream_.vao() || GLuint(saved.program)!=nativeProgram))return Draw::nativeRequired;
         if(!synchronize(scene) || !readyToDraw(scene,first,count))return Draw::nativeRequired;
         if(!count)return Draw::submitted;
-        glUseProgram(program_);glUniformMatrix4fv(mvp_,1,GL_FALSE,matrix.data());
-        if(effect_>=0)glUniform4fv(effect_,1,effect.data());glUniform1i(sampler_,0);
+        if(!nativeStreamOnly_){
+            glUseProgram(program_);glUniformMatrix4fv(mvp_,1,GL_FALSE,matrix.data());
+            if(effect_>=0)glUniform4fv(effect_,1,effect.data());glUniform1i(sampler_,0);
+            glBindVertexArray(vao_);
+        }
         glActiveTexture(GL_TEXTURE0);glBindTexture(GL_TEXTURE_2D,texture);
-        glBindVertexArray(vao_);
         for(unsigned lane=0;lane<4;++lane)glBindBufferBase(GLStateSnapshot::storageTarget,lane,buffers_[lane]);
         if(glGetError()!=GL_NO_ERROR)return Draw::nativeRequired;
         if(nativeProgram){

@@ -40,7 +40,7 @@ try {
         $files += Get-ChildItem -LiteralPath (Join-Path $root $name) -File -Recurse |
             Where-Object { $_.Extension -notin @('.pyc','.exe','.obj','.dll','.pdb','.geode') -and $_.Name -notlike '*.local.*' -and $_.FullName -notmatch '[\\/]graphify-out[\\/]' }
     }
-    foreach ($name in @('R4-00','R4-01','R4-04','R4-06','R4-07','R4-08','R4-09','R4-10','R4-11','R4-12','R4-13','R4-14','R4-15','R4-16','R4-17','R4-18','R4-19','R4-20','R4-21','R4-22','R4-23','R4-25','R4-26','R4-27','R4-28','R4-29','R4-30','R4-31','R4-32','R4-33','R4-34','R4-35','R4-36','R4-37','R4-38','R4-39','R4-40','R4-41','R4-42','R4-43','R4-44','R4-45','R4-46','R4-47','R4-48','R4-49','R4-52','R4-54','R4-57','R4-58','R4-59','R4-60')) {
+    foreach ($name in @('R4-00','R4-01','R4-04','R4-06','R4-07','R4-08','R4-09','R4-10','R4-11','R4-12','R4-13','R4-14','R4-15','R4-16','R4-17','R4-18','R4-19','R4-20','R4-21','R4-22','R4-23','R4-25','R4-26','R4-27','R4-28','R4-29','R4-30','R4-31','R4-32','R4-33','R4-34','R4-35','R4-36','R4-37','R4-38','R4-39','R4-40','R4-41','R4-42','R4-43','R4-44','R4-45','R4-46','R4-47','R4-48','R4-49','R4-52','R4-54','R4-57','R4-58','R4-59','R4-60','R4-61')) {
         $directory = Join-Path $root "research/$name"
         if (!(Test-Path -LiteralPath $directory)) { continue }
         $files += Get-ChildItem -LiteralPath $directory -File -Recurse |
