@@ -1,4 +1,21 @@
-# Branche active : v0.3.0-alpha.6 (V10)
+# Recherche active : renderer continu R57–R60
+
+État au 8 novembre 2026, branche `research/area-pose-v6`.
+
+| Version privée | Chemin | État |
+|---|---|---|
+| v0.4.0-alpha.57 | Rendu GPU continu R57 | Actif en jeu ; performances insuffisantes |
+| v0.4.0-alpha.58 | Caches et suppression du double dessin | Contrôles isolés ; fuite de prédicat corrigée ensuite |
+| v0.4.0-alpha.59 | Transfert natif différé R59 | Contrôles isolés et Heliopolis 74–78 % ; 120 FPS non atteint |
+| v0.4.0-alpha.60 | Mesures CPU par étape R60 | Contrôles isolés ; passage interrompu vers 51,6 %, cible non couverte |
+
+Ces versions restent expérimentales et séparées du build V10 historique ci-dessous.
+Le journal distingue les binaires effectivement testés et les modifications ultérieures.
+Aucune version normale ni installation principale n'est promue par ce checkpoint.
+
+---
+
+# Référence historique : v0.3.0-alpha.6 (V10)
 
 Cocos garde son rendu canonique sans hook de dessin. L'optimisation active est
 la reutilisation exacte des quotients Area, avec garde de signature du moteur.

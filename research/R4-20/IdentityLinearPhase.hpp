@@ -23,10 +23,10 @@ inline bool identityObject(const area::Object& o) {
     for(unsigned at:{0x2a0u,0x2a4u})if((o.get<std::uint32_t>(at)&0x7fffffffu)>0x49800000u)return false;
     return finitePosition(o)&&o.get<int>(0x3a0)==7;
 }
-inline pose::Matrix materializeIdentityHelper(Node& child,Point p) {
+inline pose::Matrix materializeIdentityHelper(Node& child,Point p,float sx=1,float sy=1) {
     const auto minusZero=std::bit_cast<float>(0x80000000u);
-    pose::Matrix local{1,0,minusZero,1,p.x,p.y};
-    child.put(0x38,0.f);child.put(0x3c,0.f);child.put(0x40,1.f);child.put(0x44,1.f);
+    pose::Matrix local{sx,0,minusZero,sy,p.x,p.y};
+    child.put(0x38,0.f);child.put(0x3c,0.f);child.put(0x40,sx);child.put(0x44,sy);
     child.put(0x4c,p.x);child.put(0x50,p.y);child.put(0x114,p.x);child.put(0x118,p.y);
     child.put(0x8c,local);child.data[0x111]=child.data[0x112]=0;child.data[0x11c]=1;
     return local;
@@ -79,7 +79,7 @@ inline unsigned identityFlags(const OwnedTransformOracle& oracle) {
     return linearFlags;
 }
 template<bool ScaleUpdates=false>
-inline void executeIdentity(World& w,const OwnedTransformOracle& oracle,unsigned linearFlags,float sx,float sy,bool resetVisual,float compiledX=1,float compiledY=1) {
+inline void executeIdentity(World& w,const OwnedTransformOracle& oracle,unsigned linearFlags,float sx,float sy,bool resetVisual,float compiledX=1,float compiledY=1,float sourceX=1,float sourceY=1) {
 #ifdef CHLORIUM_TRANSFORM_STAGE_AUDIT
     const auto audit2=AuditClock::now();
 #endif
@@ -104,7 +104,7 @@ inline void executeIdentity(World& w,const OwnedTransformOracle& oracle,unsigned
         const auto moved=reset(layer,p,true);o[0x350]=1;
         nodeCall<0x4a8,Point*>(p,&point);
         Point relative{pose::sub(point.x,centerPoint.x),pose::sub(point.y,centerPoint.y)};
-        const auto local=materializeIdentityHelper(w.child,relative);
+        const auto local=materializeIdentityHelper(w.child,relative,sourceX,sourceY);
         const float tx=pose::add(pose::add(pose::mul(local.tx,parentMatrix.a),pose::mul(local.ty,parentMatrix.c)),parentMatrix.tx);
         const float ty=pose::add(pose::add(pose::mul(local.tx,parentMatrix.b),pose::mul(local.ty,parentMatrix.d)),parentMatrix.ty);
         float dx=pose::sub(tx,point.x),dy=pose::sub(ty,point.y);

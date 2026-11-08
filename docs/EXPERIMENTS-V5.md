@@ -554,3 +554,797 @@ Dense 4096/16 phases : ratio median des paires 0,759 (0,682-0,820), 9/9 gains ;
 cas de couverture, algorithme inchange. GARDER prototype ferme, pas FPS/GD.
 La plupart des barrières de jeu restent inconnues ; ne pas fusionner des ticks
 physiques sur la foi du benchmark. Meme-stamp cumulatif encore rejete ici.
+
+## 2026-10-29 - R4-27 : cumul dans le meme stamp, hors version normale
+
+Sources/echelles cumulees compilees par phase, source remise a1 seulement au
+nouveau stamp natif. Domaine dyadique borne, gardes/copiedescommandes/callbacks
+conserves. 454314 assertions dont benchmark, mutant emprunt rejete a111057 ;
+regressions R4-20 327427 / R4-22 26054 / R4-26 110202 passent. Archive exacte
+des25 entrees figee avant build puis revalidee. Inspecteur ACCEPT fonctionnel ;
+P2 chronos avec clear meme aux stamps egaux, pas de cout separe sans clear.
+Dense16/64 phases : ratios medians apparies 0,790/0,730 mais une paire regresse
+dans chaque cas ; une phase dense perd9/9. REFUSER activation normale : aucun
+frametime GD ni controle visuel/ecran noir/crash pour ce prototype non integre.
+
+Derniere consigne : aucune installation/publication/nouveau push. HEAD5678dcc
+conserve ; travaux suivants locaux. Tests futurs isoles des mods personnels :
+allowlist dans le helper de profils existant, preflight avant staging, campagnes
+canoniques separees -isolated, empreintes dependances/reglages comparees. Fixtures
+et vrais PrepareOnly natif/candidat passent, aucun jeu/dossierdepassage cree.
+Ancienne installation et entrees/DLL du candidat canonique inchangees.
+
+## 2026-10-29 - R4-28 : preuves reelles isolees et changement de cible
+
+Auditeur PE borne r2 compile/lie/package. Selection du plan respectee, hashes
+des deux paquets verifies avant staging ; fixtures preflight/alteration passent.
+257 controles GPU passent. Grief natif froid sort1 avant auditeur, restauration92
+fichiers ; reprise apres initialisation Steam atteint40. La cause semble liee au
+demarrage client, pas une preuve de crash du renderer. Reference visuelle24-40 :
+2215 images sans /2329 avec V10, couverture complete, zero mort/inactif/erreur.
+11 images tres sombres dans chaque passage, debut commun30,3931%. Deux sondes
+aux memes pourcentages ont geometrie similaire mais animations/particules et
+pixels differents ; aucun verdict de fidelite universelle ou de FPS issu de cela.
+
+Heliopolis natif74-78 sans readback : 214 images incluses,38,6566 FPS,p99 34,4752ms,
+pire37,0026ms ;212 images depassent16,6667ms. Visibilite9,6975ms/deplacement5,6914ms
+contre Area0,00409ms. Ce passage unique ne compare pas de gain ; il invalide
+Area seule comme reponse suffisante au deficit. Quatre restaurations92 fichiers
+(dont l'echec de demarrage initial),
+installation principale inchangee. Orbit non relance. Objectif60 partout non atteint.
+
+## 2026-10-29 - R4-29 : code de diagnostic cible, tests arretes
+
+Nouvelle consigne «plus de test» : aucun nouveau test ni lancement GD ensuite.
+La partie principale deja ouverte (chemin Steam) n'est pas un processus de test
+Chlorium et reste intacte. Developpement local seulement, aucun commit/push.
+Source d'echantillonnage PSS bornee et resolution PE/empreintes preparees pour
+localiser le cout visibilite/deplacement, sans hook par objet. Revision initiale
+auto-verifiee avant arret ; modifications SHA256/receipts/resolution suivantes
+non compilees/non executees. Compilation sampling engagee avant arret terminee,
+sans lancement ; ancien binaire non conforme au nouveau handshake V2. Ses
+donnees sont marquees/exclues des comparaisons FPS. Tout reste isole.
+Inspecteur lecture seule REWORK P2 : un PID de fixture seul ne prouve pas le
+mode diagnostic. Correction source : export de session immuable du vrai auditeur
+mappe + hash DLL impose avant PSS, controle reitere, recu lie au PID/images/CSV.
+Correction non compilee/non testee ; aucune validation supplementaire apres arret.
+Suivi inspecteur ACCEPT pour le handshake en source ; note mineure fermeture du
+jeu pendant relecture de l'export corrigee dans le meme gestionnaire de sortie.
+Cette derniere modification reste non compilee/non executee. Navigation statique :
+updateVisibility0x3af3a0 et moveObjects0x22dd50 dans les bindings natifs generes ;
+pas de reprise aveugle de l'ancienne reecriture Bismuth qui omet des comportements.
+Correction de navigation PE : moveObjects repartit son corps sur cinq entrees
+de fonction ; l'ancienne lecture du seul prologue masquait ses trois appels.
+Resolution commune des chaines/indirections dans les deux outils hors jeu,
+bounds explicites des codes unwind et handlers. Cas de regression ecrits mais
+non executes ; derniere revision non executee/non compilee. Candidat vtable
+0x498 vers stub 0x3be80 : observation statique insuffisante pour supprimer le
+callback ou reordonner les mouvements. Aucun chemin de rendu active/modifie.
+
+## 2026-10-29 - R4-30 : programme de prefixes d'opacite, source seulement
+
+Lecture statique native : groupOpacityMod0x19ccb0 multiplie les opacites dans
+l'ordre des groupes, avec arret <=0 ; opacityModForGroup0x260b80 refait un hash
+et une recherche de map par groupe/objet. Prototype de trie de prefixes ordonnes
+avec snapshot unique par groupe, produits SSE et publication par objet. Aucun
+tri, reassociation, cache de frame precedente ni remplacement des couleurs.
+COMISS conserve pour ses effets MXCSR (denormaux), exceptions masquees requises.
+Cas de regression ecrits, NON compiles/executés : ancien arret des tests respecte.
+Garder isole : equivalence native, vrais partages, snapshot, invalidation/barrieres,
+hooks et cout total non prouves. Aucun gain en jeu revendique, aucun hook ajoute.
+Inspecteur V6 lecture seule ACCEPT source isole sans P0/P1 ; garde NDEBUG ajoutee
+aux assertions. Bornes d'allocation requises avant tout adaptateur GD, qui
+n'existe pas ici. La revue ne remplace ni compilation ni preuve native/en jeu.
+
+### R4-30 - Adaptateur d'observation native, source non executee
+
+Profil manuel --opacity-shadow separe, hooks d'observation qui deleguent chaque
+appel natif une seule fois. Une phase ciblee, maximum512 appels/16384 lectures,
+stockage fixe, aucune lecture supplementaire des champs objets/getters moteur.
+Trace des prefixes reellement executes, pas des appartenances completes : ne
+certifie ni cache persistant ni equivalence future. Controle valeurs changeantes,
+reentrance, gestionnaires multiples et environnement FP ; replay natif observe
+et comparaison du programme prevus, etat FP du jeu restaure apres diagnostic.
+Tous les frametimes du profil exclus, provenance marquee, comparateur FPS refuse.
+Lanceurs exigent un plan/package distinct et le switch explicite ; plan local
+autorise non modifie. Bornes precedant allocations du programme via la collecte.
+Ni compilation, tests, lancement GD, installation, commit ou push ; aucun resultat
+de parite ou gain FPS encore disponible. Garder strictement isole/desactive.
+Contrat registres : XMM1/2 vivants au getter, XMM3 vivant dans visibility. Le
+generateur Tulip3.1.15 local sauvegarde/restaure bien XMM1..3 ; le P1 initial de
+la revue est retire sur cette preuve source. Correspondance avec loader/handler
+reel encore non prouvee : construction --opacity-shadow refusee avant tout build,
+et #error dans le header observateur. Aucun contournement, compilation ou test.
+Le noyau standalone reste distinct ; aucune activation moteur ni promotion.
+
+## 2026-10-29 - Reprise autorisee, Grief jusqu'a 65 pour cent
+
+Autorisation explicite des tests renouvelee. Limite Grief88952972 etendue de40 a65,
+autres niveaux/reglages/profil isole inchanges. Revision de campagne grief65-r1
+distincte pour conserver les anciennes preuves. PrepareOnly reste sans effet,
+y compris quand un repertoire de campagne existe deja. L'observateur d'opacite
+non verifie reste bloque ; valider d'abord le noyau CPU et les gardes de diagnostic.
+
+## 2026-11-03 — Cible 120 FPS et R4-31, reprise explicitement autorisee
+
+Branche research/area-pose-v6, HEAD5678dcc ; changements locaux conserves.
+Autorisation autonome des essais renouvelee, cible120/plafond120 uniquement dans
+la fixture isolee. Version GD2.2081, Geode5.11.2, candidat normal V10 conserve.
+Auditeur r4 distinct compile/lie/package : DLLfaa9ee705fcedaf7e69a69d89c31e27ce6b146593fb8602feba1cefb6447e800,
+paquet60c6d63b1ead9b0ab5822d3fdd9a448bb5d5d45c1618f5d2583dc1493f04628e.
+Plafond natif via GameManager::updateCustomFPS et variable0116 ; intervalle
+0,008333333767950535s et VSync0 effectivement verifies dans les recus en jeu.
+Statistiques de stabilite sur raw_frame_ms, sans soustraire le cout auditeur ;
+budget8,333333ms. Comparateur refuse plafonds differents/non verifies, readbacks
+visuels et diagnostics shadow/sampling. Cinq controles de comparaison passent,
+ainsi que les preflights reels natif/candidat et rejet de paquet altere.
+
+Orbit natif : premier lancement sort1 avant auditeur, profil92 fichiers restaure.
+Unique reprise de demarrage permise atteint la section83-100, puis deux morts
+vers88,44 et blocages importants ; reference REJETEE, aucun couple revendique.
+Statistiques partielles ne representent ni une run reussie ni une preuve de gain.
+Grief24-65 : sans5213 images incluses,76,3586FPS,p9923,6321ms,pire29,2586ms ;
+avec5281 images,77,3739FPS,p9925,6422ms,pire40,1842ms. Zero mort des deux cotes,
+meme niveau/auditeur/profil/reglages ;89,16%/87,35% images >8,333333ms.
+Un seul couple : moyenne legerement superieure, pics p99/pire moins bons,
+aucune acceleration causale et aucune promotion. Pas de collecte visuelle dans
+ces essais performance : ils ne prouvent PAS l'absence d'ecrans noirs.
+Chaque passage termine a restaure/verifie92 fichiers ; installation inchangee.
+Preuves privees : build-research/runtime-canonical-v10-isolated-fps120-r4-performance.
+
+R4-31 : plan de reconstruction de paquets persistants par dependances, inspire
+des regions Sodium et du cache de batches Bismuth, sources primaires epinglees
+dans research/R4-31/DECISION.md. Aucune copie Sodium, aucun changement de licence.
+Revue contradictoire propre : corriges reutilisation d'adresse de scene, echec
+de transfert laissant un paquet valide, allocations par frame, visibilite perimee.
+Ordre natif conserve ; decision passage natif entier avant tout dessin prive.
+Deux classes de ressources separees : geometrie residente et parametres GPU ;
+un changement de parametre ne reconstruit pas les sommets dans le modele.
+Controles CPU compiles/passes, y compris compte synthetique1000 paquets affectes
+sur100000 pour une entree changee. Ce compte n'est PAS un gain FPS en jeu.
+Prototype sans adaptateur GD/GL, reste isole/desactive. Invalidations completes,
+pixels, effets2.2, buffers/fences, cout total et ecrans noirs restent a prouver.
+Ni installation principale, archive Documents, commit, push ou publication.
+
+Heliopolis74-78 : references120 toutes deux completes, zero mort. Sans165 images,
+29,8933FPS,p9957,4431ms,pire61,7805ms ; avec194 images,34,9382FPS,p9941,99ms,
+pire45,8064ms. Toutes les images des deux passages depassent8,333333ms. Ce couple
+unique est descriptif : le candidat ne change que le calcul Area, dont le cout
+est minuscule ici ; l'ecart observe n'est donc pas attribue sans repetition au
+mod. Aucun objectif120 ni validation visuelle globale atteint.
+
+Diagnostic R4-29 recompile : auto-controle20 snapshots PSS passe, handles equilibres,
+worker actif, processus non-fixture rejete. Auditeur samplingV2/120 compile et
+package16d9e48613be34306a9f44a0dc365b0ddb5845f5bb0f26cca104c72424f8abae
+(DLL40635fe4c26e39e6f471cc9d80b96e1abfd28a309c012f7d041cf89b3c67ffa5).
+Heliopolis diagnostic isole distinct : garde session/hash verifiee,18 adresses,
+zero manquante/erreur nettoyage,64,0112ms de snapshots en256,957ms. Limite de
+cout observateur25% declenchee : aucune conclusion fine sur18 observations.
+Une seule reprise justifiee avec intervalle50ms au lieu de10ms est engagee.
+Tous les frametimes sampling exclus par l'auditeur/comparateur. Donnees privees
+separees dans runtime-canonical-v10-isolated-fps120-leaf-r1/r2-sampling.
+Lecture statique updateObjectSection0x227f50 confirme deja un chemin rapide
+quand les indices de section ne changent pas ; cela ne justifie PAS de supprimer
+les callbacks. Aucune reecriture native issue d'un nom de fonction seulement.
+
+Reprise sampling50ms terminee :53 observations,0 manquante/erreur de nettoyage,
+168,411ms de capture sur3059,73ms (~5,50%), arret normal a la duree3000ms.
+Heliopolis diagnostic atteint78 sans mort, restauration92 fichiers verifiee.
+Adresses resolues sur images SHA : moveObjects6/53, preUpdateVisibility5/53,
+updateVisibility3/53, GameObject::getObjectTextureRect0x1978f0 :3/53 (binding verifie), setDirtyRecursively2/53 et updateAtlasIndex2/53. Ce sont des feuilles
+observees dans le temps mural, avec attentes possibles, sans pile inclusive :
+pas des pourcentages CPU prouves. Aucun getter d'opacite ne domine cette petite
+capture ; ne pas prioriser sa reecriture comme si son cout etait deja mesure.
+La prochaine integration doit viser le suivi spatial/mouvements et la preparation
+persistante de geometrie/parametres, avec preuve des callbacks natifs et de toutes
+les dependances. Le prototype R4-31 ne retire encore aucun de ces calculs en jeu.
+Au total de cette reprise : huit sessions de fixture (dont demarrage Orbit en
+echec), restaurations92 fichiers a chaque fin ; aucun jeu laisse ouvert par nous.
+Preuves de gain120, de fidelite et d'absence d'ecrans noirs toujours insuffisantes.
+
+## 2026-11-03 — Session autonome de cinq heures, R4-32
+
+Demarrage11:48:47UTC, echeance demandee16:48:47UTC. Cible120, tests autorises,
+profil isole/full detail/sans shake/sans noclip, aucun sous-agent, publication,
+installation principale ou archive Documents remplaces. Travaux locaux preserves.
+Capture native bornee de deux images, sans modifier de dessin ni callback :
+premier lancement refuse avant niveau par la garde atlas de l'auditeur.
+Exception limitee au profil capture compile, en mode natif sans production ;
+table de verite controlee, interdiction intacte pour les profils performances.
+Reprise Heliopolis74-78 complete sans mort ;92 fichiers restaures/verifies a
+chaque tentative. V1 DLLdc1a8404a95a1c46a7924ea08b66173a23bb915350fab3a91347a1c0efabe03b,
+paquet5fa09c856489238be4ee0fc987ba993799d19b9ba4fd4ff367939463e968882c.
+Capture22 draws/image,10755/10919 quads, tous associes, zero erreur de capture.
+Alignement par identite :10690 conserves,229 ajoutes,65 retires, ordre relatif
+conserve ;zero changement geometrie locale/UV,7965 matrices et1711 couleurs
+modifiees. Pas un gain FPS. Appariement strict par taille ratait dix lots.
+V2 a capture un mauvais champ de controle ; correction V3 ci-dessous.
+Visibilite, FP, parent UID et groupes/racines sont observes sans getters natifs. Aucun de ces constats ne prouve qu'un callback peut etre retire.
+Details/preuves utiles seulement dans research/R4-32/DECISION.md et captures
+privees build-research/runtime-canonical-v10-isolated-pass-capture-r2-pass-capture.
+Headroom essaye sur le log : proxy local indisponible, compression0,3% seulement ;
+ne pas repeter les gros logs, utiliser filtres/lectures ciblees. Aucun service
+annexe redemarre pendant les essais.
+
+### R4-32 correction V3 et R4-33 — 3 novembre, session cinq heures
+
+Le controle natif0x149 est _realOpacity, PAS m_bUnkBool2 (0x139). Les assertions
+ABI ont bloque la compilation fautive ; V3 lit le bon octet. Oracle Cocos reel,
+calcul GPU puis geometrie residente/parametres animes et rejeu de deux images
+implementes. Sources/preuves syntheses dans research/R4-33/DECISION.md.
+Heliopolis21306 quads, Grief32:5099, Grief64:4129, Orbit3596 et Society2730
+pris en charge correspondent bit a bit ; cas non geres gardes natifs. Corpus
+adversarial4097, quatre arrondis x quatre DAZ/FTZ, borne atteignant FLT_MIN,
+24 scenarios pixels exacts et mutants opacite/MVP noir rejetes. Aucun gain FPS.
+Revue : initialisation manquante au passage vers un quad natif nul corrigee.
+Resultat NEGATIF du noyau resident, travail CPU conserve : mediane0,694806ms
+contre0,584625ms direct (9 lots alternes x16). Ne pas activer. Il faut retirer
+du vrai travail natif avec preuve, pas ajouter des uploads/shaders par-dessus.
+Society auto139648964 ajoute sur demande ; diagnostic0-15 atteint apres une
+mort initiale, donc comparaison invalide. Orbit deux morts, invalide egalement.
+Grief32-65 et64-65 atteints sans mort.92 fichiers restaures/verifies par passage,
+installation principale inchangee, aucune capture d'ecran ni publication.
+
+R4-34 : diagnostic materiel des lectures/ecritures de quatre X d'un sprite,
+sur un seul intervalle main-thread. Premier essai contexte logiciel sans hits
+rejete ; helper Get/SetThreadContext suspendu/verifie fonctionne. Tests nettoyage,
+debordement, proprietaire et LastError passent. Deux passages Helio74-78 sans
+mort,92 restaurations chacune.15 acces resolus :4 ecritures Cocos,4 lectures
+updateQuad,7 lectures runtime C++ (candidats de pile de l'auditeur, pas unwind).
+Octets verifies a la fin, pas snapshot atomique ; aucune fermeture globale des
+dependances prouvee. Certains atlas sont deja propres/residents : volume natif
+complet du R4-33 reste theorique. Details bornes dans research/R4-34/DECISION.md.
+
+R4-35 : oracle ABI sur deux fonctions possedees par l'auditeur, aucun getter GD
+accroche. Appelant Win64 remplit XMM1/2/3, detours les ecrasent volontairement ;
+Geode reel conserve les12 mots pour les deux signatures Thiscall float (1/2 args),
+retours detour2/8 observes, hooks retires et retours natifs1/7 retrouves. CPU
+controle positif/poison passe. Cela ne prouve PAS les call-sites natifs ; R4-30
+reste bloque. Paquet0198307657a0cfc0d19724460a3871cd003eae796b5107f31497191c3e64595f.
+Society0-15 atteint avec1 mort initiale : passage invalide FPS/visuel,2071 images
+exclues.17 atlas/18 deja propres sur chacune des2 images capturees.92 fichiers
+restaures/verifies, installation principale et candidat normal inchanges.
+Details/prerequis encore ouverts : research/R4-35/DECISION.md. Aucun push/export.
+
+R4-36 : hash entier natif remplace dans un prototype prive, valeurs toujours
+lues dans la table native vivante (aucun cache d'opacite). Identite exhaustive
+des10000 hashes,42 438 evaluations controlees puis56 584 avec variante factorisee.
+Essai reel Helio74-78 N/A/B/B/A/N :6 cibles atteintes sans mort,92 restaurations
+verifiees chacune. N1 sans focus sur195 images -> bras sans Chlorium REJETE.
+Bloc reference A/B/B/A valide : medianes28,916 contre27,811FPS ;
+p9952,129 contre51,453ms ; pire53,338 contre58,056ms. Aucune activation :
+moyenne/pic regressent, causalite incertaine et120FPS non atteints. Donnees exactes
+dans research/R4-36/DECISION.md et heliopolis-reference-abba.local.json prive.
+Variante CPU sans table : exacte mais pas meilleure de facon convaincante ;
+pas de test GD supplementaire de cette variante. Prochain levier : mesurer les
+appels reels plutot que supposer que GD ne partage pas deja certains calculs.
+
+R4-37 : comptage natif sans patch par deux points d'arret d'execution, un seul
+intervalle entre captures Helio74-78.92 produits de groupes/92 recherches,
+184 evenements complets :70 retours3af8aa,22 retours3af9fe,92 retours19ccfb.
+Zero mort, cible78 atteinte,92 fichiers restaures/verifies, installation intacte.
+Tests isoles1200 traps + regression des lectures/ecritures passent. RF, debordement,
+registres XMM, retour natif et propriete des slots controles. Ce n'est pas une
+mesure FPS. Piste opacite non prioritaire ; viser le parcours memoire/mouvements.
+Details et empreintes : research/R4-37/DECISION.md. Aucun changement promu.
+
+R4-38 : prechargement memoire dans une copie de la boucle moveObjects native,
+calculs et callbacks conserves.6720 cas compares octet/FP/callback exacts.
+Trampoline puis version inline : toutes les36 paires de chaque variante perdent.
+Ratios medians1,104-1,419 puis1,168-1,287. ABANDON, aucun test/patch GD.
+Details research/R4-38/DECISION.md ; mesures de noyau uniquement, aucun gain jeu.
+
+R4-39 : SSE2 groupe les4 sommets d'un meme sprite.1296384 comparaisons natives
+sur Helio/Orbit83/Grief64 passent,29031 quads captures pris en charge exacts.
+Noyau Helio : ratio median0,9541,6/9 gains,plage0,9003-1,1237 -> preuve
+insuffisante pour activer. Ne remplace aucun callback ; voir R4-39/DECISION.md.
+
+## 2026-11-04 — Reprise autonome de cinq heures
+
+Debut06:14:44UTC, echeance11:14:44UTC. Branche et modifications locales preservees,
+profil isole/full detail/120FPS/noshake/noclipfalse, sans sous-agent ni publication.
+R4-40 : NaN revele un ordre d'operandes inverse par le compilateur -> echec
+avant activation. Instructions SSE2 explicites :1754528 cas arithmetiques passent.
+Insertion dans le Cocos du helper uniquement :1750592 methodes completes
+comparees sur Helio/Orbit83/Grief64 passent. Gardes fallback observees, contexte
+unwind/RBX/RDI/XMM6..15 verifie, corps natif restaure apres chaque processus.
+Copies CCSize conservees, callbacks natifs conserves. Gain CPU de noyau faible :
+ratio0,98378,7/9 paires,2 regressions -> PAS d'integration/test jeu justifie.
+Methode/details/limites : research/R4-40/DECISION.md. Reference normale inchangee.
+
+R4-41 : occlusion opaque ordonnee, prototype GPU isole.129 cas RGBA8 exacts,
+68 fallbacks, mutants noir/alpha/early-depth detectes. Cas synthetique favorable,
+mais ZERO quad entierement opaque dans les lots Helio observes. Variante alpha :
+2005 quads natifs captures avec VBO/IBO/programme GPU lies verifies. Reproduction
+native imparfaite :204 octets/138 pixels differents, candidat=baseline helper.
+Noyau non valide en jeu : GPU0,726->1,931ms, wall1,408->2,716ms,0/9 gains.
+ABANDON de cette variante ; aucun gain jeu/fidelite revendique.92 fichiers
+restaures apres chaque diagnostic, reference normale inchangee. R4-41/DECISION.md.
+
+R4-42 : programme de mouvements GPU partage par combinaison, additions FP64
+ordonnees.2163720 etats/prefixes natifs compares exacts,36 rejets arithmetiques,
+4 mutants observateurs detectes. Gros noyau64 commandes favorable (ratios wall
+0,174/0,272), petits lots perdants (17x/49x). AUCUN gain FPS ni callbacks GPU prouves.
+Census reel Helio74-78 :696/986 appels,32849/34816 visites,467/678 groupes vides,
+plus gros groupe3290 visite une fois, repetitionmax7/10. Le noyau64 commandes
+ne represente PAS ces images ; presque toutes les visites ont des indices de
+section nonnegatifs, les effets de leurs callbacks ne sont pas clos. Zero mort,92 fichiers restaures, aucun chemin normal modifie. R4-42/DECISION.md.
+
+R4-43 : comparaison dans le framebuffer natif : copies avant/apres, redessin
+natif,977 quads points retires sur2009 et restauration finale :ZERO octet different.
+Helio74-78 atteint sans mort,92 fichiers restaures. Noyau points defavorable :
+GPU ratio1,0032, CPU1,5701, wall1,0197 ; pas d'activation. Outil conserve pour
+verifier les prochaines variantes GPU au meme endroit, sans accepter le decalage
+194/204 octets du helper hors jeu. Tests isoles14 cas,5 fallbacks,mutant detecte.
+R4-44 : shader ignore uniquement RGBA exactement nul, lookup avant branche.
+Reproduction isolee : candidat=baseline helper ; ecart natif194 octets toujours
+explicite.9 paires : span GPU ratio0,9280,wall0,9667,CPU1,2198. Ces chiffres NE
+sont PAS des frametimes de jeu ni un gain global. Diagnostic natif distinct en
+cours ; aucune modification d'installation/reference, aucun commit/push/export.
+
+R4-44 natif termine :2009 quads, shader clone execute (`drawn`),ZERO octet
+different pour baseline/points/zero-fragment/copies/restauration. Helio78 atteint
+sans mort ;92 fichiers restaures et SHA verifies. Preuve locale d'image seulement,
+pas de gain FPS global. Prototype conserve isole, reference normale inchangee.
+Session06:14:44UTC -> cloture apres11:14:44UTC (plus de cinq heures). Aucun
+sous-agent, capture periodique, commit, push, publication ou export Documents.
+
+
+Society auto139648964, test demande apres session : selection diagnostic>=256
+pour atteindre le lot420 (ancien seuil1024 ne testait rien au debut). Shader
+inchange.0-15% : baseline/candidat zero-fragment/copies/restauration, ZERO octet
+different ;5 quads points retires. Replay exporte natif exact aussi.9 paires de
+noyau : GPU1,35854->1,18391ms (ratio0,8732), wall1,9465->1,8102ms (0,9298),
+CPU0,083->0,1047ms (1,2447). PAS des FPS en jeu ni un gain global.
+Mort au depart0,0061235% dans le diagnostic ET dans une reference native sans
+ces captures/prototype ; les deux atteignent15% apres reset, comparaisons FPS
+rejetees. Cause de la mort non etablie.92 fichiers restaures apres chaque passe,
+installation/reference inchangees, aucune promotion. DetailsR4-44/DECISION.md.
+
+## 2026-11-04 — Continuation autonome d'une heure
+
+Debut16:58:37UTC,echeance17:58:37UTC. Branche/diffs preexistants preserves.
+R4-45 : observation native sans hook de mort/collision, R8 capture/teste. Cause
+immediate Society : objet8,type2,position/start(0,105), appel natif depuis214950,
+mort0,0061235%. Hypothese ID du clone0 : garder139648964 ne change pas la mort.
+Pas de contournement ni de relaxation des criteres ; passages FPS rejetes.
+R4-46 : shader zero lie temporairement autour de l'appel atlas NATIF complet,
+avec garde corps/texture/hooks. Uniformes natifs, uploads/dirty/callbacks conserves.
+MXCSR/LastError entrants et effets sortants du callback conserves, meme exception.
+Rejeu Cocos complet natif exact :9 paires,ratio spanGPU0,8613,wall0,9189,CPU1,1731.
+Mesures de lot isole UNIQUEMENT,pas FPS. Pixel-identique en cible native : Society
+0%420 quads,Helio74%585,Society10%474 ; un seul appel natif par variante.
+Validation renforcee : pas de succes sans shader demande execute/couleur exacte/
+restauration ; requetes d'occlusion actives rejetees.14 cas,6 fallbacks,mutant teste.
+Helio78 atteint sans mort ; Society15 atteint apres mort initiale, preuve FPS
+invalide. Chaque passe restaure92 fichiers/SHA et laisse le paquet principal intact.
+Details techniques : R4-45/DECISION.md et R4-46/DECISION.md. Rien promu/publie.
+
+Verification finaleR46 : Helio74-78,lot580,un appel natif,zero difference pixels,
+renderer_comparison_passed=true,sortie succes,zero mort.281 images/281 exclues FPS.
+Paquet793466ee285b27570ac1a4298a1c6258328a096d94666cd916a49d5a8af8a834.
+Sources compilees verifiees/archivees pour cette heure ; reference107b945c... et
+installation principale non remplacee (paquet local.chlorium absent au controle final).
+La reference475191c7... du compte rendu ne constitue pas une verification finale.
+Toujours aucun gain FPS global/120 stable prouve,
+ni activation normale. Prochaine etape : module experimental persistant separe
+avec cycle de vie des programmes et auditeur independant avant A/B complets.
+
+Correction utilisateur2026-11-04 : Society tue normalement au premier essai.
+La mort initiale n'est donc pas un bug Chlorium a corriger. Pour les prochains
+A/B, meme premier essai de preparation puis mesure de la tentative suivante.
+Les captures diagnostiques existantes restent exclues des preuves FPS ; aucun
+changement collision/gameplay ni requalification retroactive des mesures.
+
+## 2026-11-04 — R4-47, fondation du renderer persistant
+
+Priorite utilisateur : reecriture complete du rendu. Aucun test pendant sa partie.
+Scene sur notifications, handles generationnels, lanes geometrie/parametres/ordre/
+fallback ; stockage et dessin GPU propres, shader R4-33 reutilise. Plus de scan
+complet par image dans cette nouvelle scene ; aucun chemin natif retire.
+Revue : corrige couleurs/UV du fallback, changements de scene/consommateur,
+ordre invalide apres destruction, et distinction echec avant/apres dessin.
+Sources de controles CPU/GPU preparees, NON compilees/NON executees. Installation
+et version normale inchangees ; aucun gain declare. R4-47/DECISION.md detaille
+les contrats manquants : producteurs natifs, lecteurs CPU, effets, groupes/Area
+et validation. Fondation isolee, pas encore un remplacement complet de GD.
+
+## 2026-11-05 — R4-47, raccord aux notifications de sprites natifs
+
+Encodeur partage R4-33 ; registre par adresse/ID natif, sans dereferencement.
+Scene.update compare seulement le sprite notifie et salit les lanes modifiees.
+Adaptateur SHADOW : comparaison CPU96 octets avec le quad observe, MXCSR restaure,
+fallback complet si divergence/source non concordante. Il ajoute du travail de
+validation et ne supprime aucune preparation native. Aucun hook natif installe.
+Revue corrige la creation apres destruction avant reparation de l'ordre.
+Controles CPU/GPU prepares pour ces transitions ; toujours NON compiles et NON
+executes selon la restriction utilisateur. Aucun gain FPS/activation declares.
+
+Suite statiqueR4-47 : jeton unique de creation exige meme si adresse+ID natif
+sont reutilises ; cas de controle prepare. Pont GLSL pour UN programme Cocos
+standard epingle : graphe de positions resident, varyings natifs, expression
+fragment couleur*texture conservee sans facteur de demonstration. Source GLSL
+convertie n'est pas preuve du programme natif lie ni de parite pixels. Sources
+deja capturees extraites en fichiers prives ; aucun test/compilation/lancement.
+Autres effets/programmes et raccord des hooks restent a etablir ; rien active.
+
+## 2026-11-06 — R4-47/48 qualifies, R4-49 premier lot natif GPU exact
+
+Tests reautorises explicitement. Graphify interroge via NetworkX ; graphe ancien
+utilise comme carte puis sources actuelles verifiees. R47 CPU passe ;15 images
+GPU possedees exactes avec plages SSBO et vrai shader Cocos. R33 regression :
+25503 quads eligibles/21676 captures natifs,zero divergence GPU,24 images exactes.
+R48 modele updateQuad :480 cas natifs passes ; inventaire statique NON exhaustif.
+R49 : nouveau dessin resident branche a l'auditeur prive, positions reconstruites
+depuis les sources natives, fallback complet sinon, restoration R43 conservee.
+Demarrage froid sans auditeur : aucune preuve. Helio74-78 distinct a chaud :
+580/580 quads reconstruits,zero octet divergent sur comparaison/restauration,
+zero mort,success=true,92 fichiers restaures. Paquet5b1d359f... ; voirR49/DECISION.
+Preparation CPU native toujours executee ; aucun gain FPS ni activation normale.
+
+
+## 2026-11-06 — R50 cache persistant, divergence Society, R51 hybride natif
+
+R50 : stockage conserve entre deux captures, ordre identique sans revision ni
+upload, publication complete des temoins natifs, garde anti-image perimee. Helio
+580 vers587 quads : cache reutilise,587 reconstruits,zero octet divergent ; transferts
+prives de mise a jour4096/30720/2348/0 octets. Premier refus sans dessin : aliases
+mono BACK/BACK_LEFT corriges en conservant rejet HDR/MRT/erreurs GL. R43 passe
+14 images possedees,9 refus,1 mutant,2 controles de format par defaut.
+Society R50 :420 quads,zero uploads,mais4 octets d'image divergents. Rejet conserve.
+Oracle R33 :2730 quads captures Society exacts (6557 eligibles avec synthetiques),
+zero divergence GPU,24 cas pixels. Probleme situe apres la production des quads.
+
+R51 : nouveau flux GPU de quads vers un VBO prive, puis dessin par le programme
+natif reel ; stockage persistant et restauration TF/VAO/SSBO/texture preservees.
+17 images possedees exactes,CPU/8 gardes comparaison/gardes lancement passes.
+Society R51 :420/420,zero divergence ; donnees VBO/IBO/images natives/binaire natif,
+textures,MVP et etat identiques au cas R50 rejet. Mort initiale attendue = passage
+entier NON qualifie. Helio R51 :587/587 exacts,zero mort,cible78 atteinte. Tous les
+92 fichiers partages restaures,installation principale inchangee. Preuves/binaire
+exact conserves sous build-research/resident-native-replay ; details R49/DECISION.
+Census corrige : ces diagnostics peuvent consommer les erreurs GL. Pas de gain FPS
+prouve : preparation CPU native toujours payee,passage GPU supplementaire,lectures
+pixels. Aucune activation normale ; autres effets/Grief/Orbit restent a qualifier.
+
+Cloture de cette campagne bornee : binaire teste natif4cfd0df6...,conserve avec
+ses sources et r51-proof.local.json. Dernier rebuild c1f9592e... compile/package,
+non relance dans GD : comparaison des archives confirme une UNIQUE modification
+du drapeau de diagnostic des erreurs GL ; tous les autres fichiers/chemins de
+rendu sont identiques. Gardes de lancement finaux,8 tests de comparaison et diff
+check passes. Pas de commit/push/publication/installation principale. Etape
+suivante : conserver les quads GPU entre dessins et etablir les lecteurs CPU
+avant de supprimer la preparation native ; aucun raccourci sur groupes/Area.
+
+
+## Reprise 7h — R52/R53, donnees persistantes et mises a jour exactes
+
+Branche conservee research/area-pose-v6 ; Graphify interroge (graphe ancien,
+relations non inventees), puis verification des sources actuelles. R52 : quads
+GPU maintenus par emplacement, indices produits sur GPU ; modifications d'ordre
+sans recalcul de geometrie.24 images possedees exactes,foreign SSBO4/TF preserves,
+initialisation refusee si compteur natif de primitives actif. Dans GD : Society
+420 objets,zero divergence,aucun recalcul apres seed ; Helio587 objets,zero
+ divergence,640 emplacements recalcules.92 fichiers restaures pour chaque passage.
+Mort initiale Society attendue : passage entier exclu des comparaisons.
+
+R53 : masque CPU exact des quads modifies, reconnu seulement au commit reussi,
+independant des plages d'upload elargies. Nouveau producteur compute GPU issu du
+graphe arithmetique epingle ; donnees natives96 octets par quad,programme natif
+pour le dessin.24 images possedees exactes ; CPU/commit refuse/masques passes.
+Oracle Cocos reel :6827 et25773 quads compares,zero divergence ; notification
+manquante volontaire detectee puis reparee.198 triplets d'images chronometres
+R51/R52/R53 strictement egaux. Noyau8192 objets :82 changements disperses,
+7872 recalculs R52 contre82 R53 ; mediane GPU0.3152 vers0.1939ms,p950.3379 vers
+0.1960ms. Negatif : petits blocs contigus R53 env0.01ms plus lent queR52 ; aucune
+promotion sur ces chronometrages isoles,aucun gain FPS global deduit.
+GD R53 : Society420 exact/cache reutilise ; Helio587 exact/587 recalcules. Native
+restore exact. Analyse du lot Helio :580 matrices retenues changent uniquement
+TX,quads579 modifies ; hypothese de faux dirty flags rejetee (aucun flag change).
+Couts CPU natifs non retires. Binaires/sources R51/R52/R53 conserves avec empreintes,
+preuves build-research/resident-native-replay/r52-r53-proof.local.json.
+
+R54 en cours : observateur opt-in de producteurs natifs (pose,couleur,updateQuad),
+original appele une fois,FP/LastError post-appel preserves,pas de pointeurs natifs
+suivis apres stockage. Champs d'admission SourcePayload compares apres seed1,
+contre CPU natif2. Budget borne et cas ecritures/notifications manquantes testes.
+Hooks supplementaires desactives par defaut. Compiler/serialiser passe ; validation
+GD du mode inactif/actif encore requise. Aucune suppression de callback/calcul,
+aucune installation principale/publication,fermeture des lecteurs CPU toujours
+NON prouvee. Recherche de la vraie alimentation incrementale du renderer.
+
+R54 : mode inactif verifie Society (pas de receipt producteurs, hook atlas inactif).
+Premier Helio actif : donnees sprites exactes mais suivi atlas incomplet ; mort
+a50.82%,passage entier exclu. Observateurs depuis limites a deux frames, inactifs
+au demarrage/desactives a la fin. Helio r54-windowed-producers-helio-r3 : cible78,
+zero mort,585 quads GPU reconstruits exactement et restauration image exacte.
+11240 paquets sprite/indices exacts ; suivi atlas9138 exacts,11 manquants,2091
+divergents : NON qualifie.92 fichiers restaures,package principal inchange.
+Binaire/sources R54 geles sous resident-native-replay/r54-windowed-qualified-helio*.
+Pas de gain FPS deduit. Census RGBA zero : Helio/Society,aucun quad zero-couleur
+non ponctuel ; abandon du culling supplementaire sur cette hypothese sans cible.
+
+R55 statique : inventaire des exports instance Cocos etendu aux retours non-void
+et methodes const (84 contre55). Nouveau lecteur initWithTexture a8bcf0 identifie.
+118 echappements restent ouverts ; fermeture CPU toujours NON prouvee. Tests du
+classificateur passes. Aucun calcul natif supprime.
+R55 prototype : alimentation GPU depuis paquets producteurs, donnee oracle lue
+uniquement pour refuser les divergences, pas pour fournir le payload. Mode reste
+diagnostique deux frames, seed initial natif. Tests manque/source modifiee/index
+change/quad divergent/identite dupliquee passent ; compilation SDK en cours.
+
+R55 compile/link/package passes. Helio :588 quads issus des paquets producteurs,
+Grief :288 ; images et restauration exactes,zero erreur GL,fenetres atteintes
+(Helio78,Grief65).92 fichiers restaures pour chaque passage. Tous les calculs et
+callbacks natifs restent executes ; aucun gain CPU ou FPS n'est prouve par ce
+raccordement. Grief24% contient3004/3021 quads,lot le plus grand607/611 : les288
+quads controles ne representent ni tous les lots ni toute la fenetre24-65.
+
+R56 revue GPU : les barrieres apres compute couvrent les fetchs vertex/index,
+mais pas une prochaine reecriture SSBO apres leurs lectures. Ajout d'une barriere
+SHADER_STORAGE avant reecriture d'un stockage deja initialise ; seed/reuse sans
+travail conserves. Reference : Khronos OpenGL-Refpages/gl4/glMemoryBarrier.xml,
+section GL_SHADER_STORAGE_BARRIER_BIT (ordre des ecritures apres acces anterieurs).
+Test instrumente echoue avant correction,puis passe :24 images possedees exactes,
+barriere requise pour pose/ordre/style/remplacement et absente pour seed/reuse.
+Ce risque de course est corrige dans le prototype ; aucun lien causal avec les
+anciens blackscreens n'est encore prouve. Verification SDK/natif encore requise.
+
+R56 verification : compilation/link/package passent. Orbit capture a89%,cible100
+atteinte,zero mort.444 quads depuis paquets producteurs,444 reconstruits sur GPU,
+zero octet divergent et restauration exacte,zero erreur GL detectee. Les autres
+lots/frames restent natifs ; ni run entiere remplacee ni gain FPS global prouves.
+Overlay corrige en DIAG CHLORIUM / NATIF + GPU pour ce mode hybride, plutot que
+SANS CHLORIUM. Gardes de lancement,24 cas GPU,contrats CPU passent.92 fichiers
+partages restaures ; baseline SHA inchangee,package principal toujours absent.
+Sources/binaire et preuve scopes : resident-native-replay/r56-qualified-orbit-batch*
+et r56-proof.local.json. Decision : garder le prototype isole,ne pas activer la
+version normale. Suite architecturale : etablir fermeture des lecteurs/lifetimes
+et alimentation incrementale avant de retirer la preparation native ; qualifier
+les autres lots/programmes/effets et mesurer frametimes en paires equilibrees.
+
+## R57 — nouveau mandat : continu d'abord, arret des essais sans Chlorium
+
+Le renderer R51-R56 etait un replay ponctuel. R57 introduit un mode continu
+separe,cache par atlas,eviction des enregistrements hors ordre courant sans
+inferer une destruction native,source du shader epinglee embarquee. Gardes de
+programme/ownership/contexte/topologie et bornes conservees ; repli natif pour
+les cas non admis. Nouveau paquet native-resident-continuous-r57,ancien coeur
+Area V10 absent. Installation principale inchangee.
+
+Chaque lot accepte est dessine par le renderer GPU,avec copie GPU de sauvegarde
+du target pour annuler un echec apres soumission. Le corps atlas natif s'execute
+ensuite UNE fois avec rasterisation desactivee : conserve uploads,calculs,
+compteurs/etat natifs et callbacks,sans redessiner les pixels. Couts natifs et
+vertex work demeurent ; cette premiere integration peut degrader les FPS. Pas
+de gain annonce. Les lots incompatibles utilisent integralement le chemin natif.
+
+344 controles GPU possedes passent,dont320 dessins consecutifs avec churn
+d'identites au-dela de la capacite,poses,couleurs,ordre et disparitions,blend
+normal/additif,annulation d'une image volontairement endommagee. Ancien mode
+ponctuel toujours verifie. Compilation/link du nouveau renderer passent ; son
+integration GD et sa couverture reelle restent a verifier. Auditeur independant
+R57 en compilation ; futur essai avec Chlorium seulement,pas de nouvelle reference.
+
+Stockage :270 objets de compilation regenerables retires.387 copies volumineuses
+de sauvegardes DEJA RESTAUREES et verifiees mutualisees par liens physiques NTFS,
+contenus SHA256 controles avant/apres,chaque chemin de restauration conserve.
+Espace libre observe12.64 vers18.56Gio (valeurs ponctuelles),7.79Gio logiques de
+doublons evites. Aucun code,binaire de reference,preuve ou sauvegarde unique
+supprime. Receipts cleanup-compiler-outputs.local.json et backup-compaction-*.
+
+R57 reel dans GD : Helio0-78%,3234 frames,67768 lots effectivement soumis puis
+conserves a l'ecran,14618194 quads (100% des lots/quads observes),zero repli,
+zero rollback/fatal signale,zero mort. Ce sont des soumissions continues du
+nouveau paquet,pas un replay de deux snapshots.344 cas GPU isoles conserves.
+Section74-78 :16.26FPS,p95 image119.87ms,90 images mesurees ; objectif120 NON
+atteint. Aucune nouvelle reference sans Chlorium lancee. Rendu complet pixel
+par pixel et absence de tous blackscreens NON prouves. Preparation CPU et
+vertex work natifs restent payes,plus sauvegarde du framebuffer et lecture
+synchrone des indices a chaque lot : couts a traiter avant promotion.
+92 fichiers restaures,installation principale inchangee. Preuve/binaire/source
+testes preserves sous build-research/resident-continuous-r57. L'auditeur teste
+affichait encore gpu_active=false dans les progress generiques ; compteurs
+resident_continuous_r57 attestent les vrais commits. Correction de ce seul
+indicateur en compilation,aucun changement du renderer natif teste20fc32c2.
+
+## Lanceur visible R57
+
+Raccourci Bureau Chlorium - tests GPU et dossier Documents/chlorium/Tests-GPU-R57
+avec lancement/choix des quatre autos,arret gracieux et instructions. Controleur
+separe cache,jeu explicitement WindowStyle Normal,revision de campagne unique
+en memoire sans ecraser le plan,mode candidate seulement,donnees partagees
+sauvegardees/restaurees par le wrapper existant. Aucun nouveau paquet/source du
+jeu copie dans Documents. Compteurs visibles : FPS,AVEC CHLORIUM GPU CONTINU,
+part de lots effectivement commites (ou REPLI NATIF),details/shake conserves.
+Les quatre choix passent le preflight sans lancer GD. Compilation/link passent
+pour l'overlay ; renderer20fc32c2 inchange,paquet e00b8d89 conserve.
+Premier lancement visible ferme avant le harness (exit1),92 fichiers restaures.
+Lancement suivant apres WindowStyle Normal explicite : processus/fenetre valides,
+compteurs R57 actifs,10473/10473 lots commites a49.1%,zero repli/fatal. Le controle
+de mise au premier plan est retourne false ; Alt+Tab reste necessaire si Windows
+garde Codex devant. Inspection visuelle automatique indisponible (outils CUA/node
+retournent kernel assets/path not found),aucune capture repetee. Pas de validation
+visuelle complete ni de gain FPS annonce. Arret utilisateur via .stop-request,
+fin automatique aux bornes existantes ou deux morts,restauration par controleur.
+Le test visible s'est ensuite termine avec morts (validation performance rejetee),
+92 fichiers verifies restaures. Un GD principal distinct est maintenant ouvert,
+conserve intact. Raccourci pointe vers le CMD pour conserver le message explicatif
+si un jeu est deja ouvert ; notice precise copie de test et Alt+Tab. Pas de nouvelle
+installation dans les mods principaux ni de fermeture forcee du jeu de l'utilisateur.
+
+
+## R58 - supprimer le travail redondant du renderer continu (code uniquement)
+
+Retour utilisateur : performances R57 mauvaises. Grief88952972 demande0-100,
+mais quitte par utilisateur a36.1084%,pas termine. Dernier echantillon4 images
+seulement vers35.88-36.11 :6.93FPS,aucune moyenne de run extrapolee. Compteurs :
+34936 lots,34552 commits,384 replis budget,zero rollback/fatal signale. Pas de
+nouvelle comparaison avec reference ; sources/binaires R57 conserves.
+
+Hypothese : supprimer les synchronisations GPU->CPU par lot et le second travail
+vertex natif coute moins que reproduire l'etat natif avec rasterizer discard.
+Profil separe --resident-fast / native-resident-fast-r58,v0.4.0-alpha.58 :
+- Topologie native telechargee/verifiee une fois par identite atlas/UID/IBO/
+  pointeur CPU/capacite/contexte. Chaque prefixe CPU est encore compare bit a bit.
+  Changement ou incoherence : repli natif. Writer mapBuffers156 octets epingle
+  FNV e348dc857131a9f0 (SDK2.2081,m_pIndices0x38). Hors profil de mods isole ou
+  writer non reconnu : lecture synchrone R57 conservee. Limite connue : les
+  ecritures GPU seules ne sont pas observees ; aucune qualification generale.
+- Cache d'encodage exact source192+quad96+controle FP : reutilise seulement le
+  calcul pur,appelle TOUJOURS Scene::update et ses controles de vie/etat/upload.
+  Evenements de style ne contournent pas cette validation.
+- Lots de points degeneres entierement rendus par le natif : aucun rendu GPU
+  prive,aucune sauvegarde cible pour ces lots. Aucun objet natif supprime.
+- Suppression du second draw natif par predicat occlusion nul (QUERY_WAIT),sans
+  glGetQueryObject ni lecture CPU. L'appel natif et ses uploads/etats/compteurs
+  restent executes exactement une fois. Si indisponible/refuse : ancien discard.
+  Fermeture conditionnelle en erreur : quarantaine du renderer. Sauvegarde et
+  restauration framebuffer conservees. Cette suppression ne couvre QUE le corps
+  natif epingle et le profil de mods isole,pas des callbacks tiers arbitraires.
+  Source primaire : https://registry.khronos.org/OpenGL/extensions/NV/NV_conditional_render.txt
+
+Relecture statique : taille du snapshot indices corrigee en capacity*6 (uint16),
+controle FP inclus dans la cle,Scene::update conserve meme sur hit,mode NO_WAIT
+exclu car pourrait redessiner,scope conditionnel ferme avant toute commande
+ulterieure. Invalidation et fallback conserves. ABI StatsR57 conserve ; export
+separe ChloriumReadFastStatsR58 pour lectures/reutilisations/contournements.
+
+Controles ECRITS mais NON executes : R4-58/checks.cpp (anciens contrats scene +
+cache topologie/identites/capacite/rejets + mutation de chaque octet source/quad
+et controle FP),gpu_checks.cpp (ancienne suite GPU + preuve upload/callback/
+image preserves et zero primitive du draw supprime). Aucune compilation,aucun
+test CPU/GPU/GD,aucune installation ni modification du plan runtime. Pas de gain
+mesure,120FPS non atteint,parite et blackscreens non qualifies. Cache additionnel
+~400 octets par sprite actif : cout memoire/benefice reel a mesurer. R58 conserve
+ISOLE,NON PROMU. R57 continue de payer preparation CPU/upload natifs et copie
+framebuffer par lot : ces couts restants ne sont pas declares resolus.
+
+Derniere relecture R58 : separation des flags CPU de maintenance (dirty,
+recursiveDirty,flip,rectRotated,opacityModifyRGB) des parametres GPU. Preuve
+source : encodeParameters copie matrice/rectangle/z/couleurs/UV autoritaires ;
+corners::domain/materialize et resident.vert ne lisent que1|64|128|512|1024.
+Seul le paquet de parametres prive est masque,sous macro R58 ; aucun flag natif,
+callback ou controle known()/Scene::update retire. Matrice/quad natifs toujours
+compares,donc UV/couleurs/poses resultant d'un flip ou opacityModifyRGB restent
+pris en compte. Cela evite de salir le GPU pour un changement de maintenance
+sans changement visuel. Controle source ajoute pour revision/uploads inchanges,
+flag geometrie64 et rejet de flags inconnus ; NON execute. Diff whitespace des
+fichiers suivis propre (relecture de code uniquement,pas un test fonctionnel).
+
+
+### R58 suite - allocations par lot et checkpoint tardif (non execute)
+
+Hypothese CPU : deux unordered_set temporaires allouent un noeud par sprite et
+par preparation ; le vecteur d'ordre est aussi recree. R58 utilise deux tables
+plates reutilisables AddressSet (identites exactes,zero interdit,charge<=1/2,
+capacite<=65536,sondage lineaire) et un ordre persistant. Les DEUX controles de
+doublons sont conserves,ainsi que les controles de vie/generation de Scene.
+Croissance seule alloue ; reset efface la table,donc ne conserve aucune ancienne
+identite. Le cout de remise a zero reste O(capacite),pas un cache magique O(1).
+
+Hypothese GPU : les sauvegardes de cible avant un refus de pre-soumission sont
+inutiles. Point de checkpoint prive ajoute APRES validations/synchronisation/
+materialisation GPU et JUSTE AVANT glDrawElements. R58 y appelle TargetBackup.begin,
+qui conserve tous ses controles et restaure ses bindings. Refus : aucun draw,
+appel natif normal. Echec apres soumission : restauration toujours obligatoire.
+Un refus sans soumission autorise une nouvelle tentative avec controles complets
+pour ne pas condamner un atlas apres un etat transitoire. R57 et les replays
+ponctuels gardent leur checkpoint externe (arguments optionnels nuls).
+
+Relecture dependances : les seuls appelants sont NativeReplay,ContinuousRenderer,
+gpu_scene_checks et NativeInputCensus ; les appels draw() sans argument restent
+valides. ContextEpoch::capture restaure bien le VAO ; TargetBackup restaure ses
+FBO/texture/element-buffer avant le draw. Nouveau callback interne doit conserver
+l'etat GL. Compteurs distincts checkpointsSaved/preSubmitDeclines ajoutes,ABI R57
+inchangee. Controles ecrits pour table pleine/collisions/churn/zero/doublons et
+comparaison unordered_set ; suite GPU ecrite pour refus avant checkpoint,checkpoint
+refuse sans modification de pixels,reprise puis rollback sur320 images.
+
+Aucune compilation,aucun test execute,aucun jeu lance,aucun paquet installe.
+Gain reel inconnu. La copie reste PLEIN ECRAN pour tout lot effectivement soumis ;
+le cout principal des copies n'est donc PAS resolu. Reduire son rectangle sans
+borne de couverture prouvee risquerait de laisser des pixels errones lors d'un
+rollback : cette modification n'est pas faite. Variante R58 toujours isolee.
+
+
+## R59 - validation R58, transfert GPU natif differe et fuite de predicat
+
+R58 compile/link passent (DLL a9569527,paquet90b5f516). Contrats CPU passent,
+345 cas GPU possedes passent avec shaders natifs captures. Premier lancement GPU
+avant main refuse faute de glew32.dll dans le dossier isole ; build.cmd copie
+maintenant la dependance existante. Preuves R58 figees resident-fast-r58-proof.
+Aucun resultat FPS en jeu,aucune installation. Ces cas ne couvraient pas encore
+une erreur GL laissee en attente avant la reutilisation du predicat.
+
+Nouveau chantier R59 : enlever le transfert natif de sommets lorsque le draw
+natif est supprime par le predicat zero et que Chlorium a deja soumis ses pixels.
+Analyse native2.2081 : drawNumberOfQuads0xa6350 teste m_bDirty0x48,puis envoie
+count*96 via BufferSubData (IAT0xe4d48),puis efface ce flag. SDK confirme que ce
+flag concerne la mise a jour du VBO. CPU/preparation/callback/compteur natifs
+restent executes. Scope prive suspend seulement ce transfert en conservant le
+flag dirty a la sortie. Repli natif complet : upload natif normal. Repli partiel :
+flag conserve pour les plages encore en attente,jusqu'a un upload complet.
+Controles conserves : corps natif/texture/driver/import connus,profil isole,
+predicat actif,buffer vivant/assez grand/non mappe,contexte courant et bornes CPU.
+Bindings COPY_READ restaures ; exceptions restaurent dirty. Aucun skip en simple
+rasterizer-discard. Aucune patch IAT dans la variante retenue.
+
+Critique : premier prototype interceptait un import pour reporter le transfert ;
+compile/link et controles isoles passaient,mais le drapeau natif rend cet import
+inutile. Remplace par scope local plus court,sans changement de fonction globale.
+Premiere compilation du scope echoue sur GL_COPY_READ_BUFFER_BINDING absent du
+vieux GLEW ; alias GL_COPY_READ_BUFFER deja utilise par le projet repris.
+
+Panne supplementaire REPRODUITE : predicat reutilise + INVALID_ENUM preexistant.
+BeginConditionalRender reussissait,glGetError lisait l'ancienne erreur,active_
+restait false et le predicat zero n'etait jamais ferme. Le clear vert suivant
+restait masque (controle rouge exit1). Correction : refuser l'erreur precedente
+AVANT le begin. Controle vert passe ; reproduction sous predicate-error-r59.
+C'est une fuite prouvee du nouveau chemin R58,pas la preuve que tous les noirs
+historiques de GD avaient cette cause.
+
+R59 final : compile/link passent (DLL d8fb472b,paquetbcf50a7f). 345 cas GPU
+herites et contrats du scope dirty passent : transfert reellement differe,
+callback une fois,repli complet/partiel,buffer mappe et erreur native preservee,
+bornes/bindings,scopes imbriques et exception. Controle predicat rouge puis vert.
+Sources exactes,paquet et logs figes sous resident-deferred-r59-proof/d8fb472bf8d7.
+Jeu NON lance,installation principale inchangee,plan runtime R57 inchange.
+Aucun gain FPS mesure/annonce. Cout CPU natif et copies plein ecran toujours payes.
+R59 reste EXPERIMENTAL : couverture des lecteurs GPU tiers/effets2.2 et mesures
+appariees Orbit/Grief/Helio restent indispensables avant promotion normale.
+
+
+## R60 — attribution CPU et reprise du 8 novembre 2026
+
+R59 réellement mesuré sur Helio74–78 :97 images retenues,17.797FPS,p95=105.367ms,
+p99=119.3529ms,pire=454.6984ms ; toutes dépassent8.333ms. Référence R57 avec même
+modèle/auditeur/réglages :82 images,15.080FPS,p95=124.5505ms. Une paire seulement,
+pas de gain causal annoncé. R59 confirme61287 transferts différés/1.443Go et137
+lectures d'indices pour61150 réutilisations sur0–78,zero rollback/fatal signalé.
+Les92 fichiers protégés sont restaurés et vérifiés à chaque sortie.
+
+Deux lancements R59 n'ont pas atteint le harness. Le contrôle R57 et un diagnostic
+R59 avec logs détaillés ont atteint la cible. Cause du démarrage intermittent non
+établie. Inventaire des mods maintenant limité à une partie active et au loader
+Done ; aucune prétention que ce garde résout à lui seul tous les démarrages.
+
+R60 ajoute des scopes QPC sans allocation :préparation native hors atlas,capture,
+indices,préparation GPU,programme,sources,uploads,matérialisation,backup,dessin et
+corps natif. Sommes imbriquées et LastError vérifiés,345 cas GPU hérités et contrats
+R59 passent ; compile/link candidat et auditeur passent. Détection de diagnostic
+corrigée dans le script :le marqueur doit être lu avant de libérer la chaîne DLL.
+Provenance R60/startup marquée non comparable pour ne pas transformer une mesure
+instrumentée en preuve de gain.
+
+Passage R60 interrompu à51.633%,cible74–78 NON atteinte. Attribution disponible sur
+40.066–51.633 :11.347s cumulées dans les batches,dont10.737 dans les atlas ;
+prepare4.123s(inclut sources2.379s et programme0.408s),backup1.146s,upload0.498s,
+matérialisation0.512s,capture0.615s,draw0.505s,natif0.487s. Ces temps inclusifs ne
+s'additionnent pas tous. Les compilations/réinitialisations et les sources méritent
+la prochaine expérimentation ; cette section ne décrit pas les effets finaux.
+
+Reprise utilisateur du8novembre :mise à jour du dépôt explicitement demandée.
+Visibilité origin constatée publique,puis corrigée en privée selon la demande
+initiale. Checkpoint de recherche seulement,pas de merge/release ni installation.
+Jeu fermé et profils restaurés lors de cette reprise. Cible120FPS toujours ouverte.

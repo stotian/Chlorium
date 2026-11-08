@@ -1,5 +1,5 @@
 function Get-ResearchModProfile {
-    param([Parameter(Mandatory)][string]$ModsDirectory,[Parameter(Mandatory)][string]$ProfileRoot)
+    param([Parameter(Mandatory)][string]$ModsDirectory,[Parameter(Mandatory)][string]$ProfileRoot,[string[]]$AllowedIds=@())
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     $loaderPath = Join-Path $ProfileRoot 'geode/mods/geode.loader/saved.json'
     $preferences = if (Test-Path -LiteralPath $loaderPath) {
@@ -16,6 +16,7 @@ function Get-ResearchModProfile {
             $reader = [IO.StreamReader]::new($entry.Open())
             try { $mod = $reader.ReadToEnd() | ConvertFrom-Json } finally { $reader.Dispose() }
         } finally { $archive.Dispose() }
+        if ($AllowedIds.Count -and $mod.id -notin $AllowedIds) { throw 'Isolated profile contains an unexpected mod' }
         if ($mod.id -eq 'local.chlorium') { continue } # Paired experimental variable.
         if ($mod.id -notmatch '^[a-z0-9_-]+\.[a-z0-9_.-]+$' -or !$mod.version -or !$ids.Add($mod.id)) {
             throw 'Invalid or duplicate common mod identity'

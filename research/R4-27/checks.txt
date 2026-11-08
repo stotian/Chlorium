@@ -1,0 +1,7 @@
+PASS 454314 native cumulative scale assertions including alternating benchmark
+PASS borrowed-command mutant rejected at assertion 111057
+PASS regressions R4-20 327427, R4-22 26054, R4-26 110202
+PASS 25 benchmark sources and ZIP unchanged after compilation
+PASS canonical production inputs/DLL and installed package hashes unchanged
+PASS 6 common profile invariants and strict foreign/candidate rejection
+PASS actual native/candidate isolated PrepareOnly calls: same dependency/settings hashes, no game/run directory

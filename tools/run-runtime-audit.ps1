@@ -1,14 +1,42 @@
 #Requires -Version 7.0
-param([switch]$Native, [switch]$VisualWatch, [switch]$WithUserMods, [switch]$ExternalFocus, [switch]$AtlasStorageRegression, [string]$GameDirectory, [string]$Package, [string]$ProductionPackage, [string]$ReportDirectory,
+param([switch]$Native, [switch]$VisualWatch, [switch]$WithUserMods, [switch]$ExternalFocus, [switch]$ExternalSampling, [switch]$OpacityShadow, [switch]$PassCapture, [switch]$AtlasStorageRegression, [string]$GameDirectory, [string]$Package, [string]$ProductionPackage, [string]$ReportDirectory,
     [string]$UserGameDirectory = 'C:\Program Files (x86)\Steam\steamapps\common\Geometry Dash',
-    [ValidateSet(0,133260800,129598490,88952972)][int]$FetchLevel = 0,
-    [ValidateSet(133260800,129598490,88952972)][int]$Level = 133260800,
+    [ValidateSet(0,133260800,129598490,88952972,139648964)][int]$FetchLevel = 0,
+    [ValidateSet(133260800,129598490,88952972,139648964)][int]$Level = 133260800,
     [int]$BenchmarkSeconds = 900,
     [ValidateRange(0,99.999)][double]$FromPercent = 0,
     [ValidateRange(0.001,100)][double]$ToPercent = 100,
     [ValidateSet('map','orphan')][string]$StreamMode = 'orphan',
-    [ValidateRange(0,100)][double[]]$CapturePercent = @())
+    [ValidateRange(0,100)][double[]]$CapturePercent = @(),[switch]$StartupDiagnostic)
 $ErrorActionPreference = 'Stop'
+if($env:CHLORIUM_NATIVE_PRODUCER_CAPTURE -eq '1'){
+    if(!$Native -or !$PassCapture -or $WithUserMods){throw 'Producer observer requires the isolated native pass-capture profile'}
+    if(@('CHLORIUM_QUAD_READ_WATCH','CHLORIUM_OPACITY_INVOCATIONS','CHLORIUM_MOVE_COMMAND_CENSUS','CHLORIUM_OWNED_REGISTER_ORACLE','CHLORIUM_STARTUP_DEATH_WATCH' | Where-Object {[Environment]::GetEnvironmentVariable($_,'Process') -eq '1'}).Count){throw 'Producer observer cannot combine hardware or invocation diagnostics'}
+}
+if($env:CHLORIUM_RESIDENT_NATIVE_STREAM -eq '1' -and $env:CHLORIUM_RESIDENT_NATIVE_REPLAY -ne '1'){throw 'Native vertex stream requires its explicit resident replay diagnostic'}
+if($env:CHLORIUM_RESIDENT_NATIVE_REPLAY -eq '1'){
+    if(!$Native -or !$PassCapture -or $WithUserMods){throw 'Resident replay requires the isolated native pass-capture profile'}
+    if($env:CHLORIUM_NATIVE_BATCH_REPLAY -ne '1' -or $env:CHLORIUM_OPAQUE_INPUT_CENSUS -ne '1' -or $env:CHLORIUM_OPAQUE_PIXEL_PAIR -ne '1'){throw 'Resident replay requires its explicit native pixel replay chain'}
+    if(@('CHLORIUM_ZERO_FRAGMENT_DISCARD','CHLORIUM_ZERO_NATIVE_HANDOFF','CHLORIUM_STARTUP_DEATH_WATCH','CHLORIUM_QUAD_READ_WATCH','CHLORIUM_OPACITY_INVOCATIONS','CHLORIUM_MOVE_COMMAND_CENSUS','CHLORIUM_OWNED_REGISTER_ORACLE' | Where-Object {[Environment]::GetEnvironmentVariable($_,'Process') -eq '1'}).Count){throw 'Resident replay cannot combine renderer or hardware diagnostics'}
+    $taskResidentSource=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../research/R4-33/resident.vert'))
+    if(!$env:CHLORIUM_RESIDENT_VERTEX_FILE -or [IO.Path]::GetFullPath($env:CHLORIUM_RESIDENT_VERTEX_FILE) -ne $taskResidentSource){throw 'Resident replay requires the pinned local vertex source'}
+    if((Get-FileHash -LiteralPath $taskResidentSource -Algorithm SHA256).Hash.ToLowerInvariant() -ne 'bc8f9c88d908d769b440d86f10d494520a582b655f46de0c4348b7911cca9ad0'){throw 'Resident vertex source changed; rebuild and review before launch'}
+}
+if($env:CHLORIUM_ZERO_NATIVE_HANDOFF -eq '1' -and $env:CHLORIUM_ZERO_FRAGMENT_DISCARD -ne '1'){throw 'Native shader handoff requires its explicit zero fragment diagnostic'}
+if($env:CHLORIUM_STARTUP_DEATH_WATCH -eq '1' -and !$PassCapture){throw 'Startup death observation requires the isolated pass-capture diagnostic'}
+if($env:CHLORIUM_STARTUP_DEATH_WATCH -eq '1' -and @('CHLORIUM_QUAD_READ_WATCH','CHLORIUM_OPACITY_INVOCATIONS','CHLORIUM_OPAQUE_INPUT_CENSUS','CHLORIUM_MOVE_COMMAND_CENSUS','CHLORIUM_OWNED_REGISTER_ORACLE' | Where-Object {[Environment]::GetEnvironmentVariable($_,'Process') -eq '1'}).Count){throw 'Use only one startup death diagnostic per run'}
+if($env:CHLORIUM_ZERO_FRAGMENT_DISCARD -eq '1' -and $env:CHLORIUM_NATIVE_BATCH_REPLAY -ne '1'){throw 'Zero fragment discard requires its explicit native batch replay'}
+if($env:CHLORIUM_QUAD_READ_WATCH -eq '1' -and !$PassCapture){throw 'Native quad read observation requires the isolated pass-capture diagnostic'}
+if($env:CHLORIUM_OPACITY_INVOCATIONS -eq '1' -and !$PassCapture){throw 'Native opacity invocation census requires the isolated pass-capture diagnostic'}
+if($env:CHLORIUM_OPAQUE_INPUT_CENSUS -eq '1' -and !$PassCapture){throw 'Opaque input census requires the isolated pass-capture diagnostic'}
+if($env:CHLORIUM_MOVE_COMMAND_CENSUS -eq '1' -and !$PassCapture){throw 'Movement command census requires the isolated pass-capture diagnostic'}
+if($env:CHLORIUM_NATIVE_BATCH_REPLAY -eq '1' -and !$PassCapture){throw 'Native batch replay requires the isolated pass-capture diagnostic'}
+if($env:CHLORIUM_NATIVE_BATCH_REPLAY -eq '1' -and $env:CHLORIUM_OPAQUE_PIXEL_PAIR -ne '1'){throw 'Native batch replay requires its explicit native pixel pair'}
+if($env:CHLORIUM_MOVE_COMMAND_CENSUS -eq '1' -and @('CHLORIUM_OPAQUE_INPUT_CENSUS','CHLORIUM_OPACITY_INVOCATIONS','CHLORIUM_QUAD_READ_WATCH','CHLORIUM_OWNED_REGISTER_ORACLE' | Where-Object {[Environment]::GetEnvironmentVariable($_,'Process') -eq '1'}).Count){throw 'Use only one explicit native movement diagnostic per run'}
+if($env:CHLORIUM_OPAQUE_PIXEL_PAIR -eq '1' -and $env:CHLORIUM_OPAQUE_INPUT_CENSUS -ne '1'){throw 'Native batch pixel pair requires its explicit opaque input census'}
+if($env:CHLORIUM_OPAQUE_INPUT_CENSUS -eq '1' -and ($env:CHLORIUM_OPACITY_INVOCATIONS -eq '1' -or $env:CHLORIUM_QUAD_READ_WATCH -eq '1' -or $env:CHLORIUM_OWNED_REGISTER_ORACLE -eq '1')){throw 'Use only one explicit native input diagnostic per run'}
+if($env:CHLORIUM_OPACITY_INVOCATIONS -eq '1' -and $env:CHLORIUM_QUAD_READ_WATCH -eq '1'){throw 'Use only one hardware breakpoint diagnostic per run'}
+if($env:CHLORIUM_OWNED_REGISTER_ORACLE -eq '1' -and !$PassCapture){throw 'Owned register oracle requires the isolated pass-capture diagnostic'}
 $root = Split-Path -Parent $PSScriptRoot
 if ($FromPercent -ge $ToPercent) { throw 'The target percentage range must increase' }
 if ($CapturePercent.Count -gt 16 -or ($CapturePercent | Where-Object { $_ -lt $FromPercent -or $_ -ge $ToPercent })) {
@@ -18,6 +46,11 @@ if ($CapturePercent.Count -and !$VisualWatch) { throw 'Capture percentages requi
 $game = if ($GameDirectory) { $GameDirectory } else { Join-Path $root 'test-game' }
 $destination = Join-Path $game 'geode\mods\local.chlorium.audit.geode'
 $productionDestination = Join-Path $game 'geode\mods\local.chlorium.geode'
+. (Join-Path $PSScriptRoot 'ModProfile.ps1')
+if(!$WithUserMods) {
+    $isolatedProfile=Get-ResearchModProfile -ModsDirectory (Join-Path $game 'geode/mods') -ProfileRoot (Join-Path $env:LOCALAPPDATA 'GeometryDash') -AllowedIds @('geode.node-ids')
+    if(@($isolatedProfile.mods).Count -ne 1){throw 'Isolated profile requires the node-ids dependency'}
+}
 if (Get-Process GeometryDash -ErrorAction SilentlyContinue) { throw 'A game session is already running; refusing to interfere' }
 if (!$Package) {
     $cache = Get-Content -LiteralPath (Join-Path $root 'build\CMakeCache.txt') -Raw
@@ -44,6 +77,36 @@ try {
     $supportsMathPipeline = $binary.Contains('CHLORIUM_MATH_PIPELINE_AUDIT_V1')
     $supportsNativeSnapshots = $binary.Contains('CHLORIUM_NATIVE_SNAPSHOT_AUDIT_V1')
     $supportsCanonical = $binary.Contains('CHLORIUM_CANONICAL_CORE_AUDIT_V10')
+    $supportsContinuous = $binary.Contains('CHLORIUM_RESIDENT_CONTINUOUS_AUDIT_R57')
+    $opacityHashAuditBinary = $binary.Contains('CHLORIUM_OPACITY_HASH_AUDIT_R36')
+    if (!$binary.Contains('CHLORIUM_AUDIT_120FPS_PACING_R4')) { throw 'Rebuild the auditor with verified 120 FPS pacing before launching this campaign' }
+    $opacityShadowBinary = $binary.Contains('CHLORIUM_OPACITY_PREFIX_SHADOW_V1')
+    $passCaptureBinary = $binary.Contains('CHLORIUM_NATIVE_PASS_CAPTURE_V3')
+    if($env:CHLORIUM_ZERO_NATIVE_HANDOFF -eq '1' -and !$binary.Contains('CHLORIUM_ZERO_NATIVE_HANDOFF_R46')){throw 'Rebuild the native shader handoff before this diagnostic'}
+    if($env:CHLORIUM_RESIDENT_NATIVE_REPLAY -eq '1' -and !$binary.Contains('CHLORIUM_RESIDENT_NATIVE_REPLAY_R49')){throw 'Rebuild the resident native replay before this diagnostic'}
+    if($env:CHLORIUM_RESIDENT_NATIVE_REPLAY -eq '1' -and !$binary.Contains('CHLORIUM_RESIDENT_NATIVE_CACHE_R50')){throw 'Rebuild the persistent resident cache before this diagnostic'}
+    if($env:CHLORIUM_RESIDENT_NATIVE_STREAM -eq '1' -and !$binary.Contains('CHLORIUM_RESIDENT_NATIVE_STREAM_R51')){throw 'Rebuild the native vertex stream before this diagnostic'}
+    if($env:CHLORIUM_RESIDENT_NATIVE_STREAM -eq '1' -and !$binary.Contains('CHLORIUM_RESIDENT_NATIVE_SLOT_CACHE_R52')){throw 'Rebuild the native slot cache before this diagnostic'}
+    if($env:CHLORIUM_RESIDENT_NATIVE_STREAM -eq '1' -and !$binary.Contains('CHLORIUM_RESIDENT_EXACT_GPU_UPDATES_R53')){throw 'Rebuild the exact GPU updates before this diagnostic'}
+    if($env:CHLORIUM_RESIDENT_NATIVE_STREAM -eq '1' -and !$binary.Contains('CHLORIUM_RESIDENT_OVERWRITE_BARRIER_R56')){throw 'Rebuild the GPU overwrite barrier before this diagnostic'}
+    if($env:CHLORIUM_NATIVE_PRODUCER_CAPTURE -eq '1' -and !$binary.Contains('CHLORIUM_NATIVE_PRODUCER_SHADOW_R54')){throw 'Rebuild the native producer observer before this diagnostic'}
+    if($env:CHLORIUM_NATIVE_PRODUCER_CAPTURE -eq '1' -and !$binary.Contains('CHLORIUM_NATIVE_PRODUCER_REPLAY_R55')){throw 'Rebuild the event packet replay before this diagnostic'}
+    if($env:CHLORIUM_RESEARCH_SOURCE_LEVEL_ID -eq '1' -and !$binary.Contains('CHLORIUM_RESEARCH_SOURCE_LEVEL_ID_R45')){throw 'Rebuild the source level identity experiment before this diagnostic'}
+    if($env:CHLORIUM_STARTUP_DEATH_WATCH -eq '1' -and !$binary.Contains('CHLORIUM_STARTUP_DEATH_WATCH_R45')){throw 'Rebuild the startup death observer before this diagnostic'}
+    if($env:CHLORIUM_ZERO_FRAGMENT_DISCARD -eq '1' -and !$binary.Contains('CHLORIUM_ZERO_FRAGMENT_DISCARD_R44')){throw 'Rebuild the zero fragment discard before this diagnostic'}
+    if($env:CHLORIUM_NATIVE_BATCH_REPLAY -eq '1' -and !$binary.Contains('CHLORIUM_NATIVE_BATCH_REPLAY_R43')){throw 'Rebuild the native batch replay before this diagnostic'}
+    if($env:CHLORIUM_OWNED_REGISTER_ORACLE -eq '1' -and !$binary.Contains('CHLORIUM_OWNED_REGISTER_ORACLE_V1')){throw 'Rebuild the owned register oracle before this diagnostic'}
+    if($env:CHLORIUM_QUAD_READ_WATCH -eq '1' -and !$binary.Contains('CHLORIUM_NATIVE_QUAD_READ_WATCH_DIAGNOSTIC_V1')){throw 'Rebuild the native quad read observer before this diagnostic'}
+    if($env:CHLORIUM_OPACITY_INVOCATIONS -eq '1' -and !$binary.Contains('CHLORIUM_NATIVE_OPACITY_INVOCATIONS_R37')){throw 'Rebuild the native opacity invocation census before this diagnostic'}
+    if($env:CHLORIUM_OPAQUE_INPUT_CENSUS -eq '1' -and !$binary.Contains('CHLORIUM_OPAQUE_INPUT_CENSUS_R41')){throw 'Rebuild the opaque input census before this diagnostic'}
+    if($env:CHLORIUM_OPAQUE_PIXEL_PAIR -eq '1' -and !$binary.Contains('CHLORIUM_NATIVE_BATCH_PIXEL_PAIR_R41')){throw 'Rebuild the native batch pixel pair before this diagnostic'}
+    if($env:CHLORIUM_MOVE_COMMAND_CENSUS -eq '1' -and !$binary.Contains('CHLORIUM_NATIVE_MOVEMENT_CENSUS_R42')){throw 'Rebuild the native movement census before this diagnostic'}
+    if($binary.Contains('CHLORIUM_NATIVE_PASS_CAPTURE_V') -and !$passCaptureBinary){throw 'Unsupported native pass capture version; rebuild the diagnostic'}
+    if($passCaptureBinary -ne [bool]$PassCapture){throw 'Native pass capture requires its explicit diagnostic flag and matching auditor'}
+    if($PassCapture -and (!$Native -or $VisualWatch -or $WithUserMods -or $ExternalSampling -or $OpacityShadow -or !$measurementOnly -or !$supportsCanonical)){throw 'Native pass capture is an isolated native diagnostic, never a performance comparison'}
+    if($opacityShadowBinary -ne [bool]$OpacityShadow){throw 'Opacity shadow requires its explicit diagnostic flag and matching auditor'}
+    if($OpacityShadow -and (!$Native -or $VisualWatch -or $WithUserMods -or $ExternalSampling -or !$measurementOnly -or !$supportsCanonical)){throw 'Opacity shadow requires its isolated native diagnostic profile without image capture or sampling'}
+    if($ExternalSampling -and (!$Native -or $VisualWatch -or $WithUserMods -or !$measurementOnly -or !$binary.Contains('CHLORIUM_EXTERNAL_SAMPLING_AUDIT_V2'))){throw 'External sampling requires its isolated native diagnostic auditor; never use it as a performance run'}
     if ($VisualWatch -and (!$binary.Contains('CHLORIUM_VISUAL_READBACK_V2') -or
         !$binary.Contains('CHLORIUM_PRESENTED_CAPTURE_ONLY_V3') -or !$binary.Contains('CHLORIUM_READBACK_STATE_GUARDS_V5'))) {
         throw 'Rebuild visual diagnostics with presented-frame reads, scoped GL restoration, and complete probe/file coverage'
@@ -69,6 +132,8 @@ if ($measurementOnly -and (Test-Path -LiteralPath $productionDestination)) { thr
 $requireTargetedMath = $false
 $requireMathPipeline = $false
 $requireNativeSnapshots = $false
+$requireOpacityHash = $false
+$rendererTimingDiagnostic = $false
 if ($measurementOnly -and !$Native) {
     if (!$ProductionPackage) { $ProductionPackage = Join-Path $root 'dist\local.chlorium.geode' }
     Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -91,12 +156,20 @@ if ($measurementOnly -and !$Native) {
             if (!$supportsMathPipeline) { throw 'Rebuild the measurement module to require both active math pipeline components' }
             $requireMathPipeline = $true
         }
-        if ($binary.Contains('CHLORIUM_NATIVE_CANONICAL_BACKEND_V10')) {
+        if ($binary.Contains('CHLORIUM_RESIDENT_CONTINUOUS_R57')) {
+            if(!$supportsContinuous -or !$supportsCanonical){throw 'Continuous renderer requires its independent R57 activation and native-body auditor'}
+            if($binary.Contains('CHLORIUM_NATIVE_CANONICAL_BACKEND_V10')){throw 'Continuous renderer must not contain the old canonical core'}
+        } elseif ($binary.Contains('CHLORIUM_NATIVE_CANONICAL_BACKEND_V10')) {
             if (!$supportsCanonical -or !$binary.Contains('CHLORIUM_CANONICAL_AREA_QUOTIENTS_V10')) { throw 'Canonical core requires its independent V10 proof auditor' }
+            if($binary.Contains('CHLORIUM_NATIVE_OPACITY_HASH_R36')){
+                if(!$opacityHashAuditBinary){throw 'Rebuild the independent R36 opacity hash auditor'}
+                $requireOpacityHash=$true
+            }
         } elseif ($binary.Contains('CHLORIUM_EXPERIMENTAL_NATIVE_SNAPSHOTS_V1')) {
             if (!$supportsNativeSnapshots) { throw 'Rebuild the independent measurement module to verify native snapshot activation' }
             $requireNativeSnapshots = $true
         }
+        $rendererTimingDiagnostic = $binary.Contains('CHLORIUM_RENDERER_TIMING_R60')
         $binary = $null
     } finally { $productionZip.Dispose() }
 }
@@ -104,6 +177,8 @@ if ($measurementOnly -and !$Native) {
 # directory must not erase an existing readable report with an empty one.
 $previous = $env:CHLORIUM_AUDIT_OUTPUT
 $previousNative = $env:CHLORIUM_AUDIT_NATIVE
+$previousOpacityHash = $env:CHLORIUM_REQUIRE_OPACITY_HASH_R36
+$previousSampling = $env:CHLORIUM_EXTERNAL_SAMPLING
 $previousFetch = $env:CHLORIUM_AUDIT_FETCH_ID
 $previousBenchmark = $env:CHLORIUM_BENCHMARK_SECONDS
 $previousLevel = $env:CHLORIUM_BENCHMARK_LEVEL
@@ -196,8 +271,7 @@ try {
         $env:CHLORIUM_EXPECTED_USER_MODS = (($userModManifest | Where-Object requested_enabled | ForEach-Object id) -join ',')
     } else {
         $env:CHLORIUM_EXPECTED_USER_MODS = $null
-        . (Join-Path $PSScriptRoot 'ModProfile.ps1')
-        $isolatedProfile = Get-ResearchModProfile -ModsDirectory (Join-Path $game 'geode/mods') -ProfileRoot (Join-Path $env:LOCALAPPDATA 'GeometryDash')
+        $isolatedProfile = Get-ResearchModProfile -ModsDirectory (Join-Path $game 'geode/mods') -ProfileRoot (Join-Path $env:LOCALAPPDATA 'GeometryDash') -AllowedIds @('geode.node-ids','local.chlorium.audit')
         $profileHash = $isolatedProfile.profile_sha256
         $profileSettingsHash = $isolatedProfile.settings_sha256
         $isolatedProfile.mods | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath ($output + '.mods.json') -Encoding UTF8
@@ -218,6 +292,7 @@ try {
     }
     @{
         level = $Level; native = [bool]$Native; measurement_only = $measurementOnly
+        target_fps = 120
         measurement_sha256 = (Get-FileHash -LiteralPath $Package).Hash
         production_sha256 = if ($stagedProduction) { (Get-FileHash -LiteralPath $productionDestination).Hash } else { $null }
         game_sha256 = (Get-FileHash -LiteralPath (Join-Path $game 'GeometryDash.exe')).Hash
@@ -232,6 +307,29 @@ try {
         combined_math_pipeline_required = $requireMathPipeline
         native_snapshots_required = $requireNativeSnapshots
         target_from_percent = $FromPercent; target_to_percent = $ToPercent
+        external_sampling_requested = [bool]$ExternalSampling
+        opacity_shadow_diagnostic = [bool]$OpacityShadow
+        native_pass_capture_diagnostic = [bool]$PassCapture
+        movement_command_census_diagnostic = ($env:CHLORIUM_MOVE_COMMAND_CENSUS -eq '1')
+        native_batch_replay_diagnostic = ($env:CHLORIUM_NATIVE_BATCH_REPLAY -eq '1')
+        zero_fragment_discard_diagnostic = ($env:CHLORIUM_ZERO_FRAGMENT_DISCARD -eq '1')
+        startup_death_diagnostic = ($env:CHLORIUM_STARTUP_DEATH_WATCH -eq '1')
+        research_source_level_id = ($env:CHLORIUM_RESEARCH_SOURCE_LEVEL_ID -eq '1')
+        zero_native_handoff_diagnostic = ($env:CHLORIUM_ZERO_NATIVE_HANDOFF -eq '1')
+        resident_native_replay_diagnostic = ($env:CHLORIUM_RESIDENT_NATIVE_REPLAY -eq '1')
+        resident_native_cache_diagnostic = ($env:CHLORIUM_RESIDENT_NATIVE_REPLAY -eq '1')
+        resident_native_stream_diagnostic = ($env:CHLORIUM_RESIDENT_NATIVE_STREAM -eq '1')
+        resident_exact_gpu_updates_diagnostic = ($env:CHLORIUM_RESIDENT_NATIVE_STREAM -eq '1')
+        renderer_timing_diagnostic = $rendererTimingDiagnostic
+        startup_diagnostic = [bool]$StartupDiagnostic
+        native_producer_capture_diagnostic = ($env:CHLORIUM_NATIVE_PRODUCER_CAPTURE -eq '1')
+        resident_vertex_sha256 = $(if($env:CHLORIUM_RESIDENT_NATIVE_REPLAY -eq '1'){(Get-FileHash -LiteralPath $taskResidentSource -Algorithm SHA256).Hash.ToLowerInvariant()}else{$null})
+        native_quad_reads_diagnostic = $env:CHLORIUM_QUAD_READ_WATCH -eq '1'
+        native_opacity_invocations_diagnostic = $env:CHLORIUM_OPACITY_INVOCATIONS -eq '1'
+        opaque_input_census_diagnostic = $env:CHLORIUM_OPAQUE_INPUT_CENSUS -eq '1'
+        native_batch_pixel_pair_diagnostic = $env:CHLORIUM_OPAQUE_PIXEL_PAIR -eq '1'
+        owned_register_oracle_diagnostic = $env:CHLORIUM_OWNED_REGISTER_ORACLE -eq '1'
+        native_opacity_hash_r36_required = $requireOpacityHash
         low_detail_requested = $false; disable_shake_requested = $true
         debug_overlays_disabled_requested = [bool]$WithUserMods
         visual_probe_percents = @($CapturePercent)
@@ -244,6 +342,7 @@ try {
     $resourceTrace.WriteLine('elapsed_wall_s,working_set_bytes,private_bytes,cpu_seconds')
     $env:CHLORIUM_AUDIT_OUTPUT = $output
     $env:CHLORIUM_AUDIT_NATIVE = if ($Native) { '1' } else { $null }
+    $env:CHLORIUM_EXTERNAL_SAMPLING = if ($ExternalSampling) { '1' } else { $null }
     $env:CHLORIUM_AUDIT_FETCH_ID = if ($FetchLevel -gt 0) { [string]$FetchLevel } else { $null }
     $env:CHLORIUM_BENCHMARK_SECONDS = if ($BenchmarkSeconds -gt 0) { [string]$BenchmarkSeconds } else { $null }
     $env:CHLORIUM_BENCHMARK_LEVEL = [string]$Level
@@ -255,9 +354,10 @@ try {
     $env:CHLORIUM_STREAM_MODE = $StreamMode
     $env:CHLORIUM_REQUIRE_TARGETED_MATH_V3 = if ($requireMathPipeline) { 'pipeline' } elseif ($requireTargetedMath) { '1' } else { $null }
     $env:CHLORIUM_REQUIRE_NATIVE_SNAPSHOTS = if ($requireNativeSnapshots) { '1' } else { $null }
+    $env:CHLORIUM_REQUIRE_OPACITY_HASH_R36 = if($requireOpacityHash){'1'}else{$null}
     # This is the visible interactive game being tested, not a background
     # helper. Let GD manage its own normal focused rendering/timing.
-    $testProcess = Start-Process -FilePath (Join-Path $game 'GeometryDash.exe') -WorkingDirectory $game -PassThru
+    $testProcess = Start-Process -FilePath (Join-Path $game 'GeometryDash.exe') -WorkingDirectory $game -WindowStyle Normal -PassThru
     # One activation request, never a fabricated foreground metric. The
     # harness still checks the real owning PID before/after measured frames.
     if (!('ChloriumResearchFocus' -as [type])) {
@@ -315,6 +415,7 @@ public static class ChloriumResearchFocus {
 } finally {
     $env:CHLORIUM_AUDIT_OUTPUT = $previous
     $env:CHLORIUM_AUDIT_NATIVE = $previousNative
+    $env:CHLORIUM_EXTERNAL_SAMPLING = $previousSampling
     $env:CHLORIUM_AUDIT_FETCH_ID = $previousFetch
     $env:CHLORIUM_BENCHMARK_SECONDS = $previousBenchmark
     $env:CHLORIUM_BENCHMARK_LEVEL = $previousLevel
@@ -327,6 +428,7 @@ public static class ChloriumResearchFocus {
     $env:CHLORIUM_VISUAL_PROBES = $previousProbes
     $env:CHLORIUM_REQUIRE_TARGETED_MATH_V3 = $previousTargetedMath
     $env:CHLORIUM_REQUIRE_NATIVE_SNAPSHOTS = $previousNativeSnapshots
+    $env:CHLORIUM_REQUIRE_OPACITY_HASH_R36 = $previousOpacityHash
     if ($resourceTrace) { $resourceTrace.Dispose() }
     if ($testProcess -and !$testProcess.HasExited) { Stop-Process -Id $testProcess.Id -ErrorAction SilentlyContinue }
     if ($testProcess) { $testProcess.WaitForExit(5000) | Out-Null; $testProcess.Dispose() }

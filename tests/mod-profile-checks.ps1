@@ -44,3 +44,20 @@ $refused=$false
 try { Read-Profile | Out-Null } catch { $refused=$true }
 Assert $refused 'Ambiguous duplicate identities rejected'
 'PASS: 6 isolated profile invariants; fixture retained only in ignored build-research'
+$mods=Join-Path $folder 'strict-mods'
+[IO.Directory]::CreateDirectory($mods) | Out-Null
+Add-FixtureMod 'dependency.geode' 'geode.node-ids'
+$strict=Get-ResearchModProfile -ModsDirectory $mods -ProfileRoot $profile -AllowedIds @('geode.node-ids')
+Assert ($strict.mods.Count -eq 1 -and $strict.mods[0].id -eq 'geode.node-ids') 'Minimal dependency accepted by identity'
+Add-FixtureMod 'candidate.geode' 'local.chlorium'
+$refused=$false
+try {Get-ResearchModProfile -ModsDirectory $mods -ProfileRoot $profile -AllowedIds @('geode.node-ids') | Out-Null}
+catch {if($_.Exception.Message -match 'unexpected mod'){$refused=$true}else{throw}}
+Assert $refused 'Unexpected candidate must reject before the paired-variable exclusion'
+Remove-Item -LiteralPath (Join-Path $mods 'candidate.geode')
+Add-FixtureMod 'geode.node-ids.geode' 'example.foreign'
+$refused=$false
+try {Get-ResearchModProfile -ModsDirectory $mods -ProfileRoot $profile -AllowedIds @('geode.node-ids') | Out-Null}
+catch {if($_.Exception.Message -match 'unexpected mod'){$refused=$true}else{throw}}
+Assert $refused 'Renamed foreign package must not bypass minimal profile validation'
+'PASS: strict minimal profile accepts dependency and rejects foreign/candidate packages before exclusion'

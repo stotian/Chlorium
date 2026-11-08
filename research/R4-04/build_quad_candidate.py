@@ -32,17 +32,33 @@ profiles = {
     "--gpu-exchange": "native-gpu-exchange-v8",
     "--persistent-transfer": "native-persistent-transfer-v9",
     "--canonical": "native-canonical-v10",
+    "--opacity-hash": "native-opacity-hash-r36",
     "--canonical-measure": "measurement-canonical-v10",
+    "--canonical-measure-r2": "measurement-canonical-v10-r2",
+    "--canonical-measure-r3": "measurement-canonical-v10-r3",
+    "--canonical-measure-r4": "measurement-canonical-v10-r4",
+    "--canonical-sample": "measurement-canonical-sampling-v10",
+    "--pass-capture": "measurement-native-pass-v10",
+    "--resident-continuous": "native-resident-continuous-r57",
+    "--resident-fast": "native-resident-fast-r58",
+    "--resident-deferred": "native-resident-deferred-r59",
+    "--resident-timed": "native-resident-timed-r60",
+    "--continuous-measure": "measurement-resident-continuous-r57",
+    "--continuous-measure-r59": "measurement-resident-deferred-r59",
+    "--continuous-measure-r60": "measurement-resident-timed-r60",
+    "--opacity-shadow": "measurement-canonical-opacity-shadow-v10",
     "--transfer-measure": "measurement-transfer-v9",
     "--transfer-measure-r2": "measurement-transfer-v9-r2",
 }
 if len(sys.argv) > 2 or (len(sys.argv) == 2 and sys.argv[1] not in profiles):
     raise SystemExit("Choose exactly one explicit research build profile")
 selected = sys.argv[1] if len(sys.argv) == 2 else ""
+if selected == "--opacity-shadow":
+    raise SystemExit("R4-30 observer build blocked: installed-loader native-register compatibility has not been verified")
 profile = profiles[selected]
 measurement = profile.startswith("measurement-")
 native_audit = selected == "--native-audit"
-canonical = profile == "native-canonical-v10"
+canonical = profile in ("native-canonical-v10", "native-opacity-hash-r36")
 native_persistent = profile == "native-persistent-transfer-v9"
 native_vertex = canonical or native_persistent or profile in ("native-vertex-black-v5", "native-adaptive-upload-v6", "native-draw-bridge-v7", "native-gpu-exchange-v8")
 native_exchange = profile == "native-gpu-exchange-v8"
@@ -92,8 +108,35 @@ if canonical:
     flags += ["/DCHLORIUM_NATIVE_CANONICAL_V10=1"]
     source_names = ["src/renderer/NativeAreaDivisions.cpp", "src/renderer/NativeAtlasStatsEmpty.cpp", "src/renderer/NativePauseGuard.cpp", "src/BuildIdentity.cpp"]
 sources = [root / name for name in source_names]
-if selected=="--canonical-measure":
+if selected in ("--resident-continuous", "--resident-fast", "--resident-deferred", "--resident-timed"):
+    flags = [flag for flag in flags if not flag.startswith(("/DCHLORIUM_EXPERIMENTAL_NATIVE_", "/DCHLORIUM_NATIVE_SNAPSHOTS="))]
+    flags += ["/DCHLORIUM_RESIDENT_CONTINUOUS_R57=1", "/fp:strict"]
+    sources = [root/"research/R4-57/ContinuousRenderer.cpp",root/"src/BuildIdentity.cpp"]
+    if selected in ("--resident-fast", "--resident-deferred", "--resident-timed"):
+        flags += ["/DCHLORIUM_RESIDENT_FAST_R58=1"]
+    if selected in ("--resident-deferred", "--resident-timed"):
+        flags += ["/DCHLORIUM_NATIVE_UPLOAD_DEFERRAL_R59=1"]
+    if selected=="--resident-timed":
+        flags += ["/DCHLORIUM_RENDERER_TIMING_R60=1"]
+if selected=="--opacity-hash":
+    flags += ["/DCHLORIUM_NATIVE_OPACITY_HASH_R36=1"]
+    sources.append(root / "research/R4-36/NativeOpacityHashPatch.cpp")
+if selected in ("--canonical-measure","--canonical-measure-r2","--canonical-measure-r3","--canonical-measure-r4","--continuous-measure","--continuous-measure-r59","--continuous-measure-r60","--canonical-sample","--pass-capture","--opacity-shadow"):
     flags += ["/DCHLORIUM_CANONICAL_AUDIT_V10=1"]
+if selected in ("--canonical-measure-r2","--canonical-measure-r3","--canonical-measure-r4","--continuous-measure","--continuous-measure-r59","--continuous-measure-r60","--canonical-sample","--pass-capture","--opacity-shadow"):
+    flags += ["/DCHLORIUM_CANONICAL_AUDIT_PE_R2=1"]
+if selected in ("--continuous-measure-r59","--continuous-measure-r60"):
+    flags += ["/DCHLORIUM_EXTENDED_RESIDENT_STATS_R59=1"]
+if selected=="--continuous-measure-r60":
+    flags += ["/DCHLORIUM_RENDERER_TIMING_AUDIT_R60=1"]
+if selected=="--pass-capture":
+    flags += ["/DCHLORIUM_NATIVE_PASS_CAPTURE=1"]
+    sources.append(root / "research/R4-32/NativePassCapture.cpp")
+if selected=="--canonical-sample":
+    flags += ["/DCHLORIUM_EXTERNAL_SAMPLING_AUDIT=1"]
+if selected=="--opacity-shadow":
+    flags += ["/DCHLORIUM_OPACITY_PREFIX_SHADOW=1", "/fp:strict"]
+    sources.append(root / "research/R4-30/NativeOpacityShadow.cpp")
 if selected=="--transfer-measure-r2":
     flags += ["/DCHLORIUM_TRANSFER_HYBRID_AUDIT_V9=1"]
 if native_persistent:
@@ -134,12 +177,23 @@ manifest = {"schema_version": 1, "revision": profile,
             "mod_id": "local.chlorium.audit" if measurement else "local.chlorium", "version": "v0.2.0-alpha.6" if measurement or native_audit else "v0.3.0-alpha.5" if native_persistent else "v0.3.0-alpha.4" if native_exchange else "v0.3.0-alpha.3" if native_bridge else "v0.3.0-alpha.2" if adaptive_upload else json.loads((root / "mod.json").read_text(encoding="utf-8"))["version"] if canonical else "v0.3.0-alpha.1" if native_vertex else "v0.2.0-alpha.610",
             "compile_status": "not_run", "link_status": "not_run",
             "game_status": "not_run", "flags": flags, "sources": [], "libraries": [], "headers": [], "resources": []}
+if selected=="--resident-continuous":
+    manifest.update(backend="CHLORIUM_RESIDENT_CONTINUOUS_R57",version="v0.4.0-alpha.57")
+if selected=="--resident-fast":
+    manifest.update(backend="CHLORIUM_RESIDENT_FAST_R58",version="v0.4.0-alpha.58")
+if selected=="--resident-deferred":
+    manifest.update(backend="CHLORIUM_NATIVE_UPLOAD_DEFERRAL_R59",version="v0.4.0-alpha.59")
+if selected=="--resident-timed":
+    manifest.update(backend="CHLORIUM_RENDERER_TIMING_R60",version="v0.4.0-alpha.60")
 for source in sources:
     manifest["sources"].append({"path": source.name, "sha256": fingerprint(source)})
 for header in (root / "src" / "renderer").glob("*.hpp"):
     manifest["headers"].append({"path": header.name, "sha256": fingerprint(header)})
 if measurement:
-    for header in ("tests/FrameWatch.hpp", "tests/VisualSignature.hpp", "tests/CanonicalCoreProof.hpp", "src/BProfiler.hpp"):
+    for header in ("tests/FrameWatch.hpp", "tests/VisualSignature.hpp", "tests/CanonicalCoreProof.hpp", "tests/MeasurementHookPolicy.hpp", "src/BProfiler.hpp"):
+        manifest["headers"].append({"path": header, "sha256": fingerprint(root / header)})
+if selected=="--opacity-shadow":
+    for header in ("research/R4-30/GroupOpacityProgram.hpp", "research/R4-30/NativeOpacityShadow.hpp"):
         manifest["headers"].append({"path": header, "sha256": fingerprint(root / header)})
 for resource in sorted((root / "resources").rglob("*")):
     if resource.is_file():
@@ -155,10 +209,16 @@ save()
 # SDK/static dependency identities remain in the fingerprint; no GD binary,
 # save data, private logs or credentials enter this source archive.
 snapshot_files = set()
-for folder in ("src", "legacy", "tests", "research/R4-08", "research/R4-11", "research/R4-17"):
+for pattern in ("*.cpp", "*.hpp"):
+    snapshot_files.update((root / "research/R4-57").rglob(pattern))
+    snapshot_files.update((root / "research/R4-58").rglob(pattern))
+    snapshot_files.update((root / "research/R4-59").rglob(pattern))
+    snapshot_files.update((root / "research/R4-60").rglob(pattern))
+for folder in ("src", "legacy", "tests", "research/R4-08", "research/R4-11", "research/R4-17", "research/R4-30", "research/R4-32", "research/R4-33", "research/R4-34", "research/R4-35", "research/R4-36", "research/R4-37", "research/R4-41", "research/R4-42", "research/R4-43", "research/R4-44", "research/R4-45", "research/R4-46", "research/R4-47", "research/R4-48", "research/R4-49", "research/R4-54"):
     for pattern in ("*.cpp", "*.hpp", "*.h"):
         snapshot_files.update((root / folder).rglob(pattern))
 snapshot_files.update(root / resource["path"] for resource in manifest["resources"])
+snapshot_files.add(root / "research/R4-33/resident.vert")
 snapshot_files.add(Path(__file__).resolve())
 snapshot_files.add(root / "research/R4-04/build_history.py")
 snapshot_hashes = {path: fingerprint(path) for path in sorted(snapshot_files)}

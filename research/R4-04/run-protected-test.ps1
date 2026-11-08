@@ -1,6 +1,6 @@
 #Requires -Version 7.0
 param(
-    [Parameter(Mandatory)][ValidateSet(88952972,129598490,133260800)][int]$Level,
+    [Parameter(Mandatory)][ValidateSet(88952972,129598490,133260800,139648964)][int]$Level,
     [Parameter(Mandatory)][ValidateSet('native','candidate')][string]$Mode,
     [switch]$WithUserMods,
     [switch]$PrepareOnly,
@@ -12,13 +12,23 @@ param(
     [switch]$PersistentTransfer,
     [switch]$Canonical,
     [switch]$ExternalFocus,
+    [switch]$ExternalSampling,
+    [switch]$OpacityShadow,
+    [switch]$PassCapture,
     [switch]$Performance,
     [switch]$BlackScreen,
     [ValidateSet('initial','visible','frames')][string]$CensusRevision='initial',
     [ValidateSet('initial','r2')][string]$TransferRevision='initial',
-    [switch]$RetryStartup
+    [switch]$RetryStartup,
+    [ValidatePattern('^[a-z0-9][a-z0-9-]{0,31}$')][string]$RunRevision,
+    [switch]$FullLevel,
+    [string]$PlanPath
 )
 $ErrorActionPreference = 'Stop'
+if($FullLevel -and ($Level -ne 88952972 -or $Mode -ne 'candidate' -or !$Canonical -or !$Performance)){throw 'Full-level override is restricted to the explicitly requested Grief continuous-renderer test'}
+if($PassCapture -and (!$Canonical -or $Mode -ne 'native' -or $Performance -or $WithUserMods -or $ExternalSampling -or $OpacityShadow)){throw 'Native pass capture requires its separate isolated native diagnostic'}
+if($ExternalSampling -and (!$Canonical -or $Mode -ne 'native' -or $Performance -or $WithUserMods)){throw 'External sampling requires a separate native canonical diagnostic with isolated mods'}
+if($OpacityShadow -and (!$Canonical -or $Mode -ne 'native' -or $Performance -or $WithUserMods -or $ExternalSampling)){throw 'Opacity shadow requires its isolated native canonical diagnostic, never a performance comparison'}
 if ($TransferRevision -ne 'initial' -and !$PersistentTransfer) { throw 'Transfer revision requires the explicit persistent profile' }
 if ($Canonical -and ($GpuExchange -or $PersistentTransfer -or $NativeBridge -or $AdaptiveUpload -or $AreaCensus -or $PoseCensus -or $BlackScreen)) {throw 'Canonical core requires its separate comparison profile'}
 if ($Performance -and (!($GpuExchange -or $PersistentTransfer -or $Canonical) -or $PoseCensus -or $AreaCensus -or $BlackScreen)) { throw 'Performance comparison requires an explicit production profile' }
@@ -30,10 +40,42 @@ if ($PoseCensus -and $AreaCensus) { throw 'Choose one census' }
 if ($PoseCensus) { $AreaCensus=$true }
 $taskRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
 $taskPlanPath = Join-Path $PSScriptRoot 'runtime-plan.local.json'
+if($PlanPath){
+    $taskPlanPath=[IO.Path]::GetFullPath($PlanPath)
+    $taskPlansRoot=[IO.Path]::GetFullPath((Join-Path $taskRoot 'build-research'))
+    if(!$taskPlanPath.StartsWith($taskPlansRoot+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase) -or !$taskPlanPath.EndsWith('.local.json',[StringComparison]::OrdinalIgnoreCase)){
+        throw 'Research plans must be local JSON files inside build-research'
+    }
+    $taskProbe=$taskPlanPath
+    while($taskProbe -and $taskProbe -ne $taskPlansRoot){
+        if((Test-Path -LiteralPath $taskProbe) -and ((Get-Item -LiteralPath $taskProbe -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)){throw 'Research plan path is redirected'}
+        $taskProbe=[IO.Path]::GetDirectoryName($taskProbe)
+    }
+}
 $taskPlan = Get-Content -LiteralPath $taskPlanPath -Raw | ConvertFrom-Json
+if($RunRevision){$taskPlan.run_revision=$RunRevision}
 if ($taskPlan.status -ne 'authorized_by_user') { throw 'Runtime campaign lacks explicit user authorization' }
+if($taskPlan.allowed_modes -and $Mode -notin $taskPlan.allowed_modes){throw 'This campaign only authorizes the selected Chlorium renderer; native baseline tests are stopped'}
+if ($taskPlan.run_revision -and $taskPlan.run_revision -notmatch '^[a-z0-9][a-z0-9-]{0,31}$') {throw 'Invalid campaign revision'}
+if([bool]$taskPlan.opacity_shadow -ne [bool]$OpacityShadow){throw 'Opacity shadow requires its distinct, explicitly selected campaign plan'}
+if([bool]$taskPlan.native_pass_capture -ne [bool]$PassCapture){throw 'Native pass capture requires its distinct campaign plan'}
+if ($WithUserMods -and $taskPlan.mod_profile -eq 'isolated') { throw 'Current campaign requires isolated mods; personal mod profiles are not authorized' }
 $taskTarget = @($taskPlan.targets | Where-Object level -eq $Level)
 if ($taskTarget.Count -ne 1) { throw 'Level is outside the authorized campaign' }
+if($FullLevel){$taskTarget[0].from_percent=0.0;$taskTarget[0].to_percent=100.0}
+if($Canonical) {
+    foreach($planned in @(@{path=$taskPlan.measurement_package;sha256=$taskPlan.measurement_sha256},@{path=$taskPlan.candidate_package;sha256=$taskPlan.candidate_sha256})) {
+        if(!$planned.path -or !$planned.sha256 -or (Get-FileHash -LiteralPath (Join-Path $taskRoot $planned.path) -Algorithm SHA256).Hash -ne $planned.sha256) {
+            throw 'Campaign package hash mismatch; no backup, staging or game launch permitted'
+        }
+    }
+}
+if([IO.Path]::GetFullPath($taskPlan.game_fixture) -ne [IO.Path]::GetFullPath('C:/Users/stoti/Chlorium/test-game') -or $taskPlan.main_installation_changes){
+    throw 'This wrapper only supports the isolated GD fixture; main installation changes are forbidden'
+}
+. (Join-Path $taskRoot 'tools/ModProfile.ps1')
+$taskIsolatedProfile=if(!$WithUserMods){Get-ResearchModProfile -ModsDirectory (Join-Path $taskPlan.game_fixture 'geode/mods') -ProfileRoot (Join-Path $env:LOCALAPPDATA 'GeometryDash') -AllowedIds @('geode.node-ids')}else{$null}
+if(!$WithUserMods -and @($taskIsolatedProfile.mods).Count -ne 1){throw 'Isolated profile requires the node-ids dependency'}
 if (Get-Process GeometryDash,cl,link,ninja -ErrorAction SilentlyContinue) { throw 'A game/build process is running; refusing concurrent testing' }
 $taskProfileRoot = [IO.Path]::GetFullPath((Join-Path $env:LOCALAPPDATA 'GeometryDash'))
 $taskCampaign = Join-Path $taskRoot $(if ($AreaCensus) {'build-research/runtime-area-census-v5'} else {'build-research/runtime-v4'})
@@ -47,11 +89,15 @@ if ($NativeBridge) { $taskCampaign=Join-Path $taskRoot 'build-research/runtime-n
 if ($GpuExchange) { $taskCampaign=Join-Path $taskRoot 'build-research/runtime-gpu-exchange-v8'; if(!$WithUserMods){$taskCampaign+='-isolated'} }
 if ($PersistentTransfer) { $taskCampaign=Join-Path $taskRoot 'build-research/runtime-persistent-transfer-v9'; if(!$WithUserMods){$taskCampaign+='-isolated'} }
 if ($PersistentTransfer -and $TransferRevision -eq 'r2') { $taskCampaign+='-r2' }
-if ($Canonical) { $taskCampaign=Join-Path $taskRoot 'build-research/runtime-canonical-v10' }
+if ($Canonical) { $taskCampaign=Join-Path $taskRoot 'build-research/runtime-canonical-v10'; if(!$WithUserMods){$taskCampaign+='-isolated'} }
+if ($taskPlan.run_revision) { $taskCampaign+='-'+$taskPlan.run_revision }
+if ($ExternalSampling) { $taskCampaign+='-sampling' }
+if ($OpacityShadow) { $taskCampaign+='-opacity-shadow' }
+if ($PassCapture) { $taskCampaign+='-pass-capture' }
 if ($Performance) { $taskCampaign+='-performance' }
 if ($AreaCensus -and ($Level -ne 133260800 -or $Mode -ne 'native')) { throw 'Area census is a native Orbit diagnostic only' }
 $taskRun = Join-Path $taskCampaign "$Level-$Mode"
-if (Test-Path -LiteralPath $taskRun) {
+if (!$PrepareOnly -and (Test-Path -LiteralPath $taskRun)) {
     if (!$RetryStartup) { throw 'This authorized pass already has a run directory; refusing an implicit repeat' }
     $previousBackup=Get-Content -LiteralPath (Join-Path $taskRun 'profile-backup.local.json') -Raw | ConvertFrom-Json
     $previousMode=if ($Mode -eq 'native') {'native'} else {'chlorium'}
@@ -125,7 +171,7 @@ $taskFiles = @(Get-ProtectedFiles)
 $taskBytes = ($taskFiles | Measure-Object Length -Sum).Sum
 if ($taskBytes -gt 512MB) { throw 'Profile backup exceeds the 512 MiB preflight budget; no game launched' }
 if ($PrepareOnly) {
-    [ordered]@{profile_files=$taskFiles.Count;backup_bytes=$taskBytes;game_launch=$false;level=$Level;mode=$Mode} | ConvertTo-Json
+    [ordered]@{target_from_percent=$taskTarget[0].from_percent;target_to_percent=$taskTarget[0].to_percent;profile_files=$taskFiles.Count;backup_bytes=$taskBytes;game_launch=$false;level=$Level;mode=$Mode;mod_profile=$(if($WithUserMods){'user-mods'}else{'isolated'});mod_profile_sha256=$taskIsolatedProfile.profile_sha256;profile_settings_sha256=$taskIsolatedProfile.settings_sha256;measurement_sha256=$taskPlan.measurement_sha256;candidate_sha256=$taskPlan.candidate_sha256;campaign=$taskCampaign} | ConvertTo-Json
     exit 0
 }
 [IO.Directory]::CreateDirectory($taskRun) | Out-Null
@@ -149,6 +195,12 @@ $taskMainExisted = Test-Path -LiteralPath $taskMainPackage
 $taskMainHash = if ($taskMainExisted) { (Get-FileHash -LiteralPath $taskMainPackage -Algorithm SHA256).Hash } else { $null }
 $taskFailure = $null
 try {
+    if($taskPlan.startup_diagnostic){
+        $taskLoaderSettingsPath=Assert-ProfilePath (Join-Path $taskProfileRoot 'geode/mods/geode.loader/settings.json')
+        $taskLoaderSettings=Get-Content -LiteralPath $taskLoaderSettingsPath -Raw | ConvertFrom-Json -AsHashtable
+        $taskLoaderSettings['file-log-level']='debug'
+        [IO.File]::WriteAllText($taskLoaderSettingsPath,($taskLoaderSettings | ConvertTo-Json -Depth 30),[Text.UTF8Encoding]::new($false))
+    }
     if (!(Get-Process steam -ErrorAction SilentlyContinue)) {
         Start-Process -FilePath 'C:/Program Files (x86)/Steam/steam.exe' -ArgumentList '-silent' -WindowStyle Hidden
         Start-Sleep -Seconds 8
@@ -171,6 +223,7 @@ try {
         FromPercent=[double]$taskTarget[0].from_percent;ToPercent=[double]$taskTarget[0].to_percent
         VisualWatch=(!$Performance);BenchmarkSeconds=900
     }
+    if($taskPlan.startup_diagnostic){$taskParameters.StartupDiagnostic=$true}
     if ($AdaptiveUpload) {
         $taskParameters.Package=Join-Path $taskRoot 'build-research/measurement-upload-v6/local.chlorium.audit.geode'
         $taskParameters.ProductionPackage=Join-Path $taskRoot 'build-research/native-adaptive-upload-v6/local.chlorium.geode'
@@ -202,13 +255,12 @@ try {
         $taskParameters.VisualWatch = $false
     }
     if ($Mode -eq 'native') { $taskParameters.Native=$true }
-    if ($Canonical) {
-        $taskParameters.Package=Join-Path $taskRoot 'build-research/measurement-canonical-v10/local.chlorium.audit.geode'
-        $taskParameters.ProductionPackage=Join-Path $taskRoot 'build-research/native-canonical-v10/local.chlorium.geode'
-    }
     if ($ExternalFocus) {$taskParameters.ExternalFocus=$true}
+    if ($ExternalSampling) {$taskParameters.ExternalSampling=$true;$taskParameters.VisualWatch=$false}
+    if ($OpacityShadow) {$taskParameters.OpacityShadow=$true;$taskParameters.VisualWatch=$false}
+    if ($PassCapture) {$taskParameters.PassCapture=$true;$taskParameters.VisualWatch=$false}
     if ($WithUserMods) { $taskParameters.WithUserMods=$true }
-    if ($taskParameters.VisualWatch) { $taskParameters.CapturePercent = switch ($Level) { 88952972 { @(24.9,25.2) } 129598490 { @(76.99,77.17) } 133260800 { @(89.5,96.5) } } }
+    if ($taskParameters.VisualWatch) { $taskParameters.CapturePercent = switch ($Level) { 88952972 { @(45,55,64.5) } 129598490 { @(76.99,77.17) } 133260800 { @(89.5,96.5) } } }
     & (Join-Path $taskRoot 'tools/run-runtime-audit.ps1') @taskParameters
 } catch {
     $taskFailure = $_

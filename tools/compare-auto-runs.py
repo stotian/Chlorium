@@ -18,12 +18,12 @@ def percentile(values, q):
     return sorted(values)[int(q * (len(values) - 1))] if values else None
 
 
-def summarize(rows):
-    times = [float(row['frame_ms']) for row in rows]
+def summarize(rows, target_fps=60):
+    times = [float(row.get('raw_frame_ms', row['frame_ms'])) for row in rows]
     if not times:
         return {'samples': 0}
-    slow = [v for v in times if v > 1000 / 60]
-    result = dict(samples=len(times), fps=1000 / statistics.mean(times),
+    slow = [v for v in times if v > 1000 / target_fps]
+    result = dict(samples=len(times), target_fps=target_fps, fps=1000 / statistics.mean(times),
                 p95_ms=percentile(times, .95), p99_ms=percentile(times, .99), worst_ms=max(times),
                 slow_frames=len(slow), slow_frame_percent=100 * len(slow) / len(times),
                 slow_time_percent=100 * sum(slow) / sum(times),
@@ -81,6 +81,37 @@ def read(report, expected_loaded):
 def compare(baseline, candidate, destination):
     a, ar, ab, ap = read(baseline, False)
     b, br, bb, bp = read(candidate, True)
+    if ap.get('external_sampling_requested') or bp.get('external_sampling_requested'):
+        raise ValueError('External sampling diagnostics cannot be used as performance comparisons')
+    if ap.get('opacity_shadow_diagnostic') or bp.get('opacity_shadow_diagnostic'):
+        raise ValueError('Opacity shadow diagnostics cannot be used as performance comparisons')
+    if ap.get('native_pass_capture_diagnostic') or bp.get('native_pass_capture_diagnostic'):
+        raise ValueError('Native pass capture diagnostics cannot be used as performance comparisons')
+    if ap.get('native_producer_capture_diagnostic') or bp.get('native_producer_capture_diagnostic'):
+        raise ValueError('Native producer diagnostics cannot be used as performance comparisons')
+    if any(p.get(key) for p in (ap, bp) for key in ('resident_native_replay_diagnostic', 'resident_native_cache_diagnostic', 'resident_native_stream_diagnostic', 'resident_exact_gpu_updates_diagnostic')):
+        raise ValueError('Resident renderer replay diagnostics cannot be used as performance comparisons')
+    if ap.get('visual_diagnostic') or bp.get('visual_diagnostic'):
+        raise ValueError('Visual readback diagnostics cannot be used as performance comparisons')
+    if any(p.get(key) for p in (ap, bp) for key in ('renderer_timing_diagnostic','startup_diagnostic')):
+        raise ValueError('Renderer timing/startup diagnostics cannot be used as performance comparisons')
+    if bool(ap.get('research_source_level_id')) != bool(bp.get('research_source_level_id')):
+        raise ValueError('Different source level identity policy')
+    target_fps = ap.get('target_fps', 60)
+    if target_fps != bp.get('target_fps', 60) or target_fps not in (60, 120):
+        raise ValueError('Different or unsupported FPS targets')
+    if target_fps == 120:
+        for events in (a, b):
+            pacing = [e for e in events if e.get('event') == 'frame_pacing']
+            if (len(pacing) != 1 or not pacing[0].get('verified') or pacing[0].get('target_fps') != 120 or
+                    pacing[0].get('swap_interval') != 0 or
+                    not math.isclose(pacing[0].get('interval_seconds', 0), 1 / 120, rel_tol=0, abs_tol=1e-6)):
+                raise ValueError('120 FPS pacing has not been verified in both runs')
+        if any('raw_frame_ms' not in row for row in ar + br):
+            raise ValueError('120 FPS comparisons require actual presentation intervals')
+    if not ar or not br or any(not math.isfinite(float(row.get('raw_frame_ms', row['frame_ms']))) or
+                               float(row.get('raw_frame_ms', row['frame_ms'])) <= 0 for row in ar + br):
+        raise ValueError('Missing or invalid presentation intervals')
     if ap['level'] != bp['level'] or ap['measurement_sha256'] != bp['measurement_sha256'] or ap['game_sha256'] != bp['game_sha256']:
         raise ValueError('Different levels, measurement modules or game binaries')
     if ap.get('level_sha256') != bp.get('level_sha256') or not ap.get('level_sha256'):
@@ -104,14 +135,15 @@ def compare(baseline, candidate, destination):
         coverage.append(item)
     comparisons = []
     for percent in sorted(ab.keys() | bb.keys()):
-        left, right = summarize(ab[percent]), summarize(bb[percent])
+        left, right = summarize(ab[percent], target_fps), summarize(bb[percent], target_fps)
         item = dict(percent=percent)
         for mode, data in [('sans', left), ('avec', right)]:
             item.update({mode + '_' + k: v for k, v in data.items()})
         item['p95_change_percent'] = (100 * (right['p95_ms'] / left['p95_ms'] - 1)
                                       if left['samples'] and right['samples'] else None)
         comparisons.append(item)
-    result = dict(level=ap['level'], sans=summarize(ar), avec=summarize(br),
+    result = dict(level=ap['level'], target_fps=target_fps, sans=summarize(ar, target_fps), avec=summarize(br, target_fps),
+                  evidence_status='single_pair_descriptive_only', normal_activation_proven=False,
                   resources_sans=resource_summary(a, ap), resources_avec=resource_summary(b, bp),
                   work_sans=work_summary(ar), work_avec=work_summary(br),
                   coverage_sans=coverage[0], coverage_avec=coverage[1],
@@ -125,7 +157,7 @@ def compare(baseline, candidate, destination):
     lines = [f"# Comparaison du niveau {ap['level']}", '',
              '| Mesure | Sans Chlorium | Avec Chlorium |', '|---|---:|---:|']
     for label, key in [('FPS moyens', 'fps'), ('p95 image (ms)', 'p95_ms'), ('p99 image (ms)', 'p99_ms'),
-                       ('Pire image (ms)', 'worst_ms'), ('Images > 16,67 ms (%)', 'slow_frame_percent'),
+                       ('Pire image (ms)', 'worst_ms'), (f'Images > {1000 / target_fps:.2f} ms (%)', 'slow_frame_percent'),
                        ('Temps dans ces images (%)', 'slow_time_percent')]:
         lines.append(f"| {label} | {result['sans'][key]:.2f} | {result['avec'][key]:.2f} |")
     lines += ['', 'Collisions normales.',

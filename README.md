@@ -2,66 +2,79 @@
   <img src="logo.png" width="144" alt="Logo Chlorium" />
   <h1>Chlorium</h1>
   <p>Renderer expérimental CPU/GPU pour Geometry Dash.</p>
-  <p><strong>Windows x64 · GD 2.2081 · Geode 5.11.2 · v0.3.0-alpha.6</strong></p>
+  <p><strong>Windows x64 · GD 2.2081 · Geode 5.11.2</strong></p>
 </div>
 
 Chlorium est un fork indépendant de [Bismuth, créé par IliasHDZ](https://github.com/iliasHDZ/Bismuth).
-L'objectif est de réduire fortement le travail CPU/GPU, avec tous les effets
-visuels et le gameplay conservés. Sodium inspire l'objectif ; aucun code Sodium
-n'est intégré.
+L'objectif est un rendu plus rapide avec tous les effets et le gameplay conservés,
+en visant 120 FPS stables. Aucun code Sodium n'est intégré.
 
-**La base actuelle est le coeur canonique V10.** Les anciennes soumissions
-privees V4-V9 restent disponibles dans les experiences, hors du build courant.
-L'ancien cache mathematique `v0.2.0-alpha.6` reste archive dans
-[legacy](legacy/README.md) ; il est distinct de `v0.3.0-alpha.6`.
+## État actuel
 
-## Etat reel
+**La recherche active porte sur le renderer GPU continu R57–R60. Aucun candidat
+n'atteint encore les critères de promotion dans une version normale.**
 
-Cocos conserve integralement ses dessins, shaders, uniformes, indices et buffers.
-Chlorium n'intercepte plus les dessins : aucun stockage de sommets prive, scan
-ou copie par atlas, remplacement de VAO ou restauration d'un ancien etat GL.
-Cela retire les mecanismes V5 dont les tests isoles reproduisent la divergence
-des etats GL et la perte de donnees GPU absentes de la copie CPU.
+- R57 dessine réellement les lots d'objets pendant la partie avec du stockage GPU
+  persistant. Les menus et les cas refusés conservent le rendu natif.
+- R58 réutilise les indices vérifiés et l'encodage, conserve des tables d'identités
+  réutilisables et évite le second dessin GPU natif. Une fuite de rendu conditionnel
+  après une erreur OpenGL préexistante a été reproduite puis corrigée.
+- R59 diffère les transferts natifs de sommets redondants. Le drapeau natif de mise
+  à jour reste armé pour que le retour natif rétablisse les données nécessaires.
+- R60 mesure séparément la préparation, les sources, les transferts, les sauvegardes
+  et les dessins. C'est un diagnostic, pas un résultat de performance comparable.
 
-L'optimisation active reutilise les quotients identiques dans une routine Area
-native dont le corps complet doit correspondre a GD 2.2081. Elle ne remplace
-aucun trigger, callback de gameplay, effet, collision ou pas de simulation.
-Un corps inconnu est refuse. Les trois substitutions forment un seul patch
-contigu ; toute erreur d'installation ou de bascule est signalee.
-Le garde de pause sur PlayLayer detache est conserve.
+Les calculs CPU natifs des objets et triggers restent exécutés. Le transfert
+complet de leur logique sur GPU, objectif de Bismuth, **n'est pas terminé**.
+Les sauvegardes de framebuffer par lot restent également payées.
 
-Le candidat est compile et verifie hors jeu. Les comparaisons numeriques
-portent sur les bits et flags SSE avec exceptions masquees ; les traps non
-masques ne sont pas valides. Aucun gain FPS, absence universelle de noirs ou
-compatibilite avec tous les mods n'est declare sans validation en jeu.
-Les prototypes de groupes/poses restent separes du paquet faute de preuve de
-gain integre et de contrat complet pour les callbacks natifs.
+## Validation et limites
+
+Les contrôles CPU et 345 cas GPU isolés passent pour la chaîne récente, avec des
+contrôles supplémentaires de transfert différé et de restauration après erreur.
+Ils ne prouvent pas la fidélité de tous les effets GD 2.2 ni l'absence universelle
+d'écrans noirs.
+
+Une paire sur Heliopolis auto, section 74–78 %, a donné :
+
+| Renderer | Images retenues | FPS de la section | Frametime p95 |
+|---|---:|---:|---:|
+| R57 | 82 | 15,1 | 124,6 ms |
+| R59 | 97 | 17,8 | 105,4 ms |
+
+Même auditeur, détails complets, 120 FPS demandés, sans shake ni noclip, mods isolés.
+**Une seule paire ne démontre pas un gain reproductible. Le résultat reste très
+insuffisant pour 120 FPS.** Les démarrages incomplets et le passage R60 interrompu
+vers 51,6 % ne sont pas comptés comme des tests complets.
+
+Les binaires, captures, journaux privés, sauvegardes et données de GD restent hors
+Git. Aucun de ces essais ne remplace automatiquement l'installation principale.
 
 ## Construire
 
-Prérequis : Windows x64, MSVC 2022, CMake/Ninja et SDK Geode 5.11.2.
-Les scripts locaux indiquent les chemins du poste de développement.
+Prérequis : Windows x64, MSVC 2022 et SDK Geode 5.11.2. Les scripts locaux indiquent
+les chemins du poste de développement. Ils compilent sans lancer ni installer GD.
 
-- `build-local.cmd` construit le coeur canonique V10 par defaut.
-- `package-local.ps1` verifie l'identite canonique V10 et crée le paquet dans `dist/`.
-- `research/R4-04/build-quad.cmd --native-vertex` utilise les dépendances locales
-  deja compilees pour le V5 historique, dans une sortie isolee avec empreintes. Ce script ne construit pas V10.
-- `research/R4-04/build-quad.cmd --canonical` reutilise les dependances locales
-  avec leurs empreintes et construit V10 dans une sortie separee.
-- `test-local.cmd` et les fixtures GPU vérifient les ressources et le rendu.
+```bat
+research\R4-04\build-quad.cmd --resident-deferred
+python research\R4-04\package_private_fixture.py native-resident-deferred-r59
+```
 
-La compilation CMake neuve active `CHLORIUM_EXPERIMENTAL_NATIVE_QUADS` et
-`CHLORIUM_NATIVE_VERTEX_PARITY`. Reconfigurer les anciens caches CMake : un cache
-conservant explicitement OFF ne bascule pas automatiquement. Les scripts ne
-lancent pas GD et n'installent pas de mod lors d'une compilation.
+Le paquet privé est créé sous `build-research/native-resident-deferred-r59/`.
+`--resident-timed` construit le diagnostic R60 ; `--continuous-measure-r60`
+construit son auditeur indépendant. Les essais en jeu utilisent le wrapper protégé
+et un plan local explicite avec empreintes, sauvegarde et restauration vérifiée.
 
-## Résultats et recherche
+`build-local.cmd`, `package-local.ps1` et `--canonical` conservent le V10 historique
+comme référence. Ils ne construisent pas le nouveau renderer continu.
 
-[Journal unique](docs/EXPERIMENTS-V5.md) · [Audit et priorités](research/R4-09/AUDIT.md) ·
-[Versions](docs/VERSIONS.md) · [Référence Bismuth fournie](docs/BISMUTH-REFERENCE-20261025.md).
-Les mesures distinguent résultat observé, estimation, test hors jeu et parcours
-invalide. Les fichiers de jeu, sauvegardes, configurations privées et builds
-locaux ne doivent pas être envoyés au dépôt.
+## Suivi
+
+[Journal des expériences](docs/EXPERIMENTS-V5.md) · [Versions](docs/VERSIONS.md) ·
+[Référence Bismuth](docs/BISMUTH-REFERENCE-20261025.md).
+
+Niveaux autorisés pour les mesures : Orbit auto 133260800, Grief auto 88952972,
+Heliopolis auto 129598490 et Society auto 139648964. Deux morts maximum par passage.
 
 ## Licence et attribution
 

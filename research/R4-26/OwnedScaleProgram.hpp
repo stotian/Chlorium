@@ -3,13 +3,16 @@
 
 namespace chlorium::research::transform_shadow {
 struct ScaleStep {int stamp;bool clearTracking,resetVisual;float x,y;};
+template<bool Cumulative=false>
 inline bool ownedScaleProgram(World& w,const OwnedTransformOracle& oracle,std::span<const ScaleStep> input) {
     if(input.empty()||input.size()>64||World::active)return false;
     std::array<ScaleStep,64> steps{};std::copy(input.begin(),input.end(),steps.begin());
     const auto power=[](float value){const auto bits=std::bit_cast<std::uint32_t>(value);return (bits&0x807fffffu)==0&&(bits>>23)>=123&&(bits>>23)<=131;};
     for(std::size_t n=0;n<input.size();++n) {
         if(!power(steps[n].x)||!power(steps[n].y))return false;
-        if(n&&(steps[n].stamp<=steps[n-1].stamp||!steps[n].clearTracking))return false;
+        if(n&&(steps[n].stamp<steps[n-1].stamp||
+            (steps[n].stamp!=steps[n-1].stamp&&!steps[n].clearTracking)))return false;
+        if constexpr(!Cumulative)if(n&&steps[n].stamp==steps[n-1].stamp)return false;
     }
     if(!detail::identityEligible(w,oracle,1,1))return false;
     std::array<bool,8192> seen{};
@@ -22,16 +25,22 @@ inline bool ownedScaleProgram(World& w,const OwnedTransformOracle& oracle,std::s
         if(seen[index]||steps[0].stamp<=object.get<int>(0x4e0))return false;
         seen[index]=true;
     }
-    std::array<unsigned,64> flags{};
+    struct Recipe {float sourceX=1,sourceY=1,x=1,y=1;unsigned flags=0;};
+    std::array<Recipe,64> recipes{};
     const auto controls=_mm_getcsr();const auto error=errno;
     const auto minusZero=std::bit_cast<float>(0x80000000u);
     bool supported=true;
     for(std::size_t n=0;n<input.size();++n) {
+        auto& recipe=recipes[n];
+        if constexpr(Cumulative)if(n&&steps[n].stamp==steps[n-1].stamp) {
+            recipe.sourceX=recipes[n-1].x;recipe.sourceY=recipes[n-1].y;
+        }
         _mm_setcsr(controls&~63u);
-        const auto matrix=pose::scalar({1,0,minusZero,1,0,0},{steps[n].x,0,minusZero,steps[n].y,0,0});
+        const auto matrix=pose::scalar({recipe.sourceX,0,minusZero,recipe.sourceY,0,0},{steps[n].x,0,minusZero,steps[n].y,0,0});
         const auto linear=pose::decompose(matrix,oracle.atan2());
-        flags[n]=_mm_getcsr()&63;
-        supported&=linear.scaleX==steps[n].x&&linear.scaleY==steps[n].y&&linear.rotationX==0.f&&linear.rotationY==0.f;
+        recipe.flags=_mm_getcsr()&63;recipe.x=linear.scaleX;recipe.y=linear.scaleY;
+        supported&=power(recipe.x)&&power(recipe.y)&&linear.rotationX==0.f&&linear.rotationY==0.f;
+        if(!supported)break;
     }
     _mm_setcsr(controls);errno=error;
     if(!supported)return false;
@@ -43,7 +52,8 @@ inline bool ownedScaleProgram(World& w,const OwnedTransformOracle& oracle,std::s
 #endif
         w.state.layer.put(0x3e0,step.stamp);
         if(step.clearTracking)w.state.layer.put(0xee4,0);
-        detail::executeIdentity<true>(w,oracle,flags[n],step.x,step.y,step.resetVisual,step.x,step.y);
+        const auto& recipe=recipes[n];
+        detail::executeIdentity<true>(w,oracle,recipe.flags,step.x,step.y,step.resetVisual,recipe.x,recipe.y,recipe.sourceX,recipe.sourceY);
     }
     return true;
 }

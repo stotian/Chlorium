@@ -1,0 +1,35 @@
+#version 430 core
+#extension GL_ARB_gpu_shader_fp64 : require
+layout(local_size_x=64) in;
+struct State {dvec2 position;uvec2 last;uint stamp;uint flags;};
+struct Command {dvec2 delta;uvec4 control;};
+layout(std430,binding=0) readonly buffer Initial {State initial[];};
+layout(std430,binding=1) readonly buffer Commands {Command commands[];};
+layout(std430,binding=2) writeonly buffer Results {State results[];};
+layout(std430,binding=3) readonly buffer Ranges {uvec2 ranges[];};
+layout(std430,binding=4) readonly buffer Indices {uint indices[];};
+uniform uint objectCount;
+uniform uint prefixCount;
+void main() {
+    uint i=gl_GlobalInvocationID.x;
+    if(i>=objectCount)return;
+    State state=initial[i];
+    uvec2 range=ranges[state.flags>>16u];
+    precise dvec2 position=state.position;
+    for(uint k=0u;k<range.y;++k) {
+        uint index=indices[range.x+k];
+        if(index>=prefixCount)break;
+        Command command=commands[index];
+        if((state.flags&1u)==0u&&state.stamp!=command.control.x) {
+            state.last=floatBitsToUint(vec2(position));
+            state.stamp=command.control.x;
+            state.flags|=12u;
+        }
+        // Preserve every native rounding step; a summed group delta is not equivalent.
+        if(command.delta.x!=0.0lf&&(state.flags&2u)==0u)position.x=command.delta.x+position.x;
+        if(command.delta.y!=0.0lf)position.y=command.delta.y+position.y;
+        state.flags|=48u;
+    }
+    state.position=position;
+    results[i]=state;
+}

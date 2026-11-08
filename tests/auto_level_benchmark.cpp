@@ -19,10 +19,35 @@
 #include "renderer/NativeAffinePoint.hpp"
 #include "BProfiler.hpp"
 #include "FrameWatch.hpp"
+#include "MeasurementHookPolicy.hpp"
+#include "../research/R4-57/ContinuousStats.hpp"
+extern "C" __declspec(dllexport) const char chloriumContinuousAuditIdentity[]="CHLORIUM_RESIDENT_CONTINUOUS_AUDIT_R57";
+#ifdef CHLORIUM_EXTENDED_RESIDENT_STATS_R59
+extern "C" __declspec(dllexport) const char chloriumResidentTelemetryIdentity[]="CHLORIUM_RESIDENT_TELEMETRY_R59";
+#endif
+#ifdef CHLORIUM_RENDERER_TIMING_AUDIT_R60
+extern "C" __declspec(dllexport) const char chloriumRendererTimingAuditIdentity[]="CHLORIUM_RENDERER_TIMING_AUDIT_R60";
+#endif
+#ifdef CHLORIUM_NATIVE_PASS_CAPTURE
+#include "../research/R4-32/NativePassCapture.hpp"
+#endif
+#ifdef CHLORIUM_OPACITY_PREFIX_SHADOW
+#include "../research/R4-30/NativeOpacityShadow.hpp"
+#endif
 #ifdef CHLORIUM_CANONICAL_AUDIT_V10
 #include "CanonicalCoreProof.hpp"
 #include <xmmintrin.h>
 extern "C" __declspec(dllexport) const char chloriumCanonicalAuditIdentity[]="CHLORIUM_CANONICAL_CORE_AUDIT_V10";
+extern "C" __declspec(dllexport) const char chloriumOpacityHashAuditIdentity[]="CHLORIUM_OPACITY_HASH_AUDIT_R36";
+#ifdef CHLORIUM_CANONICAL_AUDIT_PE_R2
+extern "C" __declspec(dllexport) const char chloriumCanonicalAuditBoundsIdentity[]="CHLORIUM_CANONICAL_AUDIT_BOUNDED_PE_R2";
+#endif
+#endif
+#ifdef CHLORIUM_EXTERNAL_SAMPLING_AUDIT
+#include <cstdlib>
+extern "C" __declspec(dllexport) const char chloriumExternalSamplingIdentity[]="CHLORIUM_EXTERNAL_SAMPLING_AUDIT_V2";
+extern "C" __declspec(dllexport) const unsigned chloriumExternalSamplingSessionMode=
+    std::getenv("CHLORIUM_EXTERNAL_SAMPLING")?0x53414d50u:0u;
 #endif
 #ifdef CHLORIUM_EXPERIMENTAL_NATIVE_MOVES
 #include "renderer/NativeMovementLoop.hpp"
@@ -62,13 +87,20 @@ extern "C" __declspec(dllexport) const char chloriumPresentedCaptureIdentity[] =
     "CHLORIUM_PRESENTED_CAPTURE_ONLY_V3";
 extern "C" __declspec(dllexport) const char chloriumReadbackStateIdentity[] =
     "CHLORIUM_READBACK_STATE_GUARDS_V5";
+extern "C" __declspec(dllexport) const char chloriumSceneGuardIdentity[] =
+    "CHLORIUM_AUDIT_SCENE_TRANSITION_GUARD_R3";
+extern "C" __declspec(dllexport) const char chloriumPacingIdentity[] =
+    "CHLORIUM_AUDIT_120FPS_PACING_R4";
+extern "C" __declspec(dllexport) const char chloriumSourceLevelIdentity[] =
+    "CHLORIUM_RESEARCH_SOURCE_LEVEL_ID_R45";
 bool chloriumAuditUseNative() { return std::getenv("CHLORIUM_AUDIT_NATIVE") != nullptr; }
 #ifdef CHLORIUM_MEASUREMENT_ONLY
 extern "C" __declspec(dllexport) extern const char chloriumPassiveTransformTimingIdentity[] =
     "CHLORIUM_PASSIVE_TRANSFORM_TIMER_V1";
 #endif
 namespace {
-constexpr std::array authorizedLevels{133260800, 129598490, 88952972};
+constexpr double targetFps = 120.0;
+constexpr std::array authorizedLevels{133260800, 129598490, 88952972, 139648964};
 int allowedLevel = authorizedLevels[0];
 bool selectAuthorizedLevel(const char* text) {
     if (!text) return true;
@@ -90,6 +122,9 @@ bool timingStarted = false, finishing = false, frameHadContext = false;
 bool previousFrameEligible = false, foregroundBeforeFrame = false;
 int menuFrames = 0, draws = 0, queryIndex = 0, activeQuery = -1, progressSecond = -1;
 int deaths = 0, rendererInactiveFrames = 0, issuedQuery = -1;
+bool continuousRendererSeen=false;
+std::uint64_t continuousCommitted=0;
+std::uint64_t continuousAtlasCalls=0;
 double duration = 360, initialGameTime = 0;
 double targetFrom = 0, targetTo = 100;
 bool targeted = false, targetEntered = false, targetCompleted = false;
@@ -107,6 +142,7 @@ double firstAtlasIndexOverflowPercent = -1;
 Clock::time_point started, lastEnd, nextControlCheck;
 std::ofstream report, frameTrace, gpuTrace;
 Ref<CCLabelBMFont> fpsCounter;
+Ref<CCLabelBMFont> gpuStatusCounter;
 double counterMilliseconds = 0;
 unsigned counterFrames = 0;
 chlorium::test::FrameWatch frameWatch;
@@ -150,6 +186,36 @@ std::string gapReason;
 
 void line(const std::string& text) { if (report) { report << text << '\n'; report.flush(); } }
 bool matrixSnapshot(chlorium::matrix::Snapshot& result);
+#ifdef CHLORIUM_EXTENDED_RESIDENT_STATS_R59
+void recordResidentExperiments(HMODULE module,float percent){
+    using Read=bool(*)(void*,std::size_t);
+#ifdef CHLORIUM_RENDERER_TIMING_AUDIT_R60
+    struct Timing {std::uint64_t version,count,frequency;std::array<std::uint64_t,13> ticks,calls;} timing{};
+    const auto readTiming=reinterpret_cast<Read>(GetProcAddress(module,"ChloriumReadRendererTimingR60"));
+    if(readTiming && readTiming(&timing,sizeof(timing)) && timing.version==60 && timing.count==13 && timing.frequency){
+        constexpr const char* names[]{"batch_outside_atlas","atlas","collect","indices","prepare","program","sources","upload","materialize","backup","draw","native","batch_total"};
+        auto row=matjson::Value::object();row["event"]="resident_timing_r60";row["percent"]=percent;row["frequency"]=timing.frequency;
+        row["performance_comparison"]=false;auto ticks=matjson::Value::object(),calls=matjson::Value::object();
+        for(unsigned n=0;n<13;++n){ticks[names[n]]=timing.ticks[n];calls[names[n]]=timing.calls[n];}
+        row["ticks"]=std::move(ticks);row["calls"]=std::move(calls);line(row.dump());
+    }
+#endif
+    struct Fast {std::uint64_t version,indexReads,indexBytes,indexReuses,nativePointBatches,suppressedNativeDraws,checkpointsSaved,preSubmitDeclines;} fast{};
+    const auto readFast=reinterpret_cast<Read>(GetProcAddress(module,"ChloriumReadFastStatsR58"));
+    if(readFast && readFast(&fast,sizeof(fast)) && fast.version==58){
+        auto row=matjson::Value::object();row["event"]="resident_fast_r58";row["percent"]=percent;
+        row["index_reads"]=fast.indexReads;row["index_bytes"]=fast.indexBytes;row["index_reuses"]=fast.indexReuses;
+        row["native_point_batches"]=fast.nativePointBatches;row["suppressed_native_draws"]=fast.suppressedNativeDraws;
+        row["checkpoints_saved"]=fast.checkpointsSaved;row["pre_submit_declines"]=fast.preSubmitDeclines;line(row.dump());
+    }
+    struct Upload {std::uint64_t version,skippedCalls,skippedBytes,declined;} upload{};
+    const auto readUpload=reinterpret_cast<Read>(GetProcAddress(module,"ChloriumReadUploadDeferralStatsR59"));
+    if(readUpload && readUpload(&upload,sizeof(upload)) && upload.version==59){
+        auto row=matjson::Value::object();row["event"]="resident_upload_r59";row["percent"]=percent;
+        row["deferred_calls"]=upload.skippedCalls;row["deferred_bytes"]=upload.skippedBytes;row["declined"]=upload.declined;line(row.dump());
+    }
+}
+#endif
 #ifdef CHLORIUM_CANONICAL_AUDIT_V10
 bool canonicalCoreActive() {
     static const bool engine=[] {
@@ -160,22 +226,51 @@ bool canonicalCoreActive() {
     if(!engine)return false;
     const bool native=chloriumAuditUseNative();
     const auto module=GetModuleHandleW(L"local.chlorium.dll");
+    bool optimizedArea=!native;
     if(native) {if(module)return false;}
     else {
         if(!module)return false;
+        const auto continuous=GetProcAddress(module,"chloriumContinuousIdentity");
+        if(continuous){
+            using Stats=chlorium::research::continuous::Stats;
+            const auto read=reinterpret_cast<bool(*)(Stats*,std::size_t)>(GetProcAddress(module,"ChloriumReadContinuousStatsR57"));Stats value;
+            if(std::strcmp(reinterpret_cast<const char*>(continuous),"CHLORIUM_RESIDENT_CONTINUOUS_R57") || !read ||
+               !read(&value,sizeof(value)) || value.version!=57 || !value.enabled || value.fatal)return false;
+            continuousRendererSeen=true;continuousCommitted=value.committed;continuousAtlasCalls=value.atlasCalls;
+            optimizedArea=false;
+        }else{
         const auto core=GetProcAddress(module,"chloriumCanonicalIdentity");
         const auto area=GetProcAddress(module,"chloriumCanonicalAreaIdentity");
         if(!core||!area||std::strcmp(reinterpret_cast<const char*>(core),"CHLORIUM_NATIVE_CANONICAL_BACKEND_V10")||
            std::strcmp(reinterpret_cast<const char*>(area),"CHLORIUM_CANONICAL_AREA_QUOTIENTS_V10"))return false;
+        static const bool requireHash=[] {const auto value=std::getenv("CHLORIUM_REQUIRE_OPACITY_HASH_R36");return value&&std::string_view(value)=="1";}();
+        if(requireHash){const auto active=reinterpret_cast<bool(*)()>(GetProcAddress(module,"ChloriumOpacityHashActiveR36"));if(!active||!active())return false;}
+        }
     }
     const auto game=reinterpret_cast<const unsigned char*>(GetModuleHandleW(nullptr));
     return (_mm_getcsr()&0x1f80u)==0x1f80u&&chlorium::test::canonicalAreaBody(
-        {game+chlorium::area::functionRva,chlorium::area::functionBytes},!native);
+        {game+chlorium::area::functionRva,chlorium::area::functionBytes},optimizedArea);
 }
 #endif
 bool recordNativeSnapshotStats(float percent) {
 #ifdef CHLORIUM_CANONICAL_AUDIT_V10
     const bool active=canonicalCoreActive();
+    if(const auto module=GetModuleHandleW(L"local.chlorium.dll")){
+        using Stats=chlorium::research::continuous::Stats;
+        const auto read=reinterpret_cast<bool(*)(Stats*,std::size_t)>(GetProcAddress(module,"ChloriumReadContinuousStatsR57"));Stats value;
+        if(read && read(&value,sizeof(value))){
+#ifdef CHLORIUM_EXTENDED_RESIDENT_STATS_R59
+            recordResidentExperiments(module,percent);
+#endif
+            auto row=matjson::Value::object();row["event"]="resident_continuous_r57";row["percent"]=percent;
+            row["active"]=active;row["frames"]=value.frames;row["atlas_calls"]=value.atlasCalls;
+            row["gpu_submitted"]=value.submitted;row["gpu_committed"]=value.committed;row["native_fallbacks"]=value.nativeFallbacks;
+            row["considered_quads"]=value.consideredQuads;row["committed_quads"]=value.committedQuads;
+            row["reconstructed_quads"]=value.reconstructed;row["rollbacks"]=value.rollbacks;row["fatal"]=value.fatal;
+            row["native_preparation_preserved"]=true;auto declines=matjson::Value::array();for(auto n:value.declines)declines.push(n);row["declines"]=std::move(declines);
+            line(row.dump());return active && rendererInactiveFrames==0 && value.committed>0;
+        }
+    }
     line(fmt::format("{{\"event\":\"canonical_core_v10\",\"percent\":{},\"native\":{},\"active\":{},\"inactive_frames\":{}}}",
         percent,chloriumAuditUseNative(),active,rendererInactiveFrames));
     return active&&rendererInactiveFrames==0;
@@ -312,14 +407,15 @@ void metrics(const char* event, int segment, const std::vector<double>& cpus,
              const std::vector<double>& frames, const std::vector<double>& gpus, const std::string& details = "") {
     const auto c = distribution(cpus), f = distribution(frames), g = distribution(gpus);
     const auto slow = std::count_if(frames.begin(), frames.end(), [](double ms) { return ms > 1000.0 / 60; });
+    const auto overTarget = std::count_if(frames.begin(), frames.end(), [](double ms) { return ms > 1000.0 / targetFps; });
     line(fmt::format("{{\"event\":\"{}\",\"segment\":{},\"frames\":{},\"frame_samples\":{},\"gpu_samples\":{},\"fps_average\":{},"
         "\"cpu_ms_mean\":{},\"cpu_ms_p50\":{},\"cpu_ms_p95\":{},\"cpu_ms_p99\":{},\"cpu_ms_stddev\":{},\"cpu_ms_worst\":{},"
         "\"frame_ms_mean\":{},\"frame_ms_p50\":{},\"frame_ms_p95\":{},\"frame_ms_p99\":{},\"frame_ms_stddev\":{},\"frame_ms_worst\":{},"
         "\"gpu_ms_mean\":{},\"gpu_ms_p50\":{},\"gpu_ms_p95\":{},\"gpu_ms_p99\":{},\"gpu_ms_stddev\":{},\"gpu_ms_worst\":{},"
-        "\"frames_over_60fps_budget\":{}{} }}",
+        "\"frames_over_60fps_budget\":{},\"target_fps\":{},\"frames_over_target_budget\":{}{} }}",
         event, segment, cpus.size(), frames.size(), gpus.size(), f.average > 0 ? 1000 / f.average : 0,
         c.average, c.p50, c.p95, c.p99, c.stddev, c.worst, f.average, f.p50, f.p95, f.p99, f.stddev, f.worst,
-        g.average, g.p50, g.p95, g.p99, g.stddev, g.worst, slow, details));
+        g.average, g.p50, g.p95, g.p99, g.stddev, g.worst, slow, targetFps, overTarget, details));
 }
 bool foregroundIsGame() {
     DWORD process = 0;
@@ -398,8 +494,16 @@ bool recordFrame(PlayLayer* play, Clock::time_point before, Clock::time_point af
         if (counterMilliseconds >= 250) {
             const double fps = counterFrames * 1000.0 / counterMilliseconds;
             fpsCounter->setString(fmt::format("FPS: {:.0f}", fps).c_str());
-            fpsCounter->setColor(fps >= 59.5 ? ccColor3B{150,255,150} :
-                fps >= 30 ? ccColor3B{255,215,100} : ccColor3B{255,120,120});
+            fpsCounter->setColor(fps >= targetFps ? ccColor3B{150,255,150} :
+                fps >= targetFps / 2 ? ccColor3B{255,215,100} : ccColor3B{255,120,120});
+            if(gpuStatusCounter){
+                static std::uint64_t priorCalls=0,priorCommitted=0;
+                const auto calls=continuousAtlasCalls-priorCalls,committed=continuousCommitted-priorCommitted;
+                const double share=calls?100.0*double(committed)/double(calls):0;
+                gpuStatusCounter->setString(calls?fmt::format("{} : {:.0f}% LOTS",committed?"GPU ACTIF":"REPLI NATIF",share).c_str():"GPU : EN ATTENTE");
+                gpuStatusCounter->setColor(committed?ccColor3B{150,255,150}:ccColor3B{255,190,100});
+                priorCalls=continuousAtlasCalls;priorCommitted=continuousCommitted;
+            }
             counterMilliseconds = 0; counterFrames = 0;
         }
     }
@@ -425,6 +529,15 @@ bool recordFrame(PlayLayer* play, Clock::time_point before, Clock::time_point af
     exclude(verifiedThisFrame, "gpu_verification");
     exclude(mathVerifiedThisFrame, "exact_math_verification");
     exclude(frameWatch.enabled(), "visual_diagnostic");
+#ifdef CHLORIUM_NATIVE_PASS_CAPTURE
+    exclude(true, "native_pass_capture_diagnostic");
+#endif
+#ifdef CHLORIUM_EXTERNAL_SAMPLING_AUDIT
+    exclude(chloriumExternalSamplingSessionMode==0x53414d50u,"external_sampling");
+#endif
+#ifdef CHLORIUM_OPACITY_PREFIX_SHADOW
+    exclude(true, "opacity_shadow_diagnostic");
+#endif
     const bool baseEligible = reason.empty();
     const bool boundary = baseEligible && !previousFrameEligible;
     exclude(boundary, "coverage_boundary");
@@ -440,9 +553,9 @@ bool recordFrame(PlayLayer* play, Clock::time_point before, Clock::time_point af
     window.dead += dead1 || dead2; window.noDraw += draws == 0; window.noContext += !frameHadContext;
     window.captures += capturedThisFrame; window.boundaries += boundary;
     if (included) {
-        cpu.push_back(work); intervals.push_back(interval);
-        segments[segment].cpu.push_back(work); segments[segment].intervals.push_back(interval);
-        window.cpu.push_back(work); window.intervals.push_back(interval);
+        cpu.push_back(work); intervals.push_back(rawInterval);
+        segments[segment].cpu.push_back(work); segments[segment].intervals.push_back(rawInterval);
+        window.cpu.push_back(work); window.intervals.push_back(rawInterval);
         closeCoverageGap(time);
     } else {
         if (gapActive && reason != gapReason) closeCoverageGap(time);
@@ -486,8 +599,13 @@ void finish(bool fullLevel, const char* reason) {
     recordAffineStats(PlayLayer::get() ? PlayLayer::get()->getCurrentPercent() : -1.f);
     const bool snapshotsActive = recordNativeSnapshotStats(PlayLayer::get() ? PlayLayer::get()->getCurrentPercent() : -1.f);
     const bool visualVerified = frameWatch.coverageComplete();
-    stop((fullLevel || targetCompleted) && deaths == 0 && graphicsVerified && mathVerified && visualVerified && targetedMathActive && snapshotsActive,
+    bool passCaptureVerified = true;
+#ifdef CHLORIUM_NATIVE_PASS_CAPTURE
+    passCaptureVerified = chlorium::research::pass::finish();
+#endif
+    stop((fullLevel || targetCompleted) && deaths == 0 && graphicsVerified && mathVerified && visualVerified && targetedMathActive && snapshotsActive && passCaptureVerified,
         deaths != 0 ? "Run contains deaths; paired performance/visual validation rejected" :
+        !passCaptureVerified ? "Native pass capture is incomplete; no replacement coverage proof is valid" :
         !snapshotsActive ? "Native snapshot renderer did not stay active; no GPU batching performance verdict is valid" :
         !targetedMathActive ? "Required targeted math V3 is unavailable, inactive or changed owner; no candidate performance verdict is valid" :
         !visualVerified ? "Visual readback failed or coverage is incomplete; no black-screen verdict is valid" :
@@ -601,6 +719,7 @@ void tick() {
                 for (auto hook : mod->getHooks()) {
                     const auto& name = hook->getDisplayName();
                     if (name.find("CCTextureAtlas::") == std::string::npos &&
+                        !chlorium::test::nativeProducerObserverName(name) &&
                         name.find("processTransformActions") == std::string::npos &&
                         name.find("updateVisibility") == std::string::npos &&
                         name.find("ShaderLayer::") == std::string::npos &&
@@ -635,8 +754,24 @@ void tick() {
         }
         const auto atlasDraw = reinterpret_cast<uintptr_t>(GetProcAddress(GetModuleHandleW(L"libcocos2d.dll"),
             "?drawNumberOfQuads@CCTextureAtlas@cocos2d@@QEAAXII@Z"));
+        constexpr bool captureProfile =
+#ifdef CHLORIUM_NATIVE_PASS_CAPTURE
+            true;
+#else
+            false;
+#endif
+        const auto producerFlag=std::getenv("CHLORIUM_NATIVE_PRODUCER_CAPTURE");const bool producerCapture=producerFlag&&std::string_view(producerFlag)=="1";
         for (auto hook : Mod::get()->getHooks()) {
+            if(hook->isEnabled() && chlorium::test::nativeProducerObserverName(hook->getDisplayName()) &&
+               !chlorium::test::nativePassObserverAllowed(captureProfile,chloriumAuditUseNative(),production!=nullptr,hook->getDisplayName(),producerCapture)){
+                stop(false,"Producer hooks became active outside their isolated diagnostic");return;
+            }
             if (hook->isEnabled() && hook->getAddress() == atlasDraw) {
+                if (chlorium::test::nativePassObserverAllowed(captureProfile, chloriumAuditUseNative(),
+                        production != nullptr, hook->getDisplayName(), producerCapture)) {
+                    line("{\"event\":\"native_pass_observer_allowed\",\"performance_comparison\":false}");
+                    continue;
+                }
                 stop(false, "Measurement module must not hook atlas draws or disable production optimization"); return;
             }
         }
@@ -691,12 +826,36 @@ void tick() {
         }
         if (loading) return;
         loading = true;
+        using SwapInterval = BOOL(WINAPI*)(int);
+        using GetSwapInterval = int(WINAPI*)();
+        auto resolveWgl = [](const char* name) {
+            const auto proc = wglGetProcAddress(name);
+            const auto address = reinterpret_cast<std::uintptr_t>(proc);
+            return address > 3 && address != UINTPTR_MAX ? proc : nullptr;
+        };
+        const auto swap = reinterpret_cast<SwapInterval>(resolveWgl("wglSwapIntervalEXT"));
+        const auto getSwap = reinterpret_cast<GetSwapInterval>(resolveWgl("wglGetSwapIntervalEXT"));
+        if (!wglGetCurrentContext() || !swap || !getSwap || !swap(0) || getSwap() != 0) {
+            stop(false, "Cannot verify disabled VSync for the isolated 120 FPS campaign"); return;
+        }
+        auto settings = GameManager::get();
+        settings->m_customFPSTarget = static_cast<float>(targetFps);
+        settings->setGameVariable("0116", true);
+        settings->updateCustomFPS();
+        const auto interval = CCDirector::get()->getAnimationInterval();
+        const bool pacingVerified = std::isfinite(interval) && std::abs(interval - 1.0 / targetFps) < 1e-6;
+        line(fmt::format("{{\"event\":\"frame_pacing\",\"target_fps\":{},\"interval_seconds\":{},\"swap_interval\":{},\"verified\":{}}}",
+            targetFps, interval, getSwap(), pacingVerified));
+        if (!pacingVerified) { stop(false, "Native 120 FPS limiter was not applied"); return; }
         auto level = GJGameLevel::create();
         level->copyLevelInfo(sourceLevel);
         // Preserve gameplay compatibility switches as well as level data.
         // A default-created level can otherwise take the legacy physics path.
-        level->m_levelID = 0;
+        const auto preserveSourceId=std::getenv("CHLORIUM_RESEARCH_SOURCE_LEVEL_ID");
+        const bool sourceIdentity=preserveSourceId&&std::string_view(preserveSourceId)=="1";
+        level->m_levelID = sourceIdentity?static_cast<int>(sourceLevel->m_levelID):0;
         level->m_dontSave = true;
+        line(fmt::format("{{\"event\":\"level_identity\",\"preserve_source_id\":{},\"source_id\":{},\"effective_id\":{},\"dont_save\":true}}",sourceIdentity,static_cast<int>(sourceLevel->m_levelID),static_cast<int>(level->m_levelID)));
         level->m_levelName = sourceLevel->m_levelName;
         level->m_levelString = sourceLevel->m_levelString;
         level->m_songID = sourceLevel->m_songID;
@@ -728,6 +887,11 @@ void tick() {
     if (!play || !play->m_objectLayer || !play->m_player1) { finish(false, "Auto level left; partial data saved"); return; }
     if (!setupFinished) return;
     auto scene = CCDirector::get()->getRunningScene();
+    if (!scene || !play->getParent()) {
+        if (timingStarted || elapsed() >= 60)
+            finish(false, "Native scene cleared or PlayLayer detached; no complete gameplay test");
+        return;
+    }
     if (!scene->getChildByTag(0x43484c42)) {
         line(fmt::format("{{\"event\":\"test_quality\",\"low_detail_requested\":false,\"disable_shake_requested\":true,\"low_detail_effective\":{},\"skip_camera_shake_effective\":{}}}",
             play->m_lowDetailMode, play->m_skipCameraShake));
@@ -741,7 +905,19 @@ void tick() {
         fpsCounter->setScale(.35f); fpsCounter->setAnchorPoint({1,0});
         fpsCounter->setPosition({CCDirector::get()->getWinSize().width - 8, 8});
         scene->addChild(fpsCounter, INT_MAX);
-        auto modeLabel = CCLabelBMFont::create(chloriumAuditUseNative() ? "SANS CHLORIUM" : "AVEC CHLORIUM", "bigFont.fnt");
+        const auto hashFlag=std::getenv("CHLORIUM_REQUIRE_OPACITY_HASH_R36");
+        const auto residentFlag=std::getenv("CHLORIUM_RESIDENT_NATIVE_REPLAY");
+        const bool residentDiagnostic=chloriumAuditUseNative()&&residentFlag&&std::string_view(residentFlag)=="1";
+        const auto continuousModule=GetModuleHandleW(L"local.chlorium.dll");
+        const bool continuous=continuousModule && GetProcAddress(continuousModule,"chloriumContinuousIdentity");
+        const auto label=continuous?
+#ifdef CHLORIUM_EXTENDED_RESIDENT_STATS_R59
+            (GetProcAddress(continuousModule,"chloriumRendererTimingIdentity")?"CHLORIUM R60 / DIAGNOSTIC":GetProcAddress(continuousModule,"chloriumUploadDeferralIdentity")?"AVEC CHLORIUM GPU R59":"AVEC CHLORIUM GPU R57"):
+#else
+            "AVEC CHLORIUM GPU CONTINU":
+#endif
+            residentDiagnostic?"DIAG CHLORIUM / NATIF + GPU":chloriumAuditUseNative()?"SANS CHLORIUM":hashFlag&&std::string_view(hashFlag)=="1"?"AVEC CHLORIUM R36":"AVEC CHLORIUM REF";
+        auto modeLabel = CCLabelBMFont::create(label, "bigFont.fnt");
         modeLabel->setScale(.3f); modeLabel->setAnchorPoint({1,0});
         modeLabel->setPosition({CCDirector::get()->getWinSize().width - 8, 29});
         modeLabel->setColor(chloriumAuditUseNative() ? ccColor3B{180,215,255} : ccColor3B{160,255,190});
@@ -750,6 +926,12 @@ void tick() {
         qualityLabel->setScale(.22f); qualityLabel->setAnchorPoint({1,0});
         qualityLabel->setPosition({CCDirector::get()->getWinSize().width - 8, 46});
         scene->addChild(qualityLabel, INT_MAX);
+        if(continuous){
+            gpuStatusCounter=CCLabelBMFont::create("GPU : INITIALISATION", "bigFont.fnt");
+            gpuStatusCounter->setScale(.22f);gpuStatusCounter->setAnchorPoint({1,0});
+            gpuStatusCounter->setPosition({CCDirector::get()->getWinSize().width-8,64});
+            scene->addChild(gpuStatusCounter,INT_MAX);
+        }
         if (std::getenv("CHLORIUM_EXPECTED_USER_MODS")) {
             auto profileLabel = CCLabelBMFont::create("MES MODS CHARGES", "bigFont.fnt");
             profileLabel->setScale(.22f); profileLabel->setAnchorPoint({1,0});
@@ -757,9 +939,7 @@ void tick() {
             scene->addChild(profileLabel, INT_MAX);
         }
         line(fmt::format("{{\"event\":\"test_overlay\",\"label\":\"{}\",\"fps\":true}}",
-            chloriumAuditUseNative() ? "SANS CHLORIUM" : "AVEC CHLORIUM"));
-        using SwapInterval = BOOL(WINAPI*)(int);
-        auto swap = reinterpret_cast<SwapInterval>(wglGetProcAddress("wglSwapIntervalEXT")); if (swap) swap(0);
+            label));
         initialGameTime = play->m_gameState.m_totalTime;
         started = Clock::now(); lastEnd = started;
         timingStarted = true; nextControlCheck = started;
@@ -789,6 +969,9 @@ void tick() {
     bool gpuActive = false, cpuOptimizations = false;
 #ifdef CHLORIUM_CANONICAL_AUDIT_V10
     if(!canonicalCoreActive())++rendererInactiveFrames;
+    static std::uint64_t previousContinuousCommitted=0;
+    if(continuousRendererSeen)gpuActive=continuousCommitted>previousContinuousCommitted;
+    previousContinuousCommitted=continuousCommitted;
 #endif
 #ifdef CHLORIUM_EXPERIMENTAL_STATIC_RENDERER
     auto ren = Renderer::get();
@@ -974,7 +1157,19 @@ class $modify(AutoBenchmarkDirector, CCDisplayLinkDirector) {
         frameHadContext = false; issuedQuery = -1; ++frameSequence;
         foregroundBeforeFrame = foregroundIsGame();
         if (running) BProfiler::beginFrameSampling(!targeted || inTarget(PlayLayer::get()));
+#ifdef CHLORIUM_NATIVE_PASS_CAPTURE
+        {
+            chlorium::research::pass::PreserveFP preserve;
+            auto play = PlayLayer::get();
+            const bool eligible = running && timingStarted && play && !play->m_isPaused &&
+                play->m_player1 && !play->m_player1->m_isDead && !playerTwoDead(play) && inTarget(play);
+            chlorium::research::pass::beginFrame(eligible, frameSequence, eligible ? play->getCurrentPercent() : -1);
+        }
+#endif
         CCDisplayLinkDirector::mainLoop();
+#ifdef CHLORIUM_NATIVE_PASS_CAPTURE
+        chlorium::research::pass::endFrame();
+#endif
         const auto after = Clock::now();
         verifiedThisFrame = verifyUploads && atlasUploadStats().verifiedUploads != verifiedBefore;
         mathVerifiedThisFrame = verifyMath && transformMathStats().verified != mathBefore;
@@ -993,12 +1188,29 @@ class $modify(AutoBenchmarkPlay, PlayLayer) {
 #ifndef CHLORIUM_EXPERIMENTAL_STATIC_RENDERER
     void updateVisibility(float dt) {
         auto timer = BProfiler::start("PlayLayer::updateVisibility");
+#ifdef CHLORIUM_OPACITY_PREFIX_SHADOW
+        double shadowPercent = -1;
+        bool shadowEligible = false;
+        if (running && setupFinished && !finishing && chlorium::research::opacity::nativeOpacityShadowPending() &&
+            (_mm_getcsr() & 0x1f80u) == 0x1f80u) {
+            chlorium::research::opacity::SavedOpacityFPState preserve;
+            shadowPercent = getCurrentPercent();
+            shadowEligible = !targeted || (shadowPercent >= targetFrom && shadowPercent < targetTo);
+        }
+        chlorium::research::opacity::NativeOpacityShadowScope shadow(shadowEligible, frameSequence, shadowPercent);
+#endif
         PlayLayer::updateVisibility(dt); timer.end();
+#ifdef CHLORIUM_OPACITY_PREFIX_SHADOW
+        shadow.finish();
+#endif
     }
 #endif
     void setupHasCompleted() {
         PlayLayer::setupHasCompleted();
         setupFinished = true;
+#ifdef CHLORIUM_NATIVE_PASS_CAPTURE
+        chlorium::research::pass::prepareLevel(this);
+#endif
     }
     void levelComplete() {
         PlayLayer::levelComplete();

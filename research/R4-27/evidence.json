@@ -1,0 +1,151 @@
+{
+  "experiment": "R4-27",
+  "activation": "not_promoted",
+  "gd_test": "not_run_not_integrated",
+  "assertions_including_benchmark": 454314,
+  "mutant_rejected_at": 111057,
+  "regression_checks": {
+    "R4-20": 327427,
+    "R4-22": 26054,
+    "R4-26": 110202
+  },
+  "benchmark_scope": "closed fixture kernel; not gameplay frametimes",
+  "benchmark_limit": "tracking cleared every phase, including equal stamps",
+  "benchmark_sources": {
+    "source_sha256": {
+      "research/R4-11/PoseCensus.cpp": "5f7b6e5695cf7fb08891e12871fb3b7f18f286fd9b349428a791a3abf29a4f02",
+      "research/R4-11/PoseProgram.hpp": "3ad9db8d3719bf69130ce1d13b41723c5e00f14b3c2b91d6d94bd192198c85dd",
+      "research/R4-11/pose_program_checks.cpp": "eaa9c2238000b5acd17ce7d98f84ef883733fa7c8c1ca0b9b4becb0bcb741eb1",
+      "research/R4-11/run-cpu.cmd": "ce65dc30893d15c040897bdd175e92a690a68b31f994d7340a87dab392b95a09",
+      "research/R4-19/OwnedAreaOracle.hpp": "c6118e6fc6f7eb1fd62f1fd94235135193a2d790e5146ac1cebf69b80416082e",
+      "research/R4-19/run-cpu.cmd": "fdb38e04cc029be02dbc74ae58fff979cb7675af4c3fca44b0083bb3ce4013a9",
+      "research/R4-19/StampedAreaShadow.hpp": "c4ef540e6698a32c93f4ef679b76063ce8b2988aac7dcfa3c5c181e70ab1613d",
+      "research/R4-19/stamped_area_checks.cpp": "6c548288cc02937f408deee29419dc480d70556b866193ca7568bd907fed5269",
+      "research/R4-20/IdentityLinearPhase.hpp": "fdfe6b4a6acbf2f7a3c0997250a5727c0292b5c73b085ce42e9168d60f27a0ab",
+      "research/R4-20/LoopComparison.hpp": "4ef6bcae77c976193a134ce4b9b6a9598ad766991fa3df01f797b373743b05ae",
+      "research/R4-20/loop_checks.cpp": "7ddfc947114568a1666295b8848eb1aaf13a6dada036f6a840ff6fcf7b902fcb",
+      "research/R4-20/NativeLayout.hpp": "7f3cd94468174244bc9a87478e8b0cf089937a28d8c8dea729cfc1a3ece190b3",
+      "research/R4-20/OwnedTransformOracle.hpp": "660cdf71ad33e4efcfcf21c63dcbd3a02b56963b32e48e4729cf9c7db71444c1",
+      "research/R4-20/run-cpu.cmd": "4706d53ef7fe1a196f5775d77f64cabf658a08bac074975346e0945956ac5be6",
+      "research/R4-20/TransformWorld.hpp": "f4e82ce359f57e56f6466258d2c59f6c3d318036de54a4b2e15339493b532849",
+      "research/R4-22/OwnedIdentityProgram.hpp": "28d3115715e4b792e6004f5d831c7bb9896115add3371edeb78a02138dedba2c",
+      "research/R4-22/program_checks.cpp": "df6cba47cddd1bb3bc8e522dd130e417f220de4697b141f1532940a028a107ac",
+      "research/R4-22/run-cpu.cmd": "6fc6538f1b4cb59f2c716e04446ea79456b26e9b4b7836d636f4372bc1492553",
+      "research/R4-26/OwnedScaleProgram.hpp": "f2b40d2f3b7f925074e46da53d8de1c71ec51fa4129039310b6494e5cecabb21",
+      "research/R4-26/run-cpu.cmd": "c1b8c6887f440eb62b427bc95c20754815598b20f0f8ebcf04b98506b845937e",
+      "research/R4-26/ScaleFixture.hpp": "d7080249142e884bc7da14bd6d8e72c93f1f42b0547509ac0860dd43ed181a47",
+      "research/R4-26/scale_checks.cpp": "73d535449bb1f638bfc764d8eb238e825edc79db21dc1b97668d458abfd2696f",
+      "research/R4-27/cumulative_checks.cpp": "cebc0353fb88128c73d43f20bdfbd224979733c747d4bc55b599bc9a3964b240",
+      "research/R4-27/run-cpu.cmd": "53bf0df43e760c75c98736526c2703691b708aecde9070c5424b3eacd26933c6",
+      "tests/SystemInputGuard.hpp": "906608efccef0096b68e915ebb7fe0c1fea9e947b43201b037abed317410c797"
+    },
+    "archive_sha256": "1500f1af26b3192890890ee9e4b231e9d7294e067ebd65bdc63752647b6ee1a1"
+  },
+  "benchmark_exe_sha256": "3f4d84a75e3a843a7df594c0e557f23022173b4f256e63fb1a5cfeef4175eb46",
+  "results": [
+    {
+      "objects": 4,
+      "phases": 1,
+      "batches": 9,
+      "program_native_paired_median": 1.7333333333333334,
+      "paired_min": 0.6091954022988506,
+      "paired_max": 14.214285714285714,
+      "wins": 2,
+      "native_worst_batch_us": 8.7,
+      "program_worst_batch_us": 19.9
+    },
+    {
+      "objects": 4,
+      "phases": 16,
+      "batches": 9,
+      "program_native_paired_median": 0.8749999999999999,
+      "paired_min": 0.38690476190476186,
+      "paired_max": 2.0757575757575757,
+      "wins": 7,
+      "native_worst_batch_us": 16.8,
+      "program_worst_batch_us": 13.7
+    },
+    {
+      "objects": 4,
+      "phases": 64,
+      "batches": 9,
+      "program_native_paired_median": 0.8140495867768595,
+      "paired_min": 0.7586206896551724,
+      "paired_max": 0.8559670781893004,
+      "wins": 9,
+      "native_worst_batch_us": 26.1,
+      "program_worst_batch_us": 20.8
+    },
+    {
+      "objects": 64,
+      "phases": 1,
+      "batches": 9,
+      "program_native_paired_median": 0.8955223880597015,
+      "paired_min": 0.7272727272727273,
+      "paired_max": 0.9550561797752809,
+      "wins": 9,
+      "native_worst_batch_us": 8.9,
+      "program_worst_batch_us": 8.5
+    },
+    {
+      "objects": 64,
+      "phases": 16,
+      "batches": 9,
+      "program_native_paired_median": 0.561314791403287,
+      "paired_min": 0.5443499392466585,
+      "paired_max": 0.5674300254452926,
+      "wins": 9,
+      "native_worst_batch_us": 83.1,
+      "program_worst_batch_us": 47.1
+    },
+    {
+      "objects": 64,
+      "phases": 64,
+      "batches": 9,
+      "program_native_paired_median": 0.5394819962097284,
+      "paired_min": 0.5306825297432687,
+      "paired_max": 0.5986821462190148,
+      "wins": 9,
+      "native_worst_batch_us": 532.9,
+      "program_worst_batch_us": 293.4
+    },
+    {
+      "objects": 4096,
+      "phases": 1,
+      "batches": 9,
+      "program_native_paired_median": 1.4183660215612417,
+      "paired_min": 1.3463809034907595,
+      "paired_max": 1.4672689185650696,
+      "wins": 0,
+      "native_worst_batch_us": 779.2,
+      "program_worst_batch_us": 1120.7
+    },
+    {
+      "objects": 4096,
+      "phases": 16,
+      "batches": 9,
+      "program_native_paired_median": 0.789763138562948,
+      "paired_min": 0.6983409140134287,
+      "paired_max": 1.139708595534192,
+      "wins": 8,
+      "native_worst_batch_us": 11542.5,
+      "program_worst_batch_us": 11428.2
+    },
+    {
+      "objects": 4096,
+      "phases": 64,
+      "batches": 9,
+      "program_native_paired_median": 0.7304095039714332,
+      "paired_min": 0.6753310468889999,
+      "paired_max": 1.1565479258974074,
+      "wins": 8,
+      "native_worst_batch_us": 44643.1,
+      "program_worst_batch_us": 35447.5
+    }
+  ],
+  "reference_head": "5678dcc",
+  "new_commit_or_push_after_preservation_instruction": false,
+  "installed_package_sha256": "475191c75d2e1d6afffd34cb75ec2f705f44055d86fccbae8b1304b84dc36f1d",
+  "isolated_profile_inspector": "read_only_ACCEPT_not_runtime_loaded_module_proof",
+  "runtime_profile_preflight": "actual native/candidate PrepareOnly passed; dependency and settings hashes equal; no GD or run directory"
+}

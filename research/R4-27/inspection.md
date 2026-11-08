@@ -1,0 +1,3 @@
+One read-only inspector ACCEPT for closed cumulative prototype; no P0/P1. P2: benchmark clears tracking even with equal stamps; preserved-tracking cases tested functionally but not timed separately. Actual GD barriers and dense intermediate callback states remain unproven. Inspector did not execute tests, inspect final assembly or launch GD. No performance promotion justified.
+
+Isolated-test safety follow-up: read-only ACCEPT, no P0/P1. Explicit ID allowlist precedes candidate exclusion; pre/post staging profiles and separate campaign paths are coherent. Inspector did not execute tests or GD; prepared-profile proof does not establish actually loaded modules.
