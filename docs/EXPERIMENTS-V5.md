@@ -1416,9 +1416,9 @@ d'état. Les téléchargements diagnostiques ont lieu après le dessin, jamais e
 le compute et ce dessin. Aucun processus GD/Geode lancé, aucune installation changée.
 
 Intervalle GPU isolé (28 échantillons chauds par configuration, pas des frametimes
-GD ni du temps GPU actif pur) :4096 objets/10 commandes, médiane0.634618ms,
-p950.663336ms,pire0.669063ms. Avec7 commandes :médiane0.624326ms,
-p950.671719ms,pire1.14714ms. Les intervalles comprennent les bulles de soumission.
+GD ni du temps GPU actif pur) :4096 objets/10 commandes, médiane0.599177ms,
+p950.631879ms,pire0.670225ms. Avec7 commandes :médiane0.596521ms,
+p950.628227ms,pire0.652546ms. Les intervalles comprennent les bulles de soumission.
 La scène, ses petites textures et son overdraw sont synthétiques ; aucun ratio
 FPS ni coût de niveau complet ne peut en être déduit. Dernier log local :
 build-research/fused-group-quads-r62/checks.local.txt ; entrées et binaire dans le
