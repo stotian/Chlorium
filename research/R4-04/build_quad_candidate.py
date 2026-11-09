@@ -52,6 +52,8 @@ profiles = {
     "--adaptive-measure-r66": "measurement-adaptive-pages-r66",
     "--direct-pages-r67": "native-direct-pages-r67",
     "--direct-measure-r67": "measurement-direct-pages-r67",
+    "--field-watch": "native-field-watch-r69",
+    "--field-watch-measure": "measurement-field-watch-r69",
     "--continuous-measure": "measurement-resident-continuous-r57",
     "--continuous-measure-r59": "measurement-resident-deferred-r59",
     "--continuous-measure-r60": "measurement-resident-timed-r60",
@@ -118,11 +120,11 @@ if canonical:
     flags += ["/DCHLORIUM_NATIVE_CANONICAL_V10=1"]
     source_names = ["src/renderer/NativeAreaDivisions.cpp", "src/renderer/NativeAtlasStatsEmpty.cpp", "src/renderer/NativePauseGuard.cpp", "src/BuildIdentity.cpp"]
 sources = [root / name for name in source_names]
-if selected in ("--resident-continuous", "--resident-fast", "--resident-deferred", "--resident-timed", "--resident-direct", "--group-trace", "--direct-pages", "--stream-control-r65", "--adaptive-pages", "--direct-pages-r67"):
+if selected in ("--resident-continuous", "--resident-fast", "--resident-deferred", "--resident-timed", "--resident-direct", "--group-trace", "--direct-pages", "--stream-control-r65", "--adaptive-pages", "--direct-pages-r67", "--field-watch"):
     flags = [flag for flag in flags if not flag.startswith(("/DCHLORIUM_EXPERIMENTAL_NATIVE_", "/DCHLORIUM_NATIVE_SNAPSHOTS="))]
     flags += ["/DCHLORIUM_RESIDENT_CONTINUOUS_R57=1", "/fp:strict"]
     sources = [root/"research/R4-57/ContinuousRenderer.cpp",root/"src/BuildIdentity.cpp"]
-    if selected in ("--resident-fast", "--resident-deferred", "--resident-timed", "--resident-direct", "--group-trace", "--direct-pages", "--stream-control-r65", "--adaptive-pages", "--direct-pages-r67"):
+    if selected in ("--resident-fast", "--resident-deferred", "--resident-timed", "--resident-direct", "--group-trace", "--direct-pages", "--stream-control-r65", "--adaptive-pages", "--direct-pages-r67", "--field-watch"):
         flags += ["/DCHLORIUM_RESIDENT_FAST_R58=1"]
     if selected in ("--resident-deferred", "--resident-timed", "--resident-direct", "--group-trace", "--stream-control-r65"):
         flags += ["/DCHLORIUM_NATIVE_UPLOAD_DEFERRAL_R59=1"]
@@ -133,20 +135,25 @@ if selected in ("--resident-continuous", "--resident-fast", "--resident-deferred
     if selected=="--group-trace":
         flags += ["/DCHLORIUM_GROUP_STATE_TRACE_R63=1"]
         sources.append(root / "research/R4-63/GroupTrace.cpp")
-    if selected in ("--direct-pages", "--adaptive-pages", "--direct-pages-r67"):
+    if selected in ("--direct-pages", "--adaptive-pages", "--direct-pages-r67", "--field-watch"):
         flags += ["/DCHLORIUM_DIRECT_VERTEX_PAGES_R65=1"]
     if selected=="--adaptive-pages":
         flags += ["/DCHLORIUM_ADAPTIVE_VERTEX_PAGES_R66=1"]
-    if selected=="--direct-pages-r67":
+    if selected in ("--direct-pages-r67", "--field-watch"):
         flags += ["/DCHLORIUM_DIRECT_CONTEXT_GUARD_R67=1"]
+    if selected=="--field-watch":
+        flags += ["/DCHLORIUM_NATIVE_FIELD_WATCH_R69=1"]
+        sources.append(root / "research/R4-69/FieldTrace.cpp")
     if selected=="--stream-control-r65":
         flags += ["/DCHLORIUM_R61_UNTIMED_CONTROL_R65=1"]
-if selected in ("--direct-measure-r65", "--adaptive-measure-r66", "--direct-measure-r67"):
+if selected in ("--direct-measure-r65", "--adaptive-measure-r66", "--direct-measure-r67", "--field-watch-measure"):
     flags += ["/DCHLORIUM_CANONICAL_AUDIT_V10=1", "/DCHLORIUM_CANONICAL_AUDIT_PE_R2=1", "/DCHLORIUM_DIRECT_VERTEX_AUDIT_R65=1"]
 if selected=="--adaptive-measure-r66":
     flags += ["/DCHLORIUM_ADAPTIVE_VERTEX_AUDIT_R66=1", "/DCHLORIUM_EXTERNAL_SAMPLING_AUDIT=1"]
-if selected=="--direct-measure-r67":
+if selected in ("--direct-measure-r67", "--field-watch-measure"):
     flags += ["/DCHLORIUM_DIRECT_VERTEX_AUDIT_R67=1"]
+if selected=="--field-watch-measure":
+    flags += ["/DCHLORIUM_FIELD_WATCH_AUDIT_R69=1"]
 if selected=="--opacity-hash":
     flags += ["/DCHLORIUM_NATIVE_OPACITY_HASH_R36=1"]
     sources.append(root / "research/R4-36/NativeOpacityHashPatch.cpp")
@@ -236,6 +243,10 @@ if selected=="--direct-pages-r67":
     manifest.update(backend="CHLORIUM_DIRECT_CONTEXT_GUARD_R67",version="v0.4.0-alpha.67")
 if selected=="--direct-measure-r67":
     manifest.update(backend="CHLORIUM_DIRECT_VERTEX_AUDIT_R67",version="v0.4.0-alpha.67")
+if selected=="--field-watch":
+    manifest.update(backend="CHLORIUM_NATIVE_FIELD_WATCH_R69",version="v0.4.0-alpha.69")
+if selected=="--field-watch-measure":
+    manifest.update(backend="CHLORIUM_FIELD_WATCH_AUDIT_R69",version="v0.4.0-alpha.69")
 for source in sources:
     manifest["sources"].append({"path": source.name, "sha256": fingerprint(source)})
 for header in (root / "src" / "renderer").glob("*.hpp"):
@@ -269,6 +280,7 @@ for pattern in ("*.cpp", "*.hpp"):
     snapshot_files.update((root / "research/R4-63").rglob(pattern))
     snapshot_files.update((root / "research/R4-65").rglob(pattern))
     snapshot_files.update((root / "research/R4-66").rglob(pattern))
+    snapshot_files.update((root / "research/R4-69").rglob(pattern))
 for folder in ("src", "legacy", "tests", "research/R4-08", "research/R4-11", "research/R4-17", "research/R4-30", "research/R4-32", "research/R4-33", "research/R4-34", "research/R4-35", "research/R4-36", "research/R4-37", "research/R4-41", "research/R4-42", "research/R4-43", "research/R4-44", "research/R4-45", "research/R4-46", "research/R4-47", "research/R4-48", "research/R4-49", "research/R4-54"):
     for pattern in ("*.cpp", "*.hpp", "*.h"):
         snapshot_files.update((root / folder).rglob(pattern))

@@ -79,6 +79,8 @@ def read(report, expected_loaded):
 
 
 def validate_conditions(a, ar, ap, b, br, bp):
+    if ap.get('native_field_watch_diagnostic') or bp.get('native_field_watch_diagnostic'):
+        raise ValueError('Native field watch diagnostics cannot be used as performance comparisons')
     if ap.get('external_sampling_requested') or bp.get('external_sampling_requested'):
         raise ValueError('External sampling diagnostics cannot be used as performance comparisons')
     if ap.get('opacity_shadow_diagnostic') or bp.get('opacity_shadow_diagnostic'):

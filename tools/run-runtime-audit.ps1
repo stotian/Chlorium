@@ -1,5 +1,5 @@
 #Requires -Version 7.0
-param([switch]$Native, [switch]$VisualWatch, [switch]$WithUserMods, [switch]$ExternalFocus, [switch]$ExternalSampling, [switch]$OpacityShadow, [switch]$PassCapture, [switch]$AtlasStorageRegression, [string]$GameDirectory, [string]$Package, [string]$ProductionPackage, [string]$ReportDirectory,
+param([switch]$Native, [switch]$VisualWatch, [switch]$WithUserMods, [switch]$ExternalFocus, [switch]$ExternalSampling, [switch]$OpacityShadow, [switch]$PassCapture, [switch]$FieldWatch, [switch]$AtlasStorageRegression, [string]$GameDirectory, [string]$Package, [string]$ProductionPackage, [string]$ReportDirectory,
     [string]$UserGameDirectory = 'C:\Program Files (x86)\Steam\steamapps\common\Geometry Dash',
     [ValidateSet(0,133260800,129598490,88952972,139648964)][int]$FetchLevel = 0,
     [ValidateSet(133260800,129598490,88952972,139648964)][int]$Level = 133260800,
@@ -10,6 +10,9 @@ param([switch]$Native, [switch]$VisualWatch, [switch]$WithUserMods, [switch]$Ext
     [ValidateRange(0,100)][double[]]$CapturePercent = @(),[switch]$StartupDiagnostic)
 $ErrorActionPreference = 'Stop'
 $groupTraceDiagnostic = $env:CHLORIUM_GROUP_TRACE_R63 -eq '1'
+if($env:CHLORIUM_FIELD_WATCH_R69 -and !$FieldWatch){throw 'Inherited R69 field watch requires explicit diagnostic selection'}
+if($FieldWatch -and ($Native -or $VisualWatch -or $WithUserMods -or $ExternalSampling -or $PassCapture -or $OpacityShadow -or $groupTraceDiagnostic -or $AtlasStorageRegression -or $StartupDiagnostic -or !$ProductionPackage)){throw 'R69 field watch requires Chlorium active, isolated mods and no combined diagnostic'}
+if($FieldWatch -and @('CHLORIUM_QUAD_READ_WATCH','CHLORIUM_OPACITY_INVOCATIONS','CHLORIUM_MOVE_COMMAND_CENSUS','CHLORIUM_NATIVE_PRODUCER_CAPTURE','CHLORIUM_NATIVE_BATCH_REPLAY','CHLORIUM_RESIDENT_NATIVE_REPLAY','CHLORIUM_OPAQUE_INPUT_CENSUS','CHLORIUM_OWNED_REGISTER_ORACLE','CHLORIUM_STARTUP_DEATH_WATCH' | Where-Object {[Environment]::GetEnvironmentVariable($_,'Process') -eq '1'}).Count){throw 'R69 field watch cannot combine capture diagnostics'}
 if($groupTraceDiagnostic -and ($Native -or $PassCapture -or $WithUserMods -or $ExternalSampling -or $OpacityShadow -or $VisualWatch -or $AtlasStorageRegression -or !$ProductionPackage)){
     throw 'R63 group trace requires Chlorium active with isolated mods and no combined renderer diagnostic'
 }
@@ -89,6 +92,7 @@ try {
     $supportsAdaptivePagesR66 = $binary.Contains('CHLORIUM_ADAPTIVE_VERTEX_AUDIT_R66')
     $supportsDirectGuardR67 = $binary.Contains('CHLORIUM_DIRECT_VERTEX_AUDIT_R67')
     $supportsNativeAuthorityR67 = $binary.Contains('CHLORIUM_NATIVE_AUTHORITY_AUDIT_R67')
+    if([bool]$FieldWatch -ne $binary.Contains('CHLORIUM_FIELD_WATCH_AUDIT_R69')){throw 'R69 field watch requires its matching independent auditor'}
     if($supportsDirectPagesR65 -and ($Native -or $WithUserMods -or $groupTraceDiagnostic)){throw 'R65 campaign requires Chlorium active, isolated mods and no movement trace'}
     if($groupTraceDiagnostic -and !$binary.Contains('CHLORIUM_GROUP_TRACE_AUDIT_R63')){throw 'R63 trace requires its identified independent auditor'}
     $opacityHashAuditBinary = $binary.Contains('CHLORIUM_OPACITY_HASH_AUDIT_R36')
@@ -183,6 +187,7 @@ if ($measurementOnly -and !$Native) {
             $requireNativeSnapshots = $true
         }
         if($groupTraceDiagnostic -ne $binary.Contains('CHLORIUM_GROUP_STATE_TRACE_R63')){throw 'R63 trace candidate and explicit diagnostic selection must match'}
+        if([bool]$FieldWatch -ne $binary.Contains('CHLORIUM_NATIVE_FIELD_WATCH_R69')){throw 'R69 field watch candidate and diagnostic selection must match'}
         $rendererTimingDiagnostic = $binary.Contains('CHLORIUM_RENDERER_TIMING_R60')
         $rendererVariant = if($binary.Contains('CHLORIUM_DIRECT_CONTEXT_GUARD_R67')){'direct-pages-r67'}elseif($binary.Contains('CHLORIUM_ADAPTIVE_VERTEX_PAGES_R66')){'adaptive-pages-r66'}elseif($binary.Contains('CHLORIUM_DIRECT_VERTEX_PAGES_R65')){'direct-pages-r65'}elseif($binary.Contains('CHLORIUM_R61_UNTIMED_CONTROL_R65')){'stream-control-r65'}else{'previous-profile'}
         if($rendererVariant -eq 'direct-pages-r67' -and !$supportsDirectGuardR67){throw 'R67 requires its matching context-recovery auditor and mode label'}
@@ -199,6 +204,7 @@ if ($measurementOnly -and !$Native) {
 $previous = $env:CHLORIUM_AUDIT_OUTPUT
 $previousNative = $env:CHLORIUM_AUDIT_NATIVE
 $previousOpacityHash = $env:CHLORIUM_REQUIRE_OPACITY_HASH_R36
+$previousFieldWatch = $env:CHLORIUM_FIELD_WATCH_R69
 $previousSampling = $env:CHLORIUM_EXTERNAL_SAMPLING
 $previousFetch = $env:CHLORIUM_AUDIT_FETCH_ID
 $previousBenchmark = $env:CHLORIUM_BENCHMARK_SECONDS
@@ -331,6 +337,7 @@ try {
         external_sampling_requested = [bool]$ExternalSampling
         opacity_shadow_diagnostic = [bool]$OpacityShadow
         native_pass_capture_diagnostic = [bool]$PassCapture
+        native_field_watch_diagnostic = [bool]$FieldWatch
         movement_command_census_diagnostic = ($env:CHLORIUM_MOVE_COMMAND_CENSUS -eq '1')
         native_batch_replay_diagnostic = ($env:CHLORIUM_NATIVE_BATCH_REPLAY -eq '1')
         zero_fragment_discard_diagnostic = ($env:CHLORIUM_ZERO_FRAGMENT_DISCARD -eq '1')
@@ -366,6 +373,7 @@ try {
     $env:CHLORIUM_AUDIT_OUTPUT = $output
     $env:CHLORIUM_AUDIT_NATIVE = if ($Native) { '1' } else { $null }
     $env:CHLORIUM_EXTERNAL_SAMPLING = if ($ExternalSampling) { '1' } else { $null }
+    $env:CHLORIUM_FIELD_WATCH_R69 = if ($FieldWatch) { '1' } else { $null }
     $env:CHLORIUM_AUDIT_FETCH_ID = if ($FetchLevel -gt 0) { [string]$FetchLevel } else { $null }
     $env:CHLORIUM_BENCHMARK_SECONDS = if ($BenchmarkSeconds -gt 0) { [string]$BenchmarkSeconds } else { $null }
     $env:CHLORIUM_BENCHMARK_LEVEL = [string]$Level
@@ -452,6 +460,7 @@ public static class ChloriumResearchFocus {
     $env:CHLORIUM_REQUIRE_TARGETED_MATH_V3 = $previousTargetedMath
     $env:CHLORIUM_REQUIRE_NATIVE_SNAPSHOTS = $previousNativeSnapshots
     $env:CHLORIUM_REQUIRE_OPACITY_HASH_R36 = $previousOpacityHash
+    $env:CHLORIUM_FIELD_WATCH_R69 = $previousFieldWatch
     if ($resourceTrace) { $resourceTrace.Dispose() }
     if ($testProcess -and !$testProcess.HasExited) { Stop-Process -Id $testProcess.Id -ErrorAction SilentlyContinue }
     if ($testProcess) { $testProcess.WaitForExit(5000) | Out-Null; $testProcess.Dispose() }

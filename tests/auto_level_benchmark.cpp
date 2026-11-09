@@ -21,6 +21,10 @@
 #include "FrameWatch.hpp"
 #include "MeasurementHookPolicy.hpp"
 #include "../research/R4-57/ContinuousStats.hpp"
+#ifdef CHLORIUM_FIELD_WATCH_AUDIT_R69
+#include "../research/R4-69/TraceAdapter.hpp"
+extern "C" __declspec(dllexport) const char chloriumFieldWatchAuditIdentity[]="CHLORIUM_FIELD_WATCH_AUDIT_R69";
+#endif
 #ifdef CHLORIUM_DIRECT_VERTEX_AUDIT_R65
 #include "../research/R4-65/DirectStats.hpp"
 extern "C" __declspec(dllexport) const char chloriumDirectAuditIdentity[]="CHLORIUM_DIRECT_VERTEX_AUDIT_R65";
@@ -266,6 +270,20 @@ bool canonicalCoreActive() {
         {game+chlorium::area::functionRva,chlorium::area::functionBytes},optimizedArea);
 }
 #endif
+bool recordNativeFieldWatch(){
+#ifdef CHLORIUM_FIELD_WATCH_AUDIT_R69
+    using Stats=chlorium::research::fieldtrace::Stats;Stats value;
+    const auto module=GetModuleHandleW(L"local.chlorium.dll");
+    const auto read=module?reinterpret_cast<bool(*)(Stats*,std::size_t)>(GetProcAddress(module,"ChloriumReadNativeFieldWatchR69")):nullptr;
+    const bool readOk=read && read(&value,sizeof(value));
+    auto row=matjson::Value::object();row["event"]="native_field_watch_r69";row["read"]=readOk;
+    row["complete"]=value.complete;row["reasons"]=value.reasons;row["frames"]=value.frames;row["rows"]=value.rows;row["objects"]=value.objects;row["failure"]=value.failure;
+    row["first_frame_partial"]=true;row["main_thread_only"]=true;row["global_reader_closure"]=false;line(row.dump());
+    return readOk && value.version==69 && value.complete && !value.reasons && value.frames==2 && value.rows && value.objects;
+#else
+    return true;
+#endif
+}
 bool recordNativeSnapshotStats(float percent) {
 #ifdef CHLORIUM_CANONICAL_AUDIT_V10
     const bool active=canonicalCoreActive();
@@ -558,6 +576,9 @@ bool recordFrame(PlayLayer* play, Clock::time_point before, Clock::time_point af
     exclude(time < 2, "warmup"); exclude(!foreground, "unfocused"); exclude(paused, "paused");
     exclude(dead1 || dead2, "dead"); exclude(draws == 0, "no_draw"); exclude(!frameHadContext, "no_context");
     exclude(capturedThisFrame, "capture");
+#ifdef CHLORIUM_FIELD_WATCH_AUDIT_R69
+    exclude(true,"native_field_watch_diagnostic");
+#endif
     exclude(verifiedThisFrame, "gpu_verification");
     exclude(mathVerifiedThisFrame, "exact_math_verification");
     exclude(frameWatch.enabled(), "visual_diagnostic");
@@ -631,12 +652,14 @@ void finish(bool fullLevel, const char* reason) {
     recordAffineStats(PlayLayer::get() ? PlayLayer::get()->getCurrentPercent() : -1.f);
     const bool snapshotsActive = recordNativeSnapshotStats(PlayLayer::get() ? PlayLayer::get()->getCurrentPercent() : -1.f);
     const bool visualVerified = frameWatch.coverageComplete();
+    const bool fieldWatchVerified = recordNativeFieldWatch();
     bool passCaptureVerified = true;
 #ifdef CHLORIUM_NATIVE_PASS_CAPTURE
     passCaptureVerified = chlorium::research::pass::finish();
 #endif
-    stop((fullLevel || targetCompleted) && deaths == 0 && graphicsVerified && mathVerified && visualVerified && targetedMathActive && snapshotsActive && passCaptureVerified,
+    stop((fullLevel || targetCompleted) && deaths == 0 && graphicsVerified && mathVerified && visualVerified && targetedMathActive && snapshotsActive && passCaptureVerified && fieldWatchVerified,
         deaths != 0 ? "Run contains deaths; paired performance/visual validation rejected" :
+        !fieldWatchVerified ? "Native field-read diagnostic is incomplete; no reader coverage claim is valid" :
         !passCaptureVerified ? "Native pass capture is incomplete; no replacement coverage proof is valid" :
         !snapshotsActive ? "Native snapshot renderer did not stay active; no GPU batching performance verdict is valid" :
         !targetedMathActive ? "Required targeted math V3 is unavailable, inactive or changed owner; no candidate performance verdict is valid" :
@@ -944,7 +967,7 @@ void tick() {
         const bool continuous=continuousModule && GetProcAddress(continuousModule,"chloriumContinuousIdentity");
         const auto label=continuous?
 #ifdef CHLORIUM_DIRECT_VERTEX_AUDIT_R65
-            (GetProcAddress(continuousModule,"chloriumDirectContextGuardIdentity")?"CHLORIUM R67 / DIRECT":GetProcAddress(continuousModule,"chloriumAdaptiveVertexPagesIdentity")?"CHLORIUM R66 / DIRECT":GetProcAddress(continuousModule,"chloriumDirectVertexPagesIdentity")?"CHLORIUM R65 / DIRECT":"CHLORIUM R61 / CONTROLE R65"):
+            (GetProcAddress(continuousModule,"chloriumNativeFieldWatchIdentity")?"CHLORIUM R67 + WATCH R69":GetProcAddress(continuousModule,"chloriumDirectContextGuardIdentity")?"CHLORIUM R67 / DIRECT":GetProcAddress(continuousModule,"chloriumAdaptiveVertexPagesIdentity")?"CHLORIUM R66 / DIRECT":GetProcAddress(continuousModule,"chloriumDirectVertexPagesIdentity")?"CHLORIUM R65 / DIRECT":"CHLORIUM R61 / CONTROLE R65"):
 #else
 #ifdef CHLORIUM_EXTENDED_RESIDENT_STATS_R59
             (GetProcAddress(continuousModule,"chloriumGroupTraceIdentity")?"CHLORIUM R61 + TRACE R63":GetProcAddress(continuousModule,"chloriumNativeStreamDirectIdentity")?"CHLORIUM R61 / DIAGNOSTIC":GetProcAddress(continuousModule,"chloriumRendererTimingIdentity")?"CHLORIUM R60 / DIAGNOSTIC":GetProcAddress(continuousModule,"chloriumUploadDeferralIdentity")?"AVEC CHLORIUM GPU R59":"AVEC CHLORIUM GPU R57"):

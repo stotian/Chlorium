@@ -1560,3 +1560,12 @@ de temps. Répétition sans compilation :189positions de thread entre74.43–77.
 aucun contexte manquant/erreur de nettoyage. Ce sont des positions murales, pas des
 pourcentages CPU inclusifs. Graphify :91sources,1682nœuds/2785liens,0tokenLLM ;
 deux analyses partielles etun fichier sans symboles, pas une preuve des alias natifs.
+
+R69 : observation matérielle des positions CPU, séparée du rendu R67 et exclue des
+FPS.48 cycles/192 accès exacts, quatre groupes de tests de décodage, six gardes
+de campagne. Helio74–74.5 :368 accès sur deux objets/deux images (première partielle).
+Rotations160, mouvement102, classement spatial100, rectangle texture4, insertion2.
+Tous dans le GD épinglé ; aucun débordement, données partagées92 fichiers restaurées.
+Les noms sont des adresses exactes de bindings, les comptes ne sont pas des temps.
+Ne pas supprimer les lecteurs CPU sur la foi du seul programme de déplacement.
+Prochain prototype : chemin spatial sans changement, oracle natif avant intégration.
