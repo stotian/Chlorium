@@ -10,6 +10,7 @@
 | v0.4.0-alpha.60 | Mesures CPU par étape R60 | Contrôles isolés ; passage interrompu vers 51,6 %, cible non couverte |
 | v0.4.0-alpha.61 | Stockage natif sans programme graphique privé | 345 cas GPU hérités + nouveaux gardes ; Heliopolis 74–78 % diagnostiqué, aucun gain qualifié |
 | Prototype R62 hors mod | Groupes → quads → dessin, sans positions rapatriées | 266304 états/quads et128 images comparés aux fonctions natives ; pas encore intégré à GD |
+| v0.4.0-alpha.63, diagnostic | R61 actif + observation des groupes et états finaux | Heliopolis74–75% ; deux images complètes, aucun calcul natif retiré ; pas de preuve FPS |
 
 Ces versions restent expérimentales et séparées du build V10 historique ci-dessous.
 Le journal distingue les binaires effectivement testés et les modifications ultérieures.

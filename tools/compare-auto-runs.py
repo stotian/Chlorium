@@ -93,8 +93,8 @@ def compare(baseline, candidate, destination):
         raise ValueError('Resident renderer replay diagnostics cannot be used as performance comparisons')
     if ap.get('visual_diagnostic') or bp.get('visual_diagnostic'):
         raise ValueError('Visual readback diagnostics cannot be used as performance comparisons')
-    if any(p.get(key) for p in (ap, bp) for key in ('renderer_timing_diagnostic','startup_diagnostic')):
-        raise ValueError('Renderer timing/startup diagnostics cannot be used as performance comparisons')
+    if any(p.get(key) for p in (ap, bp) for key in ('renderer_timing_diagnostic','startup_diagnostic','group_state_trace_diagnostic')):
+        raise ValueError('Renderer timing/startup/group trace diagnostics cannot be used as performance comparisons')
     if bool(ap.get('research_source_level_id')) != bool(bp.get('research_source_level_id')):
         raise ValueError('Different source level identity policy')
     target_fps = ap.get('target_fps', 60)

@@ -1440,3 +1440,55 @@ qualifié. Le domaine des poses finales est vérifié par l'oracle avant dispatc
 cette fixture, pas résolu pour des commandes futures arbitraires. L'adaptateur réel
 doit préserver sections, ancres, callbacks et lecteurs avant de retirer les boucles
 CPU. Le résultat montre une chaîne sans copie CPU intermédiaire, pas un gain en jeu.
+
+
+### R63 — dépendances de mouvement, Chlorium actif (8–9 novembre)
+
+Observation seulement : hook moveObjects appelle toujours l'original une fois.
+Copie bornée avant appel ; fin de chaque image relue dans le conteneur actuel
+m_objects et filtrée par adresses/UID déjà observés. Aucun ancien pointeur natif
+n'est suivi après son callback. Fichier exclusif local, état FP/LastError restauré,
+thread propriétaire, ABI/offsets compilés et corps natif2.2081 vérifiés. Les UID
+réutilisés, domaines invalides, pertes de propriétaire et dépassements restent
+explicitement incomplets. Aucun calcul de gameplay ou de visibilité supprimé.
+
+Premier passage Helio74–74.5%,Chlorium actif : sortie normale, mais trace tronquée
+à2048 appels. REJET de cette capture comme observation complète. Limite portée à
+8192 appels, stockage des lignes sur le tas pour éviter de grossir la pile,
+maximum262144 états copiés. Deux observations finales ajoutées au format63 via
+un bit de fonctionnalités ; le lecteur accepte l'ancien format sans prétendre
+qu'il contient des états finaux. Neuf contrôles Python, contrôles C++ de copie,
+budgets/UID/FP/fautes/sérialisation, dix gardes de comparaison passent. Les traces
+R63, comme les diagnostics de timing, sont refusées comme preuves de FPS.
+
+Campagne r63-complete-helio-1 : premier démarrage terminé avant harness, aucun
+résultat ; cache DLL constaté identique au candidat. Nouvelle tentative autorisée
+avec les mêmes octets : cible74–75 atteinte. Chlorium chargé/activé, overlay
+R61+TRACE R63, détails complets/sans shake. Les92 fichiers sont restaurés et
+vérifiés à chaque sortie ; installation principale inchangée. Pas de passage sans
+Chlorium. Cause du démarrage intermittent NON établie.
+
+DLL exécutée94c953a9f6f8b5b18325428938eb7253fd317ba7bb5ebc28f94a5e18c8697e73,
+paquet2c53d16d899c6babafbb203560382e8d52c39fbfe00af7ea33d0f8aa245b8647.
+Sources compilées archivées identiques aux quatre fichiers critiques actuels.
+Auditeur f31269cc792ff9ddeef6fe0eb5f0e6cde85c4554b1c7b34dca6a2e3ced38a3dd,
+paquet b253c73608393301a5379e5d0108372f33f32d3b01ed7ddbfdc5671a089c86f3.
+Trace SHA2560f475f554017f2aa46498061a21c52f541933a397caab8e4ad77b2063952aba1.
+
+Deux images depuis74.0343% :4880 événements dont1362 appels non vides,
+92770 visites de membres,148981 états copiés,28138 objets uniques. Aucun motif
+d'incomplétude ;28138 états finaux observés.28060 objets ont une pose cohérente
+avec les déplacements à toutes leurs observations.28001 objets portent le type
+Decoration ; ces nombres ne représentent PAS une propriété GPU autorisée.
+3646 discontinuités de positions,3417 de lastPosition/estampille et20680 de flags
+sont détectées ; beaucoup peuvent être des traitements natifs légitimes.118/119
+programmes de membership distincts par image ;48/56 visites maximum par objet.
+La trace ajoute du travail et peut augmenter les sous-pas de simulation : ces
+fréquences ne sont pas un profil représentatif sans instrumentation.
+
+R61 reste le renderer exécuté :55712 lots GPU engagés,13268033 quads, zéro
+rollback/fatal/refus hors lots ponctuels. Cela ne prouve pas zéro écran noir.
+Décision : garder R63 comme outil d'intégration, aucune promotion ni gain FPS
+annoncé. Suite : programme GPU global à listes partagées, avec≤64 opérations
+PAR OBJET plutôt que≤64 commandes dans tout le niveau. Lecteurs CPU, sections,
+hiérarchies et écritures hors mouvements restent à qualifier avant offload natif.

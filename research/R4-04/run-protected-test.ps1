@@ -56,6 +56,8 @@ $taskPlan = Get-Content -LiteralPath $taskPlanPath -Raw | ConvertFrom-Json
 if($RunRevision){$taskPlan.run_revision=$RunRevision}
 if ($taskPlan.status -ne 'authorized_by_user') { throw 'Runtime campaign lacks explicit user authorization' }
 if($taskPlan.allowed_modes -and $Mode -notin $taskPlan.allowed_modes){throw 'This campaign only authorizes the selected Chlorium renderer; native baseline tests are stopped'}
+if([bool]$taskPlan.group_trace_r63 -ne ($env:CHLORIUM_GROUP_TRACE_R63 -eq '1')){throw 'R63 trace requires its explicit campaign and diagnostic selection'}
+if($taskPlan.group_trace_r63 -and ($Mode -ne 'candidate' -or $WithUserMods -or $PassCapture)){throw 'R63 trace only permits Chlorium active with isolated mods'}
 if ($taskPlan.run_revision -and $taskPlan.run_revision -notmatch '^[a-z0-9][a-z0-9-]{0,31}$') {throw 'Invalid campaign revision'}
 if([bool]$taskPlan.opacity_shadow -ne [bool]$OpacityShadow){throw 'Opacity shadow requires its distinct, explicitly selected campaign plan'}
 if([bool]$taskPlan.native_pass_capture -ne [bool]$PassCapture){throw 'Native pass capture requires its distinct campaign plan'}

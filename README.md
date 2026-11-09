@@ -31,6 +31,10 @@ n'atteint encore les critères de promotion dans une version normale.**
   puis dessine avec le programme Cocos. Les positions restent sur le GPU : seules
   les commandes de groupes sont transférées à chaque image. Prototype fermé hors
   GD, non intégré au mod ; effets Area, hiérarchies et lecteurs CPU non qualifiés.
+- R63 observe deux images avec Chlorium actif, puis relit les objets encore
+  présents à la fin de chacune. La capture Heliopolis complète vérifie la continuité
+  des poses pour préparer l'adaptateur GPU ; elle ne désactive aucun calcul natif
+  et ne constitue pas une comparaison de performances.
 
 Les calculs CPU natifs des objets et triggers restent exécutés. Le transfert
 complet de leur logique sur GPU, objectif de Bismuth, **n'est pas terminé**.

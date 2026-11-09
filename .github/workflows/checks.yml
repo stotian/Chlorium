@@ -41,6 +41,17 @@ jobs:
           if errorlevel 1 exit /b %errorlevel%
           build-tests\timing-cpu.exe
           if errorlevel 1 exit /b %errorlevel%
+      - name: Bounded group trace and arithmetic reader
+        shell: cmd
+        run: |
+          cl /nologo /std:c++latest /O2 /fp:strict /EHsc research\R4-63\checks.cpp /Fobuild-tests/group-trace.obj /Febuild-tests/group-trace.exe
+          if errorlevel 1 exit /b %errorlevel%
+          build-tests\group-trace.exe build-tests\owned-trace.local.bin
+          if errorlevel 1 exit /b %errorlevel%
+          python research/R4-63/trace_checks.py
+          if errorlevel 1 exit /b %errorlevel%
+          python research/R4-30/comparison_guard_checks.py
+          if errorlevel 1 exit /b %errorlevel%
       - name: Owned GPU state sparse uploads
         shell: cmd
         run: |

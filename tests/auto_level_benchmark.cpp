@@ -22,6 +22,9 @@
 #include "MeasurementHookPolicy.hpp"
 #include "../research/R4-57/ContinuousStats.hpp"
 extern "C" __declspec(dllexport) const char chloriumContinuousAuditIdentity[]="CHLORIUM_RESIDENT_CONTINUOUS_AUDIT_R57";
+#ifdef CHLORIUM_GROUP_TRACE_AUDIT_R63
+extern "C" __declspec(dllexport) const char chloriumGroupTraceAuditIdentity[]="CHLORIUM_GROUP_TRACE_AUDIT_R63";
+#endif
 #ifdef CHLORIUM_EXTENDED_RESIDENT_STATS_R59
 extern "C" __declspec(dllexport) const char chloriumResidentTelemetryIdentity[]="CHLORIUM_RESIDENT_TELEMETRY_R59";
 #endif
@@ -912,7 +915,7 @@ void tick() {
         const bool continuous=continuousModule && GetProcAddress(continuousModule,"chloriumContinuousIdentity");
         const auto label=continuous?
 #ifdef CHLORIUM_EXTENDED_RESIDENT_STATS_R59
-            (GetProcAddress(continuousModule,"chloriumNativeStreamDirectIdentity")?"CHLORIUM R61 / DIAGNOSTIC":GetProcAddress(continuousModule,"chloriumRendererTimingIdentity")?"CHLORIUM R60 / DIAGNOSTIC":GetProcAddress(continuousModule,"chloriumUploadDeferralIdentity")?"AVEC CHLORIUM GPU R59":"AVEC CHLORIUM GPU R57"):
+            (GetProcAddress(continuousModule,"chloriumGroupTraceIdentity")?"CHLORIUM R61 + TRACE R63":GetProcAddress(continuousModule,"chloriumNativeStreamDirectIdentity")?"CHLORIUM R61 / DIAGNOSTIC":GetProcAddress(continuousModule,"chloriumRendererTimingIdentity")?"CHLORIUM R60 / DIAGNOSTIC":GetProcAddress(continuousModule,"chloriumUploadDeferralIdentity")?"AVEC CHLORIUM GPU R59":"AVEC CHLORIUM GPU R57"):
 #else
             "AVEC CHLORIUM GPU CONTINU":
 #endif

@@ -6,6 +6,9 @@
 #include "../R4-46/NativeHandoffContract.hpp"
 #include "TargetBackup.hpp"
 #include "ContinuousStats.hpp"
+#ifdef CHLORIUM_GROUP_STATE_TRACE_R63
+#include "../R4-63/TraceAdapter.hpp"
+#endif
 #include <atomic>
 #include <unordered_map>
 #ifdef CHLORIUM_RESIDENT_FAST_R58
@@ -319,7 +322,13 @@ class $modify(ChloriumContinuousFrame,CCDisplayLinkDirector){
         // The mod graph may still change during startup; inspect it only inside a level.
         if(ownerThread.load()==GetCurrentThreadId())isolatedIndexWriters=PlayLayer::get() && isolatedMods();
 #endif
+#ifdef CHLORIUM_GROUP_STATE_TRACE_R63
+        if(ownerThread.load()==GetCurrentThreadId())chlorium::research::grouptrace::begin(PlayLayer::get(),isolatedIndexWriters && enabled());
+#endif
         CCDisplayLinkDirector::mainLoop();
+#ifdef CHLORIUM_GROUP_STATE_TRACE_R63
+        if(ownerThread.load()==GetCurrentThreadId())chlorium::research::grouptrace::end();
+#endif
     }
 };
 class $modify(ChloriumContinuousBatch,CCSpriteBatchNode){

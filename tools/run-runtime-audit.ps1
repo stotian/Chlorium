@@ -9,6 +9,13 @@ param([switch]$Native, [switch]$VisualWatch, [switch]$WithUserMods, [switch]$Ext
     [ValidateSet('map','orphan')][string]$StreamMode = 'orphan',
     [ValidateRange(0,100)][double[]]$CapturePercent = @(),[switch]$StartupDiagnostic)
 $ErrorActionPreference = 'Stop'
+$groupTraceDiagnostic = $env:CHLORIUM_GROUP_TRACE_R63 -eq '1'
+if($groupTraceDiagnostic -and ($Native -or $PassCapture -or $WithUserMods -or $ExternalSampling -or $OpacityShadow -or $VisualWatch -or $AtlasStorageRegression -or !$ProductionPackage)){
+    throw 'R63 group trace requires Chlorium active with isolated mods and no combined renderer diagnostic'
+}
+if($groupTraceDiagnostic -and @('CHLORIUM_QUAD_READ_WATCH','CHLORIUM_OPACITY_INVOCATIONS','CHLORIUM_MOVE_COMMAND_CENSUS','CHLORIUM_NATIVE_PRODUCER_CAPTURE','CHLORIUM_NATIVE_BATCH_REPLAY','CHLORIUM_RESIDENT_NATIVE_REPLAY','CHLORIUM_OPAQUE_INPUT_CENSUS','CHLORIUM_OWNED_REGISTER_ORACLE','CHLORIUM_STARTUP_DEATH_WATCH' | Where-Object {[Environment]::GetEnvironmentVariable($_,'Process') -eq '1'}).Count){
+    throw 'R63 group trace cannot combine other capture diagnostics'
+}
 if($env:CHLORIUM_NATIVE_PRODUCER_CAPTURE -eq '1'){
     if(!$Native -or !$PassCapture -or $WithUserMods){throw 'Producer observer requires the isolated native pass-capture profile'}
     if(@('CHLORIUM_QUAD_READ_WATCH','CHLORIUM_OPACITY_INVOCATIONS','CHLORIUM_MOVE_COMMAND_CENSUS','CHLORIUM_OWNED_REGISTER_ORACLE','CHLORIUM_STARTUP_DEATH_WATCH' | Where-Object {[Environment]::GetEnvironmentVariable($_,'Process') -eq '1'}).Count){throw 'Producer observer cannot combine hardware or invocation diagnostics'}
@@ -78,6 +85,7 @@ try {
     $supportsNativeSnapshots = $binary.Contains('CHLORIUM_NATIVE_SNAPSHOT_AUDIT_V1')
     $supportsCanonical = $binary.Contains('CHLORIUM_CANONICAL_CORE_AUDIT_V10')
     $supportsContinuous = $binary.Contains('CHLORIUM_RESIDENT_CONTINUOUS_AUDIT_R57')
+    if($groupTraceDiagnostic -and !$binary.Contains('CHLORIUM_GROUP_TRACE_AUDIT_R63')){throw 'R63 trace requires its identified independent auditor'}
     $opacityHashAuditBinary = $binary.Contains('CHLORIUM_OPACITY_HASH_AUDIT_R36')
     if (!$binary.Contains('CHLORIUM_AUDIT_120FPS_PACING_R4')) { throw 'Rebuild the auditor with verified 120 FPS pacing before launching this campaign' }
     $opacityShadowBinary = $binary.Contains('CHLORIUM_OPACITY_PREFIX_SHADOW_V1')
@@ -169,6 +177,7 @@ if ($measurementOnly -and !$Native) {
             if (!$supportsNativeSnapshots) { throw 'Rebuild the independent measurement module to verify native snapshot activation' }
             $requireNativeSnapshots = $true
         }
+        if($groupTraceDiagnostic -ne $binary.Contains('CHLORIUM_GROUP_STATE_TRACE_R63')){throw 'R63 trace candidate and explicit diagnostic selection must match'}
         $rendererTimingDiagnostic = $binary.Contains('CHLORIUM_RENDERER_TIMING_R60')
         $binary = $null
     } finally { $productionZip.Dispose() }
@@ -321,6 +330,7 @@ try {
         resident_native_stream_diagnostic = ($env:CHLORIUM_RESIDENT_NATIVE_STREAM -eq '1')
         resident_exact_gpu_updates_diagnostic = ($env:CHLORIUM_RESIDENT_NATIVE_STREAM -eq '1')
         renderer_timing_diagnostic = $rendererTimingDiagnostic
+        group_state_trace_diagnostic = $groupTraceDiagnostic
         startup_diagnostic = [bool]$StartupDiagnostic
         native_producer_capture_diagnostic = ($env:CHLORIUM_NATIVE_PRODUCER_CAPTURE -eq '1')
         resident_vertex_sha256 = $(if($env:CHLORIUM_RESIDENT_NATIVE_REPLAY -eq '1'){(Get-FileHash -LiteralPath $taskResidentSource -Algorithm SHA256).Hash.ToLowerInvariant()}else{$null})

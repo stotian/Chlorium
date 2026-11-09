@@ -10,7 +10,7 @@ from build_history import preserve_previous
 
 root = Path(__file__).resolve().parents[2]
 profile = sys.argv[1] if len(sys.argv) == 2 else ""
-if profile not in ("native-resident-deferred-r59", "native-resident-timed-r60", "native-stream-direct-r61", "native-resident-fast-r58", "native-resident-continuous-r57", "native-opacity-hash-r36", "measurement-native-pass-v10", "measurement-canonical-v10-r4","measurement-resident-continuous-r57","measurement-resident-deferred-r59", "measurement-resident-timed-r60", "measurement-canonical-v10-r3", "measurement-canonical-opacity-shadow-v10", "measurement-canonical-sampling-v10", "measurement-canonical-v10-r2", "measurement-canonical-v10", "native-canonical-v10", "quad-v4", "quad-v4-scope-r2", "quad-audit-r3", "native-vertex-black-v5", "measurement-v5", "measurement-audit-r2", "measurement-black-watch-v5", "measurement-area-census-v5", "measurement-area-visible-v5", "measurement-area-frames-v5", "measurement-pose-census-v6", "native-adaptive-upload-v6", "measurement-upload-v6", "native-draw-bridge-v7", "native-gpu-exchange-v8", "native-persistent-transfer-v9", "measurement-transfer-v9", "measurement-transfer-v9-r2"):
+if profile not in ("native-resident-deferred-r59", "native-resident-timed-r60", "native-stream-direct-r61", "native-group-trace-r63", "native-resident-fast-r58", "native-resident-continuous-r57", "native-opacity-hash-r36", "measurement-native-pass-v10", "measurement-canonical-v10-r4","measurement-resident-continuous-r57","measurement-resident-deferred-r59", "measurement-resident-timed-r60", "measurement-group-trace-r63", "measurement-canonical-v10-r3", "measurement-canonical-opacity-shadow-v10", "measurement-canonical-sampling-v10", "measurement-canonical-v10-r2", "measurement-canonical-v10", "native-canonical-v10", "quad-v4", "quad-v4-scope-r2", "quad-audit-r3", "native-vertex-black-v5", "measurement-v5", "measurement-audit-r2", "measurement-black-watch-v5", "measurement-area-census-v5", "measurement-area-visible-v5", "measurement-area-frames-v5", "measurement-pose-census-v6", "native-adaptive-upload-v6", "measurement-upload-v6", "native-draw-bridge-v7", "native-gpu-exchange-v8", "native-persistent-transfer-v9", "measurement-transfer-v9", "measurement-transfer-v9-r2"):
     raise SystemExit("Choose an explicit compiled research profile")
 out = root / "build-research" / profile
 build = json.loads((out / "build-fingerprint.json").read_text(encoding="utf-8"))
@@ -24,23 +24,27 @@ if build.get("source_archive_sha256"):
     if hashlib.sha256((out / "source-inputs.zip").read_bytes()).hexdigest() != build["source_archive_sha256"]:
         raise SystemExit("Source archive fingerprint mismatch")
 audit = profile.startswith("measurement-")
-if (profile=="native-stream-direct-r61") != (b"CHLORIUM_NATIVE_STREAM_DIRECT_R61" in binary):
+if (profile=="measurement-group-trace-r63") != (b"CHLORIUM_GROUP_TRACE_AUDIT_R63" in binary):
+    raise SystemExit("R63 auditor identity/profile mismatch")
+if (profile=="native-group-trace-r63") != (b"CHLORIUM_GROUP_STATE_TRACE_R63" in binary):
+    raise SystemExit("R63 group trace identity/profile mismatch")
+if (profile in ("native-stream-direct-r61", "native-group-trace-r63")) != (b"CHLORIUM_NATIVE_STREAM_DIRECT_R61" in binary):
     raise SystemExit("R61 native stream identity/profile mismatch")
-if profile=="measurement-resident-timed-r60" and b"CHLORIUM_RENDERER_TIMING_AUDIT_R60" not in binary:
+if profile in ("measurement-resident-timed-r60", "measurement-group-trace-r63") and b"CHLORIUM_RENDERER_TIMING_AUDIT_R60" not in binary:
     raise SystemExit("R60 timing telemetry missing")
-if profile in ("native-resident-timed-r60", "native-stream-direct-r61") and b"CHLORIUM_RENDERER_TIMING_R60" not in binary:
+if profile in ("native-resident-timed-r60", "native-stream-direct-r61", "native-group-trace-r63") and b"CHLORIUM_RENDERER_TIMING_R60" not in binary:
     raise SystemExit("R60 timing identity missing")
 if profile=="measurement-resident-deferred-r59" and b"CHLORIUM_RESIDENT_TELEMETRY_R59" not in binary:
     raise SystemExit("R59 measurement telemetry missing")
 expected = (b"CHLORIUM_RUNTIME_AUDIT_BINARY_V1", b"CHLORIUM_READBACK_STATE_GUARDS_V5") if audit else (
     b"CHLORIUM_NORMAL_BINARY_V1", b"CHLORIUM_NATIVE_VERTEX_BACKEND_V5" if profile in ("native-vertex-black-v5","native-adaptive-upload-v6","native-draw-bridge-v7", "native-gpu-exchange-v8", "native-persistent-transfer-v9") else b"CHLORIUM_NATIVE_QUAD_BACKEND_V4", b"CHLORIUM_EXPERIMENTAL_NATIVE_SNAPSHOTS_V1")
-if profile in ("native-resident-continuous-r57", "native-resident-fast-r58", "native-resident-deferred-r59", "native-resident-timed-r60", "native-stream-direct-r61"):
+if profile in ("native-resident-continuous-r57", "native-resident-fast-r58", "native-resident-deferred-r59", "native-resident-timed-r60", "native-stream-direct-r61", "native-group-trace-r63"):
     expected=(b"CHLORIUM_NORMAL_BINARY_V1",b"CHLORIUM_RESIDENT_CONTINUOUS_R57")
-    if profile in ("native-resident-fast-r58", "native-resident-deferred-r59", "native-resident-timed-r60", "native-stream-direct-r61"):
+    if profile in ("native-resident-fast-r58", "native-resident-deferred-r59", "native-resident-timed-r60", "native-stream-direct-r61", "native-group-trace-r63"):
         expected += (b"CHLORIUM_RESIDENT_FAST_R58",)
     elif b"CHLORIUM_RESIDENT_FAST_R58" in binary:
         raise SystemExit("R58 prototype cannot be packaged as R57")
-    if profile in ("native-resident-deferred-r59", "native-resident-timed-r60", "native-stream-direct-r61"):
+    if profile in ("native-resident-deferred-r59", "native-resident-timed-r60", "native-stream-direct-r61", "native-group-trace-r63"):
         expected += (b"CHLORIUM_NATIVE_UPLOAD_DEFERRAL_R59",)
     elif b"CHLORIUM_NATIVE_UPLOAD_DEFERRAL_R59" in binary:
         raise SystemExit("R59 prototype cannot be packaged as an earlier renderer")
@@ -60,9 +64,9 @@ if profile=="native-gpu-exchange-v8" and b"CHLORIUM_NATIVE_GPU_EXCHANGE_V8" not 
     raise SystemExit("Native GPU exchange identity missing")
 if profile=="native-persistent-transfer-v9" and b"CHLORIUM_NATIVE_PERSISTENT_TRANSFER_V9" not in binary:
     raise SystemExit("Persistent transfer identity missing")
-if profile in ("measurement-canonical-v10","measurement-canonical-v10-r2","measurement-native-pass-v10", "measurement-canonical-v10-r4","measurement-resident-continuous-r57","measurement-resident-deferred-r59", "measurement-resident-timed-r60", "measurement-canonical-v10-r3","measurement-canonical-sampling-v10","measurement-canonical-opacity-shadow-v10") and b"CHLORIUM_CANONICAL_CORE_AUDIT_V10" not in binary:
+if profile in ("measurement-canonical-v10","measurement-canonical-v10-r2","measurement-native-pass-v10", "measurement-canonical-v10-r4","measurement-resident-continuous-r57","measurement-resident-deferred-r59", "measurement-resident-timed-r60", "measurement-group-trace-r63", "measurement-canonical-v10-r3","measurement-canonical-sampling-v10","measurement-canonical-opacity-shadow-v10") and b"CHLORIUM_CANONICAL_CORE_AUDIT_V10" not in binary:
     raise SystemExit("Canonical core audit identity missing")
-if profile in ("measurement-canonical-v10-r2","measurement-native-pass-v10", "measurement-canonical-v10-r4","measurement-resident-continuous-r57","measurement-resident-deferred-r59", "measurement-resident-timed-r60", "measurement-canonical-v10-r3","measurement-canonical-sampling-v10","measurement-canonical-opacity-shadow-v10") and b"CHLORIUM_CANONICAL_AUDIT_BOUNDED_PE_R2" not in binary:
+if profile in ("measurement-canonical-v10-r2","measurement-native-pass-v10", "measurement-canonical-v10-r4","measurement-resident-continuous-r57","measurement-resident-deferred-r59", "measurement-resident-timed-r60", "measurement-group-trace-r63", "measurement-canonical-v10-r3","measurement-canonical-sampling-v10","measurement-canonical-opacity-shadow-v10") and b"CHLORIUM_CANONICAL_AUDIT_BOUNDED_PE_R2" not in binary:
     raise SystemExit("Bounded PE audit identity missing")
 if profile=="measurement-canonical-sampling-v10" and b"CHLORIUM_EXTERNAL_SAMPLING_AUDIT_V2" not in binary:
     raise SystemExit("External sampling audit identity missing")
@@ -87,14 +91,19 @@ manifest["version"] = build["version"]
 manifest["name"] = "Chlorium" if profile=="native-canonical-v10" else "Chlorium independent measurement V5" if audit else "Chlorium persistent transfer V9 research" if profile=="native-persistent-transfer-v9" else "Chlorium GPU exchange V8 research" if profile=="native-gpu-exchange-v8" else "Chlorium native handoff V7 research" if profile=="native-draw-bridge-v7" else "Chlorium adaptive upload V6 research" if profile=="native-adaptive-upload-v6" else "Chlorium" if profile=="native-vertex-black-v5" else "Chlorium native quads V4 research"
 if profile=="native-opacity-hash-r36":
     manifest["name"]="Chlorium opacity hash R36 research"
-if profile in ("native-resident-continuous-r57", "native-resident-fast-r58", "native-resident-deferred-r59", "native-resident-timed-r60", "native-stream-direct-r61"):
+if profile in ("native-resident-continuous-r57", "native-resident-fast-r58", "native-resident-deferred-r59", "native-resident-timed-r60", "native-stream-direct-r61", "native-group-trace-r63"):
     manifest["name"]="Chlorium continuous GPU renderer R58 (unvalidated research)" if profile=="native-resident-fast-r58" else "Chlorium continuous GPU renderer R57 (research)"
     manifest["description"]="Experimental continuous retained GPU rendering; native callbacks and preparation preserved; private validation build"
-if profile in ("native-resident-deferred-r59", "native-resident-timed-r60", "native-stream-direct-r61"):
+if profile in ("native-resident-deferred-r59", "native-resident-timed-r60", "native-stream-direct-r61", "native-group-trace-r63"):
     manifest["name"]="Chlorium deferred native uploads R59 (research)"
     manifest["description"]="Experimental GPU renderer with deferred native vertex uploads and native dirty-flag recovery; unqualified in game"
-if profile in ("native-resident-timed-r60", "native-stream-direct-r61"):
-    manifest["name"]="Chlorium native stream R61 (diagnostic)" if profile=="native-stream-direct-r61" else "Chlorium renderer timing R60 (diagnostic)"
+if profile in ("native-resident-timed-r60", "native-stream-direct-r61", "native-group-trace-r63"):
+    manifest["name"]="Chlorium native stream R61 (diagnostic)" if profile in ("native-stream-direct-r61", "native-group-trace-r63") else "Chlorium renderer timing R60 (diagnostic)"
+if profile=="measurement-group-trace-r63":
+    manifest["name"]="Chlorium R63 independent group trace auditor"
+if profile=="native-group-trace-r63":
+    manifest["name"]="Chlorium R61 renderer + R63 group state trace (diagnostic)"
+    manifest["description"]="Two-frame native movement input trace with Chlorium R61 active; no GPU group offload or performance claim"
 manifest["settings"].pop("ingame_enable", None)
 manifest["settings"].pop("use_mapped_buffers", None)
 package = out / (manifest["id"] + ".geode")
@@ -102,7 +111,7 @@ preserve_previous(out)
 with zipfile.ZipFile(package, "w", compression=zipfile.ZIP_DEFLATED) as archive:
     archive.writestr("mod.json", json.dumps(manifest, ensure_ascii=False, indent=2))
     archive.writestr(manifest["id"] + ".dll", binary)
-    if profile in ("native-resident-continuous-r57", "native-resident-fast-r58", "native-resident-deferred-r59", "native-resident-timed-r60", "native-stream-direct-r61"):
+    if profile in ("native-resident-continuous-r57", "native-resident-fast-r58", "native-resident-deferred-r59", "native-resident-timed-r60", "native-stream-direct-r61", "native-group-trace-r63"):
         with zipfile.ZipFile(out / "source-inputs.zip") as frozen:
             shader=frozen.read("research/R4-33/resident.vert")
         if hashlib.sha256(shader).hexdigest()!="bc8f9c88d908d769b440d86f10d494520a582b655f46de0c4348b7911cca9ad0":
