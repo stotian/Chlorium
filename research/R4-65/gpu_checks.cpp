@@ -8,6 +8,13 @@ namespace dv=chlorium::research::directvertices;
 static PFNGLISBUFFERPROC nativeIsBuffer=nullptr;
 static unsigned bufferQueries=0;
 static GLboolean APIENTRY observeIsBuffer(GLuint name){++bufferQueries;return nativeIsBuffer(name);}
+#ifdef CHLORIUM_CANONICAL_GPU_COPY_R73
+static PFNGLBUFFERSUBDATAPROC uploadNative=nullptr;
+static PFNGLCOPYBUFFERSUBDATAPROC copyNative=nullptr;
+static unsigned cpuUploads=0,gpuCopies=0;
+static void APIENTRY observeUpload(GLenum target,GLintptr offset,GLsizeiptr size,const void* data){++cpuUploads;uploadNative(target,offset,size,data);}
+static void APIENTRY observeCopy(GLenum read,GLenum write,GLintptr from,GLintptr to,GLsizeiptr size){++gpuCopies;copyNative(read,write,from,to,size);}
+#endif
 struct TextureFixture {
     void** table;GLuint name;unsigned calls=0;
     static GLuint getName(void* self){auto& t=*static_cast<TextureFixture*>(self);++t.calls;return t.name;}
@@ -51,7 +58,19 @@ int wmain(int argc,wchar_t** argv)try{
         atlas.dirty=true;prepare();native(&atlas,count,first);const auto expected=pixels();const auto state=GLStateSnapshot::capture();
         require(std::any_of(expected.begin(),expected.end(),[](unsigned char x){return x!=0;}),"reference draws nonempty alpha pixels");
         atlas.dirty=true;prepare();const auto getterCalls=texture.calls;unsigned nativeCalls=0;SetLastError(71);const auto fp=_mm_getcsr();
-        require(adapter.draw(atlas.vertex,atlas.dirty,quads.data(),count,first,2,2,[&]{++nativeCalls;native(&atlas,count,first);SetLastError(93);}),"native draw accepts direct coherent page");
+#ifdef CHLORIUM_CANONICAL_GPU_COPY_R73
+        uploadNative=glBufferSubData;copyNative=glCopyBufferSubData;cpuUploads=gpuCopies=0;glBufferSubData=observeUpload;glCopyBufferSubData=observeCopy;
+        glBindBuffer(GL_COPY_READ_BUFFER,buffers[1]);glBindBuffer(GL_COPY_WRITE_BUFFER,buffers[1]);
+#endif
+        require(adapter.draw(atlas.vertex,atlas.dirty,quads.data(),count,first,2,2,[&]{
+#ifdef CHLORIUM_CANONICAL_GPU_COPY_R73
+            require(atlas.vertex==buffers[0],"R73 native draw retains canonical buffer identity");
+#endif
+            ++nativeCalls;native(&atlas,count,first);SetLastError(93);}),"native draw accepts direct coherent page");
+#ifdef CHLORIUM_CANONICAL_GPU_COPY_R73
+        glBufferSubData=uploadNative;glCopyBufferSubData=copyNative;require(!cpuUploads && gpuCopies==1,"one GPU copy and no duplicate CPU upload");
+        GLint read=0,write=0;glGetIntegerv(GL_COPY_READ_BUFFER,&read);glGetIntegerv(GL_COPY_WRITE_BUFFER,&write);require(GLuint(read)==buffers[1] && GLuint(write)==buffers[1],"foreign copy-buffer bindings restored");
+#endif
         require(GetLastError()==93 && _mm_getcsr()==fp,"added work preserves native post-call host state");
         require(nativeCalls==1 && texture.calls==getterCalls+1,"actual native body/getter execute exactly once");
         require(atlas.vertex==buffers[0] && !atlas.dirty,"canonical ownership and native full-upload dirty state restored");
@@ -76,6 +95,13 @@ int wmain(int argc,wchar_t** argv)try{
     require(wglMakeCurrent(nativeDC,nativeContext) && wglDeleteContext(foreign),"restore native context after foreign probe");
     require(!foreignAccepted && bufferQueries==0,"foreign context declines before native GLEW buffer dispatch");
     for(auto& q:quads)for(auto& vertex:q.corners)vertex.color=0xff21f4d3u;
+#ifdef CHLORIUM_CANONICAL_GPU_COPY_R73
+    {const auto copy=glCopyBufferSubData;glCopyBufferSubData=nullptr;atlas.dirty=true;
+     require(!adapter.draw(atlas.vertex,atlas.dirty,quads.data(),2,0,2,2,[&]{++unexpected;}) && atlas.dirty,"missing GPU copy declines before suppressing native upload");glCopyBufferSubData=copy;}
+    {std::array<std::byte,96*3> storage;storage.fill(std::byte{0xa7});glBindBuffer(GL_ARRAY_BUFFER,atlas.vertex);glBufferData(GL_ARRAY_BUFFER,storage.size(),storage.data(),GL_DYNAMIC_DRAW);
+     atlas.dirty=true;prepare();require(adapter.draw(atlas.vertex,atlas.dirty,quads.data(),2,0,2,3,[&]{native(&atlas,2,0);}),"canonical GPU copy accepts active prefix with an unused tail");
+     std::array<std::byte,96> tail;glBindBuffer(GL_COPY_READ_BUFFER,atlas.vertex);glGetBufferSubData(GL_COPY_READ_BUFFER,96*2,96,tail.data());require(std::all_of(tail.begin(),tail.end(),[](auto b){return b==std::byte{0xa7};}),"unwritten native canonical tail preserved");}
+#endif
     atlas.dirty=true;prepare();require(adapter.draw(atlas.vertex,atlas.dirty,quads.data(),2,0,2,2,[&]{native(&atlas,2,0);}),"accelerated full draw before native GPU consumer");
     const auto accelerated=pixels();prepare();glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,atlas.index);glDrawElements(GL_TRIANGLES,12,GL_UNSIGNED_SHORT,nullptr);
     require(pixels()==accelerated,"subsequent native GPU consumer sees the same canonical vertex bytes");
@@ -111,6 +137,12 @@ int wmain(int argc,wchar_t** argv)try{
     require(pages.metrics.allocated<=dv::DirectVertexPages::maxBytes,"memory bounded to 24 MiB per renderer");
     const auto dc=wglGetCurrentDC();const auto context=wglGetCurrentContext();require(wglMakeCurrent(nullptr,nullptr)!=0,"detach fixture context");require(!pages.acquire(source),"absent context rejects before GL");require(wglMakeCurrent(dc,context)!=0,"restore fixture context");
     require(!adapter.fenceFailures && glGetError()==GL_NO_ERROR,"native direct stream has no fence or GL errors");
-    std::cout<<"Direct actual native atlas: images="<<checked<<" leases="<<adapter.metrics().uploads<<" allocated="<<adapter.metrics().allocated<<" no duplicate draw, compute shader, framebuffer backup or GPU copy; NOT GD frametime\n";
+    std::cout<<"Direct actual native atlas: images="<<checked<<" leases="<<adapter.metrics().uploads<<" allocated="<<adapter.metrics().allocated
+#ifdef CHLORIUM_CANONICAL_GPU_COPY_R73
+        <<" one canonical GPU copy, zero duplicate CPU uploads, unchanged native VBO/VAO"
+#else
+        <<" no duplicate draw, compute shader, framebuffer backup or GPU copy"
+#endif
+        <<"; NOT GD frametime\n";
     glDeleteBuffers(2,buffers);glDeleteVertexArrays(1,&vao);glDeleteTextures(2,textures);glDeleteFramebuffers(1,&fbo);glDeleteProgram(shader);return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}

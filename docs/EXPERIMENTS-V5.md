@@ -1587,3 +1587,13 @@ opérations voisines : les mouvements intercalés interdisent un rejeu résident
 rotations seules. Aucun gainFPS, aucune suppression CPU.92 sauvegardes restaurées.
 Stockage :129 anciennes sauvegardes restaurées dédupliquées par liens physiques
 atomiques après SHA256 ;11444 fichiers,chemins/octets préservés,3.77Go libérés.
+
+R73 : copie GPU vers tampon canonique natif,256 images exactes etgardes passent.
+CampagneHelio BAAB mêmeauditeur :R73 32.48/33.90FPS,p95 42.01/41.57ms ;R67
+35.15/35.66FPS,p95 35.65/34.82ms. P95 négatif danslesquatre tranches ;abandon
+d'activation, pas de tests Orbit/Grief supplémentaires pourcettepiste rejetée.
+R74 : flux natif conjoint,déplacements+rotations,2458 opérations/78 objets Helio.
+Zéro discontinuité,12 classes,17004 positions exactes parpréfixe+pont résident
+2images,uneinitialisation de3744octets,17120octets decommandes et856d'indices.
+Composant seul : calculs/centres CPU toujoursnatifs, ni géométriecomplète niFPS
+prouvés. Aucune suppressiond'observateur ;versionnormale conservée.

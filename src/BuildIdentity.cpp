@@ -1,5 +1,8 @@
 // Read as data by the packager; never load a DLL to determine its build type.
 extern "C" {
+#ifdef CHLORIUM_CANONICAL_GPU_COPY_R73
+__declspec(dllexport) extern const char chloriumCanonicalGpuCopyIdentity[] = "CHLORIUM_CANONICAL_GPU_COPY_R73";
+#endif
 #ifdef CHLORIUM_DIRECT_CONTEXT_GUARD_R67
 __declspec(dllexport) extern const char chloriumDirectContextGuardIdentity[] = "CHLORIUM_DIRECT_CONTEXT_GUARD_R67";
 __declspec(dllexport) extern const char chloriumNativeVertexAuthorityIdentity[] = "CHLORIUM_NATIVE_VERTEX_AUTHORITY_R67";

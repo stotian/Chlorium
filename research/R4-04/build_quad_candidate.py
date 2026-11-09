@@ -52,6 +52,10 @@ profiles = {
     "--adaptive-measure-r66": "measurement-adaptive-pages-r66",
     "--direct-pages-r67": "native-direct-pages-r67",
     "--direct-measure-r67": "measurement-direct-pages-r67",
+    "--mixed-trace-r74": "native-mixed-trace-r74",
+    "--mixed-trace-measure-r74": "measurement-mixed-trace-r74",
+    "--canonical-copy-r73": "native-canonical-copy-r73",
+    "--canonical-copy-measure-r73": "measurement-canonical-copy-r73",
     "--rotation-trace": "native-rotation-trace-r72",
     "--rotation-trace-measure": "measurement-rotation-trace-r72",
     "--field-watch": "native-field-watch-r69",
@@ -122,11 +126,11 @@ if canonical:
     flags += ["/DCHLORIUM_NATIVE_CANONICAL_V10=1"]
     source_names = ["src/renderer/NativeAreaDivisions.cpp", "src/renderer/NativeAtlasStatsEmpty.cpp", "src/renderer/NativePauseGuard.cpp", "src/BuildIdentity.cpp"]
 sources = [root / name for name in source_names]
-if selected in ("--resident-continuous", "--resident-fast", "--resident-deferred", "--resident-timed", "--resident-direct", "--group-trace", "--direct-pages", "--stream-control-r65", "--adaptive-pages", "--direct-pages-r67", "--field-watch", "--rotation-trace"):
+if selected in ("--resident-continuous", "--resident-fast", "--resident-deferred", "--resident-timed", "--resident-direct", "--group-trace", "--direct-pages", "--stream-control-r65", "--adaptive-pages", "--direct-pages-r67", "--field-watch", "--rotation-trace", "--canonical-copy-r73", "--mixed-trace-r74"):
     flags = [flag for flag in flags if not flag.startswith(("/DCHLORIUM_EXPERIMENTAL_NATIVE_", "/DCHLORIUM_NATIVE_SNAPSHOTS="))]
     flags += ["/DCHLORIUM_RESIDENT_CONTINUOUS_R57=1", "/fp:strict"]
     sources = [root/"research/R4-57/ContinuousRenderer.cpp",root/"src/BuildIdentity.cpp"]
-    if selected in ("--resident-fast", "--resident-deferred", "--resident-timed", "--resident-direct", "--group-trace", "--direct-pages", "--stream-control-r65", "--adaptive-pages", "--direct-pages-r67", "--field-watch", "--rotation-trace"):
+    if selected in ("--resident-fast", "--resident-deferred", "--resident-timed", "--resident-direct", "--group-trace", "--direct-pages", "--stream-control-r65", "--adaptive-pages", "--direct-pages-r67", "--field-watch", "--rotation-trace", "--canonical-copy-r73", "--mixed-trace-r74"):
         flags += ["/DCHLORIUM_RESIDENT_FAST_R58=1"]
     if selected in ("--resident-deferred", "--resident-timed", "--resident-direct", "--group-trace", "--stream-control-r65"):
         flags += ["/DCHLORIUM_NATIVE_UPLOAD_DEFERRAL_R59=1"]
@@ -137,28 +141,34 @@ if selected in ("--resident-continuous", "--resident-fast", "--resident-deferred
     if selected=="--group-trace":
         flags += ["/DCHLORIUM_GROUP_STATE_TRACE_R63=1"]
         sources.append(root / "research/R4-63/GroupTrace.cpp")
-    if selected in ("--direct-pages", "--adaptive-pages", "--direct-pages-r67", "--field-watch", "--rotation-trace"):
+    if selected in ("--direct-pages", "--adaptive-pages", "--direct-pages-r67", "--field-watch", "--rotation-trace", "--canonical-copy-r73", "--mixed-trace-r74"):
         flags += ["/DCHLORIUM_DIRECT_VERTEX_PAGES_R65=1"]
     if selected=="--adaptive-pages":
         flags += ["/DCHLORIUM_ADAPTIVE_VERTEX_PAGES_R66=1"]
-    if selected in ("--direct-pages-r67", "--field-watch", "--rotation-trace"):
+    if selected in ("--direct-pages-r67", "--field-watch", "--rotation-trace", "--canonical-copy-r73", "--mixed-trace-r74"):
         flags += ["/DCHLORIUM_DIRECT_CONTEXT_GUARD_R67=1"]
     if selected=="--field-watch":
         flags += ["/DCHLORIUM_NATIVE_FIELD_WATCH_R69=1"]
         sources.append(root / "research/R4-69/FieldTrace.cpp")
-    if selected=="--rotation-trace":
+    if selected=="--canonical-copy-r73":
+        flags += ["/DCHLORIUM_CANONICAL_GPU_COPY_R73=1"]
+    if selected in ("--rotation-trace", "--mixed-trace-r74"):
         flags += ["/DCHLORIUM_NATIVE_ROTATION_TRACE_R72=1"]
         sources += [root/"research/R4-72/RotationTrace.cpp",root/"research/R4-72/PointGateway.asm"]
+        if selected=="--mixed-trace-r74":flags += ["/DCHLORIUM_MIXED_TRACE_R74=1"]
     if selected=="--stream-control-r65":
         flags += ["/DCHLORIUM_R61_UNTIMED_CONTROL_R65=1"]
-if selected in ("--direct-measure-r65", "--adaptive-measure-r66", "--direct-measure-r67", "--field-watch-measure", "--rotation-trace-measure"):
+if selected in ("--direct-measure-r65", "--adaptive-measure-r66", "--direct-measure-r67", "--field-watch-measure", "--rotation-trace-measure", "--canonical-copy-measure-r73", "--mixed-trace-measure-r74"):
     flags += ["/DCHLORIUM_CANONICAL_AUDIT_V10=1", "/DCHLORIUM_CANONICAL_AUDIT_PE_R2=1", "/DCHLORIUM_DIRECT_VERTEX_AUDIT_R65=1"]
 if selected=="--adaptive-measure-r66":
     flags += ["/DCHLORIUM_ADAPTIVE_VERTEX_AUDIT_R66=1", "/DCHLORIUM_EXTERNAL_SAMPLING_AUDIT=1"]
-if selected in ("--direct-measure-r67", "--field-watch-measure", "--rotation-trace-measure"):
+if selected in ("--direct-measure-r67", "--field-watch-measure", "--rotation-trace-measure", "--canonical-copy-measure-r73", "--mixed-trace-measure-r74"):
     flags += ["/DCHLORIUM_DIRECT_VERTEX_AUDIT_R67=1"]
-if selected=="--rotation-trace-measure":
+if selected=="--canonical-copy-measure-r73":
+    flags += ["/DCHLORIUM_CANONICAL_GPU_COPY_AUDIT_R73=1"]
+if selected in ("--rotation-trace-measure", "--mixed-trace-measure-r74"):
     flags += ["/DCHLORIUM_ROTATION_TRACE_AUDIT_R72=1"]
+    if selected=="--mixed-trace-measure-r74":flags += ["/DCHLORIUM_MIXED_TRACE_AUDIT_R74=1"]
 if selected=="--field-watch-measure":
     flags += ["/DCHLORIUM_FIELD_WATCH_AUDIT_R69=1"]
 if selected=="--opacity-hash":
@@ -250,6 +260,14 @@ if selected=="--direct-pages-r67":
     manifest.update(backend="CHLORIUM_DIRECT_CONTEXT_GUARD_R67",version="v0.4.0-alpha.67")
 if selected=="--direct-measure-r67":
     manifest.update(backend="CHLORIUM_DIRECT_VERTEX_AUDIT_R67",version="v0.4.0-alpha.67")
+if selected=="--mixed-trace-r74":
+    manifest.update(backend="CHLORIUM_MIXED_NATIVE_TRACE_R74",version="v0.4.0-alpha.74")
+if selected=="--mixed-trace-measure-r74":
+    manifest.update(backend="CHLORIUM_MIXED_TRACE_AUDIT_R74",version="v0.4.0-alpha.74")
+if selected=="--canonical-copy-r73":
+    manifest.update(backend="CHLORIUM_CANONICAL_GPU_COPY_R73",version="v0.4.0-alpha.73")
+if selected=="--canonical-copy-measure-r73":
+    manifest.update(backend="CHLORIUM_CANONICAL_GPU_COPY_AUDIT_R73",version="v0.4.0-alpha.73")
 if selected=="--rotation-trace":
     manifest.update(backend="CHLORIUM_NATIVE_ROTATION_TRACE_R72",version="v0.4.0-alpha.72")
 if selected=="--rotation-trace-measure":
@@ -294,6 +312,7 @@ for pattern in ("*.cpp", "*.hpp", "*.asm"):
     snapshot_files.update((root / "research/R4-69").rglob(pattern))
     snapshot_files.update((root / "research/R4-71").rglob(pattern))
     snapshot_files.update((root / "research/R4-72").rglob(pattern))
+    snapshot_files.update((root / "research/R4-74").rglob(pattern))
 for folder in ("src", "legacy", "tests", "research/R4-08", "research/R4-11", "research/R4-17", "research/R4-30", "research/R4-32", "research/R4-33", "research/R4-34", "research/R4-35", "research/R4-36", "research/R4-37", "research/R4-41", "research/R4-42", "research/R4-43", "research/R4-44", "research/R4-45", "research/R4-46", "research/R4-47", "research/R4-48", "research/R4-49", "research/R4-54"):
     for pattern in ("*.cpp", "*.hpp", "*.h"):
         snapshot_files.update((root / folder).rglob(pattern))

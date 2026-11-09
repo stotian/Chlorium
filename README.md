@@ -100,6 +100,12 @@ et un plan local explicite avec empreintes, sauvegarde et restauration vérifié
 `build-local.cmd`, `package-local.ps1` et `--canonical` conservent le V10 historique
 comme référence. Ils ne construisent pas le nouveau renderer continu.
 
+Le moteur de programmes mixtes GPU R71/R74 reste un composant isolé. Sur une
+capture réelle Heliopolis, 78 objets / deux images produisent 17 004 positions
+exactes, avec une seule initialisation des positions. Les calculs natifs, les
+lecteurs CPU et le rendu du jeu restent présents : aucun gain FPS n'en découle
+encore. Le transfert R73 a régressé en jeu et n'est pas activé.
+
 ## Suivi
 
 [Journal des expériences](docs/EXPERIMENTS-V5.md) · [Versions](docs/VERSIONS.md) ·

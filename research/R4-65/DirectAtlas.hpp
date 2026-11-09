@@ -44,16 +44,34 @@ public:
             glBindBuffer(GL_COPY_READ_BUFFER,old);
             if(mapped || immutable || bytes<0 || std::uint64_t(bytes)<std::size_t(first+count)*96){finishPage();return false;}
             // Native consumers may read canonical storage without calling the atlas again.
+#ifdef CHLORIUM_CANONICAL_GPU_COPY_R73
+            if(!glCopyBufferSubData || owned==canonical){finishPage();return false;}
+            GLint read=0,write=0;glGetIntegerv(GL_COPY_READ_BUFFER,&read);glGetIntegerv(GL_COPY_WRITE_BUFFER,&write);
+            glBindBuffer(GL_COPY_READ_BUFFER,owned);glBindBuffer(GL_COPY_WRITE_BUFFER,canonical);
+            glCopyBufferSubData(GL_COPY_READ_BUFFER,GL_COPY_WRITE_BUFFER,0,0,std::size_t(count)*96);
+            glBindBuffer(GL_COPY_READ_BUFFER,read);glBindBuffer(GL_COPY_WRITE_BUFFER,write);
+#else
             glGetIntegerv(GL_ARRAY_BUFFER_BINDING,&old);glBindBuffer(GL_ARRAY_BUFFER,canonical);
             glBufferSubData(GL_ARRAY_BUFFER,0,std::size_t(count)*96,quads);glBindBuffer(GL_ARRAY_BUFFER,old);
+#endif
             ++canonicalUploads;canonicalBytes+=std::size_t(count)*96;
         }
         const auto original=canonical;
         {
-        snapshot::NativeVertexLease lease(canonical,dirty,owned);
+        snapshot::NativeVertexLease lease(canonical,dirty,
+#ifdef CHLORIUM_CANONICAL_GPU_COPY_R73
+            canonical
+#else
+            owned
+#endif
+        );
         struct Finish {
             DirectAtlas* adapter;GLuint canonical;
-            ~Finish(){HostState preserve;restoreNativeAttributes(canonical);adapter->finishPage();}
+            ~Finish(){HostState preserve;
+#ifndef CHLORIUM_CANONICAL_GPU_COPY_R73
+                restoreNativeAttributes(canonical);
+#endif
+                adapter->finishPage();}
         }finish{this,original};
         native();
         }
