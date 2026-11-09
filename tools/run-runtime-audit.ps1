@@ -85,6 +85,8 @@ try {
     $supportsNativeSnapshots = $binary.Contains('CHLORIUM_NATIVE_SNAPSHOT_AUDIT_V1')
     $supportsCanonical = $binary.Contains('CHLORIUM_CANONICAL_CORE_AUDIT_V10')
     $supportsContinuous = $binary.Contains('CHLORIUM_RESIDENT_CONTINUOUS_AUDIT_R57')
+    $supportsDirectPagesR65 = $binary.Contains('CHLORIUM_DIRECT_VERTEX_AUDIT_R65')
+    if($supportsDirectPagesR65 -and ($Native -or $WithUserMods -or $groupTraceDiagnostic)){throw 'R65 campaign requires Chlorium active, isolated mods and no movement trace'}
     if($groupTraceDiagnostic -and !$binary.Contains('CHLORIUM_GROUP_TRACE_AUDIT_R63')){throw 'R63 trace requires its identified independent auditor'}
     $opacityHashAuditBinary = $binary.Contains('CHLORIUM_OPACITY_HASH_AUDIT_R36')
     if (!$binary.Contains('CHLORIUM_AUDIT_120FPS_PACING_R4')) { throw 'Rebuild the auditor with verified 120 FPS pacing before launching this campaign' }
@@ -179,6 +181,9 @@ if ($measurementOnly -and !$Native) {
         }
         if($groupTraceDiagnostic -ne $binary.Contains('CHLORIUM_GROUP_STATE_TRACE_R63')){throw 'R63 trace candidate and explicit diagnostic selection must match'}
         $rendererTimingDiagnostic = $binary.Contains('CHLORIUM_RENDERER_TIMING_R60')
+        $rendererVariant = if($binary.Contains('CHLORIUM_DIRECT_VERTEX_PAGES_R65')){'direct-pages-r65'}elseif($binary.Contains('CHLORIUM_R61_UNTIMED_CONTROL_R65')){'stream-control-r65'}else{'previous-profile'}
+        if($rendererVariant -ne 'previous-profile' -and (!$supportsDirectPagesR65 -or $rendererTimingDiagnostic)){throw 'R65 performance profiles require their identified auditor without renderer timing'}
+        if($supportsDirectPagesR65 -and $rendererVariant -eq 'previous-profile'){throw 'R65 auditor cannot mislabel another renderer'}
         $binary = $null
     } finally { $productionZip.Dispose() }
 }
@@ -330,6 +335,7 @@ try {
         resident_native_stream_diagnostic = ($env:CHLORIUM_RESIDENT_NATIVE_STREAM -eq '1')
         resident_exact_gpu_updates_diagnostic = ($env:CHLORIUM_RESIDENT_NATIVE_STREAM -eq '1')
         renderer_timing_diagnostic = $rendererTimingDiagnostic
+        renderer_variant = $rendererVariant
         group_state_trace_diagnostic = $groupTraceDiagnostic
         startup_diagnostic = [bool]$StartupDiagnostic
         native_producer_capture_diagnostic = ($env:CHLORIUM_NATIVE_PRODUCER_CAPTURE -eq '1')

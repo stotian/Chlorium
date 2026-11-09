@@ -21,6 +21,10 @@
 #include "FrameWatch.hpp"
 #include "MeasurementHookPolicy.hpp"
 #include "../research/R4-57/ContinuousStats.hpp"
+#ifdef CHLORIUM_DIRECT_VERTEX_AUDIT_R65
+#include "../research/R4-65/DirectStats.hpp"
+extern "C" __declspec(dllexport) const char chloriumDirectAuditIdentity[]="CHLORIUM_DIRECT_VERTEX_AUDIT_R65";
+#endif
 extern "C" __declspec(dllexport) const char chloriumContinuousAuditIdentity[]="CHLORIUM_RESIDENT_CONTINUOUS_AUDIT_R57";
 #ifdef CHLORIUM_GROUP_TRACE_AUDIT_R63
 extern "C" __declspec(dllexport) const char chloriumGroupTraceAuditIdentity[]="CHLORIUM_GROUP_TRACE_AUDIT_R63";
@@ -262,6 +266,15 @@ bool recordNativeSnapshotStats(float percent) {
         using Stats=chlorium::research::continuous::Stats;
         const auto read=reinterpret_cast<bool(*)(Stats*,std::size_t)>(GetProcAddress(module,"ChloriumReadContinuousStatsR57"));Stats value;
         if(read && read(&value,sizeof(value))){
+#ifdef CHLORIUM_DIRECT_VERTEX_AUDIT_R65
+            using Direct=chlorium::research::directvertices::Stats;Direct direct;
+            const auto readDirect=reinterpret_cast<bool(*)(Direct*,std::size_t)>(GetProcAddress(module,"ChloriumReadDirectVertexStatsR65"));
+            if(readDirect && readDirect(&direct,sizeof(direct))){
+                auto row=matjson::Value::object();row["event"]="direct_vertex_pages_r65";row["percent"]=percent;
+                row["version"]=direct.version;row["uploads"]=direct.uploads;row["bytes"]=direct.bytes;row["busy"]=direct.busy;
+                row["fences"]=direct.fences;row["allocated"]=direct.allocated;row["fence_failures"]=direct.fenceFailures;line(row.dump());
+            }
+#endif
 #ifdef CHLORIUM_EXTENDED_RESIDENT_STATS_R59
             recordResidentExperiments(module,percent);
 #endif
@@ -914,10 +927,14 @@ void tick() {
         const auto continuousModule=GetModuleHandleW(L"local.chlorium.dll");
         const bool continuous=continuousModule && GetProcAddress(continuousModule,"chloriumContinuousIdentity");
         const auto label=continuous?
+#ifdef CHLORIUM_DIRECT_VERTEX_AUDIT_R65
+            (GetProcAddress(continuousModule,"chloriumDirectVertexPagesIdentity")?"CHLORIUM R65 / DIRECT":"CHLORIUM R61 / CONTROLE R65"):
+#else
 #ifdef CHLORIUM_EXTENDED_RESIDENT_STATS_R59
             (GetProcAddress(continuousModule,"chloriumGroupTraceIdentity")?"CHLORIUM R61 + TRACE R63":GetProcAddress(continuousModule,"chloriumNativeStreamDirectIdentity")?"CHLORIUM R61 / DIAGNOSTIC":GetProcAddress(continuousModule,"chloriumRendererTimingIdentity")?"CHLORIUM R60 / DIAGNOSTIC":GetProcAddress(continuousModule,"chloriumUploadDeferralIdentity")?"AVEC CHLORIUM GPU R59":"AVEC CHLORIUM GPU R57"):
 #else
             "AVEC CHLORIUM GPU CONTINU":
+#endif
 #endif
             residentDiagnostic?"DIAG CHLORIUM / NATIF + GPU":chloriumAuditUseNative()?"SANS CHLORIUM":hashFlag&&std::string_view(hashFlag)=="1"?"AVEC CHLORIUM R36":"AVEC CHLORIUM REF";
         auto modeLabel = CCLabelBMFont::create(label, "bigFont.fnt");

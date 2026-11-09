@@ -78,9 +78,7 @@ def read(report, expected_loaded):
     return events, rows, bins, provenance
 
 
-def compare(baseline, candidate, destination):
-    a, ar, ab, ap = read(baseline, False)
-    b, br, bb, bp = read(candidate, True)
+def validate_conditions(a, ar, ap, b, br, bp):
     if ap.get('external_sampling_requested') or bp.get('external_sampling_requested'):
         raise ValueError('External sampling diagnostics cannot be used as performance comparisons')
     if ap.get('opacity_shadow_diagnostic') or bp.get('opacity_shadow_diagnostic'):
@@ -133,6 +131,13 @@ def compare(baseline, candidate, destination):
         if not (item.get('completed') or item.get('target_completed')):
             raise ValueError('Requested coverage was not reached')
         coverage.append(item)
+    return target_fps, coverage
+
+
+def compare(baseline, candidate, destination):
+    a, ar, ab, ap = read(baseline, False)
+    b, br, bb, bp = read(candidate, True)
+    target_fps, coverage = validate_conditions(a, ar, ap, b, br, bp)
     comparisons = []
     for percent in sorted(ab.keys() | bb.keys()):
         left, right = summarize(ab[percent], target_fps), summarize(bb[percent], target_fps)

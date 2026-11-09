@@ -6,6 +6,11 @@
 #include "../R4-46/NativeHandoffContract.hpp"
 #include "TargetBackup.hpp"
 #include "ContinuousStats.hpp"
+#ifdef CHLORIUM_DIRECT_VERTEX_PAGES_R65
+#include "../R4-65/DirectAtlas.hpp"
+#include "../R4-65/DirectStats.hpp"
+extern "C" __declspec(dllexport) const char chloriumDirectVertexPagesIdentity[]="CHLORIUM_DIRECT_VERTEX_PAGES_R65";
+#endif
 #ifdef CHLORIUM_GROUP_STATE_TRACE_R63
 #include "../R4-63/TraceAdapter.hpp"
 #endif
@@ -39,6 +44,17 @@ namespace {
 struct PostState {unsigned fp=_mm_getcsr();DWORD error=GetLastError();~PostState(){_mm_setcsr(fp);SetLastError(error);}};
 Stats stats;
 std::atomic<DWORD> ownerThread{0};
+#ifdef CHLORIUM_DIRECT_VERTEX_PAGES_R65
+directvertices::DirectAtlas directAtlas;
+bool directCallbacks=false;
+bool nativeDirectCallbacks(){
+    const auto module=GetModuleHandleW(L"libcocos2d.dll");if(!handoff::nativeAtlasBody(module))return false;
+    const auto base=reinterpret_cast<std::uintptr_t>(module);
+    for(const auto mod:Loader::get()->getAllMods())if(mod!=Mod::get())for(const auto hook:mod->getHooks())
+        if(hook->isEnabled() && (hook->getAddress()==base+0xa6350 || hook->getAddress()==base+0x10760 || hook->getAddress()==base+0x87fe0))return false;
+    return true;
+}
+#endif
 thread_local CCSpriteBatchNode* currentBatch=nullptr;
 std::uintptr_t levelAddress=0;unsigned levelId=0;
 HGLRC cacheContext=nullptr;
@@ -294,6 +310,13 @@ extern "C" __declspec(dllexport) bool ChloriumReadFastStatsR58(void* out,std::si
     std::memcpy(out,&fastStats,size);return true;
 }
 #endif
+#ifdef CHLORIUM_DIRECT_VERTEX_PAGES_R65
+extern "C" __declspec(dllexport) bool ChloriumReadDirectVertexStatsR65(chlorium::research::directvertices::Stats* out,std::size_t size){
+    using namespace chlorium::research::continuous;
+    if(!out || size!=sizeof(*out) || ownerThread.load()!=GetCurrentThreadId())return false;
+    const auto& m=directAtlas.metrics();*out={65,m.uploads,m.bytes,m.busy,m.fences,m.allocated,directAtlas.fenceFailures};return true;
+}
+#endif
 extern "C" __declspec(dllexport) bool ChloriumReadContinuousStatsR57(chlorium::research::continuous::Stats* out,std::size_t size){
     using namespace chlorium::research::continuous;
     if(!out || size!=sizeof(*out) || (ownerThread.load(std::memory_order_acquire) && ownerThread.load()!=GetCurrentThreadId()))return false;
@@ -321,6 +344,9 @@ class $modify(ChloriumContinuousFrame,CCDisplayLinkDirector){
 #ifdef CHLORIUM_RESIDENT_FAST_R58
         // The mod graph may still change during startup; inspect it only inside a level.
         if(ownerThread.load()==GetCurrentThreadId())isolatedIndexWriters=PlayLayer::get() && isolatedMods();
+#ifdef CHLORIUM_DIRECT_VERTEX_PAGES_R65
+        if(ownerThread.load()==GetCurrentThreadId()){PostState preserve;directCallbacks=isolatedIndexWriters && nativeDirectCallbacks();}
+#endif
 #endif
 #ifdef CHLORIUM_GROUP_STATE_TRACE_R63
         if(ownerThread.load()==GetCurrentThreadId())chlorium::research::grouptrace::begin(PlayLayer::get(),isolatedIndexWriters && enabled());
@@ -346,6 +372,12 @@ class $modify(ChloriumContinuousBatch,CCSpriteBatchNode){
 class $modify(ChloriumContinuousAtlas,CCTextureAtlas){
     void drawNumberOfQuads(unsigned count,unsigned first){
         using namespace chlorium::research::continuous;
+#ifdef CHLORIUM_DIRECT_VERTEX_PAGES_R65
+        struct KeepDirectPartialDirty {
+            CCTextureAtlas* atlas;bool keep;
+            ~KeepDirectPartialDirty(){if(keep)atlas->m_bDirty=true;}
+        } keepDirectDirty{this,currentBatch && flag(&m_bDirty) && (first || count!=m_uTotalQuads)};
+#endif
 #ifdef CHLORIUM_NATIVE_UPLOAD_DEFERRAL_R59
         struct KeepPartialDirty {
             CCTextureAtlas* atlas;bool keep;
@@ -364,6 +396,18 @@ class $modify(ChloriumContinuousAtlas,CCTextureAtlas){
             CCTextureAtlas::drawNumberOfQuads(count,first);
         };
         ++stats.atlasCalls;stats.consideredQuads+=count;
+#ifdef CHLORIUM_DIRECT_VERTEX_PAGES_R65
+        bool drawn=false;
+        {
+            PostState preserve;
+            drawn=enabled() && directCallbacks && currentBatch->m_pobTextureAtlas==this &&
+                chlorium::research::handoff::standardTexture(GetModuleHandleW(L"libcocos2d.dll"),m_pTexture);
+        }
+        if(drawn && directAtlas.draw(m_pBuffersVBO[0],m_bDirty,m_pQuads,count,first,m_uTotalQuads,m_uCapacity,drawNative)){
+            ++stats.committed;stats.committedQuads+=count;
+        }else{++stats.nativeFallbacks;drawNative();}
+        return;
+#endif
         if(!attempt(this,count,first)){++stats.nativeFallbacks;drawNative();return;}
         DiscardNative discard;
         if(!discard.active){

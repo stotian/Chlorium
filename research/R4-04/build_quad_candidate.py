@@ -45,6 +45,9 @@ profiles = {
     "--resident-timed": "native-resident-timed-r60",
     "--resident-direct": "native-stream-direct-r61",
     "--group-trace": "native-group-trace-r63",
+    "--direct-pages": "native-direct-pages-r65",
+    "--stream-control-r65": "native-stream-control-r65",
+    "--direct-measure-r65": "measurement-direct-pages-r65",
     "--continuous-measure": "measurement-resident-continuous-r57",
     "--continuous-measure-r59": "measurement-resident-deferred-r59",
     "--continuous-measure-r60": "measurement-resident-timed-r60",
@@ -111,21 +114,27 @@ if canonical:
     flags += ["/DCHLORIUM_NATIVE_CANONICAL_V10=1"]
     source_names = ["src/renderer/NativeAreaDivisions.cpp", "src/renderer/NativeAtlasStatsEmpty.cpp", "src/renderer/NativePauseGuard.cpp", "src/BuildIdentity.cpp"]
 sources = [root / name for name in source_names]
-if selected in ("--resident-continuous", "--resident-fast", "--resident-deferred", "--resident-timed", "--resident-direct", "--group-trace"):
+if selected in ("--resident-continuous", "--resident-fast", "--resident-deferred", "--resident-timed", "--resident-direct", "--group-trace", "--direct-pages", "--stream-control-r65"):
     flags = [flag for flag in flags if not flag.startswith(("/DCHLORIUM_EXPERIMENTAL_NATIVE_", "/DCHLORIUM_NATIVE_SNAPSHOTS="))]
     flags += ["/DCHLORIUM_RESIDENT_CONTINUOUS_R57=1", "/fp:strict"]
     sources = [root/"research/R4-57/ContinuousRenderer.cpp",root/"src/BuildIdentity.cpp"]
-    if selected in ("--resident-fast", "--resident-deferred", "--resident-timed", "--resident-direct", "--group-trace"):
+    if selected in ("--resident-fast", "--resident-deferred", "--resident-timed", "--resident-direct", "--group-trace", "--direct-pages", "--stream-control-r65"):
         flags += ["/DCHLORIUM_RESIDENT_FAST_R58=1"]
-    if selected in ("--resident-deferred", "--resident-timed", "--resident-direct", "--group-trace"):
+    if selected in ("--resident-deferred", "--resident-timed", "--resident-direct", "--group-trace", "--stream-control-r65"):
         flags += ["/DCHLORIUM_NATIVE_UPLOAD_DEFERRAL_R59=1"]
     if selected in ("--resident-timed", "--resident-direct", "--group-trace"):
         flags += ["/DCHLORIUM_RENDERER_TIMING_R60=1"]
-    if selected in ("--resident-direct", "--group-trace"):
+    if selected in ("--resident-direct", "--group-trace", "--stream-control-r65"):
         flags += ["/DCHLORIUM_NATIVE_STREAM_DIRECT_R61=1"]
     if selected=="--group-trace":
         flags += ["/DCHLORIUM_GROUP_STATE_TRACE_R63=1"]
         sources.append(root / "research/R4-63/GroupTrace.cpp")
+    if selected=="--direct-pages":
+        flags += ["/DCHLORIUM_DIRECT_VERTEX_PAGES_R65=1"]
+    if selected=="--stream-control-r65":
+        flags += ["/DCHLORIUM_R61_UNTIMED_CONTROL_R65=1"]
+if selected=="--direct-measure-r65":
+    flags += ["/DCHLORIUM_CANONICAL_AUDIT_V10=1", "/DCHLORIUM_CANONICAL_AUDIT_PE_R2=1", "/DCHLORIUM_DIRECT_VERTEX_AUDIT_R65=1"]
 if selected=="--opacity-hash":
     flags += ["/DCHLORIUM_NATIVE_OPACITY_HASH_R36=1"]
     sources.append(root / "research/R4-36/NativeOpacityHashPatch.cpp")
@@ -201,6 +210,12 @@ if selected=="--group-trace":
     manifest.update(backend="CHLORIUM_GROUP_STATE_TRACE_R63",version="v0.4.0-alpha.63")
 if selected=="--continuous-measure-r63":
     manifest.update(backend="CHLORIUM_GROUP_TRACE_AUDIT_R63",version="v0.4.0-alpha.63")
+if selected=="--direct-pages":
+    manifest.update(backend="CHLORIUM_DIRECT_VERTEX_PAGES_R65",version="v0.4.0-alpha.65")
+if selected=="--stream-control-r65":
+    manifest.update(backend="CHLORIUM_R61_UNTIMED_CONTROL_R65",version="v0.4.0-alpha.65")
+if selected=="--direct-measure-r65":
+    manifest.update(backend="CHLORIUM_DIRECT_VERTEX_AUDIT_R65",version="v0.4.0-alpha.65")
 for source in sources:
     manifest["sources"].append({"path": source.name, "sha256": fingerprint(source)})
 for header in (root / "src" / "renderer").glob("*.hpp"):
@@ -232,6 +247,7 @@ for pattern in ("*.cpp", "*.hpp"):
     snapshot_files.update((root / "research/R4-60").rglob(pattern))
     snapshot_files.update((root / "research/R4-61").rglob(pattern))
     snapshot_files.update((root / "research/R4-63").rglob(pattern))
+    snapshot_files.update((root / "research/R4-65").rglob(pattern))
 for folder in ("src", "legacy", "tests", "research/R4-08", "research/R4-11", "research/R4-17", "research/R4-30", "research/R4-32", "research/R4-33", "research/R4-34", "research/R4-35", "research/R4-36", "research/R4-37", "research/R4-41", "research/R4-42", "research/R4-43", "research/R4-44", "research/R4-45", "research/R4-46", "research/R4-47", "research/R4-48", "research/R4-49", "research/R4-54"):
     for pattern in ("*.cpp", "*.hpp", "*.h"):
         snapshot_files.update((root / folder).rglob(pattern))

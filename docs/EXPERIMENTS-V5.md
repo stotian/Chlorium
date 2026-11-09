@@ -1510,3 +1510,21 @@ Une image sans commandes conserve les états. Repli/liaisons SSBO,VAO,programme,
 FP/LastError contrôlés. R62 repasse266304 états/quads et128 images après extraction
 du validateur partagé. Garder isolé : lecteurs CPU, intégration réelle et contrat
 d'erreurs GL non qualifiés. Aucun calcul natif retiré, aucun paquet normal modifié.
+
+### R65 — entrée GPU directe, dessin natif unique (9 novembre)
+
+Suppression de la reconstruction redondante R61 sur ce chemin : quads CPU natifs
+vers pages persistantes cohérentes, dessin Cocos original une fois, mêmes shaders
+et indices. Retour natif avant dessin si indisponible. Pointeurs VAO et identité
+VBO restaurés ; données canoniques restent sales jusqu'au vrai transfert complet.
+256 images de fixture native identiques, alpha/sous-parties compris. Erreur GL
+préexistante, stockage mappé, exceptions, contexte absent, pages occupées et borne
+24MiB vérifiés. Aucun calcul de gameplay ou de visibilité supprimé.
+
+Helio74–78 premier passage :29.10FPS,p95 44.84ms,pire52.56ms ;162 intervalles
+acceptés. Cible120 non atteinte. CPU update19.03ms et visibilité7.96ms encore payés.
+85552 lots engagés,35097 refus pour pages occupées ; zéro échec de fence signalé.
+Le premier contrôle R61 sans timing était invalide (shader oublié dans le paquet,
+zéro lot engagé) : exclu, paquet corrigé et shader vérifié avant relance. Campagne
+deux versions Chlorium uniquement, même auditeur et paramètres, en cours. Aucune
+preuve de gain global, de fidélité de niveaux ou d'absence d'écrans noirs déclarée.
