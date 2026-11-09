@@ -1,0 +1,42 @@
+#version 430 core
+#extension GL_ARB_gpu_shader_fp64 : require
+layout(local_size_x=64) in;
+struct State {dvec2 position;uvec2 last;uint stamp;uint flags;vec2 offset;uvec2 reserved;};
+struct Command {dvec2 delta;vec4 linear;vec4 affineCenter;vec4 move;uvec4 control;};
+layout(std430,binding=0) readonly buffer Seeds {State seeds[];};
+layout(std430,binding=1) readonly buffer Commands {Command commands[];};
+layout(std430,binding=2) writeonly buffer Results {State results[];};
+layout(std430,binding=3) readonly buffer Ranges {uvec2 ranges[];};
+layout(std430,binding=4) readonly buffer Indices {uint indices[];};
+uniform uint objectCount;
+uniform uint prefixCount;
+void main(){
+    uint i=gl_GlobalInvocationID.x;if(i>=objectCount)return;State s=seeds[i];uvec2 r=ranges[s.flags>>16u];
+    precise dvec2 p=s.position;
+    for(uint k=0u;k<r.y;++k){uint index=indices[r.x+k];if(index>=prefixCount)break;Command c=commands[index];
+        if((s.flags&1u)==0u && s.stamp!=c.control.x){s.last=floatBitsToUint(vec2(p));s.stamp=c.control.x;s.flags|=12u;}
+        if(c.control.y==0u){
+            if(c.delta.x!=0.0lf && (s.flags&2u)==0u)p.x=c.delta.x+p.x;
+            if(c.delta.y!=0.0lf)p.y=c.delta.y+p.y;
+            s.flags|=48u;
+        }else{
+            s.flags=(s.flags&~128u)|(c.control.z<<7u)|96u;
+            precise double rx=p.x-double(s.offset.x);rx=rx-double(c.affineCenter.z);
+            precise double ry=p.y-double(s.offset.y);ry=ry-double(c.affineCenter.w);
+            precise vec2 relative=vec2(rx,ry);
+            // Installed Cocos promotes the affine products/sums to double, with different X/Y orders.
+            precise double ax=double(c.linear.z)*double(relative.y);
+            precise double bx=double(c.linear.x)*double(relative.x);
+            precise double xx=ax+bx;xx=xx+double(c.affineCenter.x);
+            precise double ay=double(c.linear.y)*double(relative.x);
+            precise double by=double(c.linear.w)*double(relative.y);
+            precise double yy=ay+by;yy=yy+double(c.affineCenter.y);
+            precise vec2 transformed=vec2(xx,yy);
+            precise float mx=c.move.x+transformed.x,my=c.move.y+transformed.y;
+            precise double nx=double(mx)-p.x;nx=nx+double(s.offset.x);nx=nx+p.x;
+            precise double ny=double(my)-p.y;ny=ny+double(s.offset.y);ny=ny+p.y;
+            p=dvec2(nx,ny);
+        }
+    }
+    s.position=p;results[i]=s;
+}

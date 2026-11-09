@@ -1569,3 +1569,12 @@ Tous dans le GD épinglé ; aucun débordement, données partagées92 fichiers r
 Les noms sont des adresses exactes de bindings, les comptes ne sont pas des temps.
 Ne pas supprimer les lecteurs CPU sur la foi du seul programme de déplacement.
 Prochain prototype : chemin spatial sans changement, oracle natif avant intégration.
+
+R70 : déplacement/classement fusionnés,30345 décisions natives et198380 visites
+complètes passent. Boucle2.101ms contre2.081ms ; pic4.266 contre2.403ms en fixture.
+Pas de gain complet : intégration GD abandonnée, prototype isolé conservé.
+R71 : programmes GPU mixtes déplacement/position de rotation, oracle327octets
+du GD réel avecdeux imports Cocos relogés.271128 états complets exacts,64 commandes,
+17 classes,quatre modes FP etquatre récurrences sans renvoi de positions.
+Témoin de cancellation contre une simplification incorrecte. Corpus synthétique,
+pas d'orientation/callbacks/lecteurs CPU qualifiés, aucun gain FPS revendiqué.
