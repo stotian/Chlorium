@@ -10,6 +10,9 @@
 #include "../R4-65/DirectAtlas.hpp"
 #include "../R4-65/DirectStats.hpp"
 extern "C" __declspec(dllexport) const char chloriumDirectVertexPagesIdentity[]="CHLORIUM_DIRECT_VERTEX_PAGES_R65";
+#ifdef CHLORIUM_ADAPTIVE_VERTEX_PAGES_R66
+extern "C" __declspec(dllexport) const char chloriumAdaptiveVertexPagesIdentity[]="CHLORIUM_ADAPTIVE_VERTEX_PAGES_R66";
+#endif
 #endif
 #ifdef CHLORIUM_GROUP_STATE_TRACE_R63
 #include "../R4-63/TraceAdapter.hpp"
@@ -36,7 +39,7 @@ using namespace geode::prelude;
 extern "C" __declspec(dllexport) const char chloriumContinuousIdentity[]="CHLORIUM_RESIDENT_CONTINUOUS_R57";
 static_assert(offsetof(CCSprite,m_sQuad)==0x1cc && offsetof(CCSprite,m_transformToBatch)==0x17c);
 static_assert(offsetof(CCTextureAtlas,m_pBuffersVBO)==0x40);
-#ifdef CHLORIUM_NATIVE_UPLOAD_DEFERRAL_R59
+#if defined(CHLORIUM_NATIVE_UPLOAD_DEFERRAL_R59) || defined(CHLORIUM_DIRECT_VERTEX_PAGES_R65)
 static_assert(offsetof(CCTextureAtlas,m_bDirty)==0x48);
 #endif
 namespace chlorium::research::continuous {
@@ -311,6 +314,13 @@ extern "C" __declspec(dllexport) bool ChloriumReadFastStatsR58(void* out,std::si
 }
 #endif
 #ifdef CHLORIUM_DIRECT_VERTEX_PAGES_R65
+#ifdef CHLORIUM_DIRECT_CONTEXT_GUARD_R67
+extern "C" __declspec(dllexport) bool ChloriumReadNativeAuthorityStatsR67(chlorium::research::directvertices::NativeAuthorityStats* out,std::size_t size){
+    using namespace chlorium::research::continuous;
+    if(!out || size!=sizeof(*out) || ownerThread.load()!=GetCurrentThreadId())return false;
+    *out={67,directAtlas.canonicalUploads,directAtlas.canonicalBytes};return true;
+}
+#endif
 extern "C" __declspec(dllexport) bool ChloriumReadDirectVertexStatsR65(chlorium::research::directvertices::Stats* out,std::size_t size){
     using namespace chlorium::research::continuous;
     if(!out || size!=sizeof(*out) || ownerThread.load()!=GetCurrentThreadId())return false;
@@ -345,7 +355,10 @@ class $modify(ChloriumContinuousFrame,CCDisplayLinkDirector){
         // The mod graph may still change during startup; inspect it only inside a level.
         if(ownerThread.load()==GetCurrentThreadId())isolatedIndexWriters=PlayLayer::get() && isolatedMods();
 #ifdef CHLORIUM_DIRECT_VERTEX_PAGES_R65
-        if(ownerThread.load()==GetCurrentThreadId()){PostState preserve;directCallbacks=isolatedIndexWriters && nativeDirectCallbacks();}
+        if(ownerThread.load()==GetCurrentThreadId()){
+            PostState preserve;
+            directCallbacks=(PlayLayer::get()?isolatedIndexWriters:isolatedMods()) && nativeDirectCallbacks();
+        }
 #endif
 #endif
 #ifdef CHLORIUM_GROUP_STATE_TRACE_R63
@@ -372,12 +385,6 @@ class $modify(ChloriumContinuousBatch,CCSpriteBatchNode){
 class $modify(ChloriumContinuousAtlas,CCTextureAtlas){
     void drawNumberOfQuads(unsigned count,unsigned first){
         using namespace chlorium::research::continuous;
-#ifdef CHLORIUM_DIRECT_VERTEX_PAGES_R65
-        struct KeepDirectPartialDirty {
-            CCTextureAtlas* atlas;bool keep;
-            ~KeepDirectPartialDirty(){if(keep)atlas->m_bDirty=true;}
-        } keepDirectDirty{this,currentBatch && flag(&m_bDirty) && (first || count!=m_uTotalQuads)};
-#endif
 #ifdef CHLORIUM_NATIVE_UPLOAD_DEFERRAL_R59
         struct KeepPartialDirty {
             CCTextureAtlas* atlas;bool keep;

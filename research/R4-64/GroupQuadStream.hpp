@@ -48,16 +48,6 @@ class GroupQuadStream {
         const auto program=glCreateProgram();if(program){glAttachShader(program,shader);glLinkProgram(program);glGetProgramiv(program,GL_LINK_STATUS,&ok);}else ok=0;
         glDeleteShader(shader);if(!ok){if(program)glDeleteProgram(program);return 0;}return program;
     }
-    static double advanceBound(double previous,std::span<const Command> commands,std::span<const Range> ranges,std::span<const unsigned> indices){
-        double maximum=0;
-        for(const auto& range:ranges){double x=0,y=0;
-            for(unsigned i=0;i<range[1];++i){const auto& command=commands[indices[range[0]+i]];
-                if(command.delta[0]!=0)x=std::nextafter(x+std::abs(command.delta[0]),std::numeric_limits<double>::infinity());
-                if(command.delta[1]!=0)y=std::nextafter(y+std::abs(command.delta[1]),std::numeric_limits<double>::infinity());}
-            maximum=std::max(maximum,std::max(x,y));
-        }
-        return maximum?std::nextafter(previous+maximum,std::numeric_limits<double>::infinity()):previous;
-    }
 public:
     struct Metrics {std::uint64_t stateSeedBytes=0,programBytes=0,lastProgramBytes=0,dispatches=0;} metrics;
     GroupQuadStream()=default;
@@ -108,7 +98,7 @@ public:
         HostState preserve;ready_=false;
         if(!usable_ || !epoch_ || !epoch_->isCurrent() || ranges.size()!=ranges_ ||
            !programEligible(commands,ranges,indices,preserve.fp) || indices.size()>ranges_*maxSteps)return false;
-        const auto nextBound=advanceBound(poseBound_,commands,ranges,indices);if(nextBound>0x1p32)return false;
+        const auto nextBound=boundAfter(poseBound_,commands,ranges,indices);if(nextBound>0x1p32)return false;
         Bindings saved;
         glMemoryBarrier(0x2000);glUseProgram(program_);
         for(unsigned lane=0;lane<7;++lane)glBindBufferBase(GLStateSnapshot::storageTarget,lane,buffers_[lane]);

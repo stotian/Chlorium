@@ -11,8 +11,8 @@ en visant 120 FPS stables. Aucun code Sodium n'est intégré.
 
 ## État actuel
 
-**La recherche active porte sur le renderer GPU continu R57–R61 et la chaîne de
-groupes GPU R62. Aucun candidat
+**La recherche active porte sur l'entrée GPU directe R67 et les programmes
+de groupes GPU R64/R68. Aucun candidat
 n'atteint encore les critères de promotion dans une version normale.**
 
 - R57 dessine réellement les lots d'objets pendant la partie avec du stockage GPU
@@ -35,10 +35,25 @@ n'atteint encore les critères de promotion dans une version normale.**
   présents à la fin de chacune. La capture Heliopolis complète vérifie la continuité
   des poses pour préparer l'adaptateur GPU ; elle ne désactive aucun calcul natif
   et ne constitue pas une comparaison de performances.
+- R64 maintient les poses sur GPU avec des programmes de groupes partagés.
+  Les mouvements enregistrés de 27 867 objets passent les contrôles natifs, mais
+  ce composant n'enlève pas encore les lecteurs CPU dans GD.
+- R65 fait dessiner Cocos directement depuis des pages de sommets cohérentes,
+  avec ses shaders et callbacks d'origine. Il retire la reconstruction et les
+  sauvegardes de framebuffer de R61. Le retour natif reste disponible.
+- R66 adapte les pages aux lots, sous la même borne mémoire. Quatre passages
+  Heliopolis ne montrent pas de gain convaincant et certains pics empirent :
+  ce chemin reste isolé.
+- R67 vérifie le contexte avant les appels de buffers et conserve le contenu
+  canonique natif pour les autres dessins GPU. Ce dernier point corrige un défaut
+  reproduit en fixture ; les transferts natifs restent payés. Partiels et cas
+  refusés restent natifs. Les effets et le gameplay restent exécutés par GD.
+- R68 regroupe les calculs CPU par programme. Son noyau isolé est rapide, mais
+  republier les objets annule le gain. Aucun hook de jeu n'utilise ce prototype.
 
 Les calculs CPU natifs des objets et triggers restent exécutés. Le transfert
 complet de leur logique sur GPU, objectif de Bismuth, **n'est pas terminé**.
-Les sauvegardes de framebuffer par lot restent également payées.
+Les prototypes directs s'activent uniquement dans le profil de mods isolé validé.
 
 ## Validation et limites
 
@@ -47,17 +62,21 @@ contrôles supplémentaires de transfert différé et de restauration après err
 Ils ne prouvent pas la fidélité de tous les effets GD 2.2 ni l'absence universelle
 d'écrans noirs.
 
-Une paire sur Heliopolis auto, section 74–78 %, a donné :
+Référence historique, avant les corrections R67 : quatre passages Heliopolis
+auto 74–78 %, ordre R65/R61/R61/R65 :
 
-| Renderer | Images retenues | FPS de la section | Frametime p95 |
+| Renderer Chlorium | FPS, deux passages | Frametime p95 | Pic le plus lent |
 |---|---:|---:|---:|
-| R57 | 82 | 15,1 | 124,6 ms |
-| R59 | 97 | 17,8 | 105,4 ms |
+| R61 sans timing détaillé | 16,76 / 15,29 | 96,76 / 98,34 ms | 200,01 ms |
+| R65 direct | 29,10 / 33,21 | 44,84 / 40,99 ms | 52,56 ms |
 
 Même auditeur, détails complets, 120 FPS demandés, sans shake ni noclip, mods isolés.
-**Une seule paire ne démontre pas un gain reproductible. Le résultat reste très
-insuffisant pour 120 FPS.** Les démarrages incomplets et le passage R60 interrompu
-vers 51,6 % ne sont pas comptés comme des tests complets.
+Le p95 baisse dans chacune des quatre tranches de pourcentage. Le contrôle ayant
+oublié son shader est exclu. [Preuves et limites](research/R4-65/helio-comparison.json).
+**Gain mesuré face à l'ancien Chlorium sur cette section uniquement : aucun test
+sans mod dans cette campagne, aucune preuve de 120 FPS ni de fidélité visuelle
+globale.** Les calculs CPU natifs restent coûteux. Les diagnostics visuels sont
+séparés des passages de performance.
 
 Les binaires, captures, journaux privés, sauvegardes et données de GD restent hors
 Git. Aucun de ces essais ne remplace automatiquement l'installation principale.
@@ -68,11 +87,11 @@ Prérequis : Windows x64, MSVC 2022 et SDK Geode 5.11.2. Les scripts locaux indi
 les chemins du poste de développement. Ils compilent sans lancer ni installer GD.
 
 ```bat
-research\R4-04\build-quad.cmd --resident-deferred
-python research\R4-04\package_private_fixture.py native-resident-deferred-r59
+research\R4-04\build-quad.cmd --direct-pages-r67
+python research\R4-04\package_private_fixture.py native-direct-pages-r67
 ```
 
-Le paquet privé est créé sous `build-research/native-resident-deferred-r59/`.
+Le paquet privé est créé sous `build-research/native-direct-pages-r67/`.
 `--resident-timed` construit le diagnostic R60 ; `--continuous-measure-r60`
 construit son auditeur indépendant. `--resident-direct` construit le diagnostic
 R61 (`native-stream-direct-r61`). Les essais en jeu utilisent le wrapper protégé

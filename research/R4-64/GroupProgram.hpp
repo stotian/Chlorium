@@ -1,9 +1,22 @@
 #pragma once
 #include "../R4-42/GroupTape.hpp"
+#include <algorithm>
+#include <cmath>
+#include <limits>
 
 namespace chlorium::research::groupprogram {
 using grouptape::State;using grouptape::Command;using grouptape::Range;
 inline constexpr std::size_t maxObjects=65536,maxCommands=8192,maxRanges=65536,maxSteps=64;
+inline double boundAfter(double previous,std::span<const Command> commands,std::span<const Range> ranges,std::span<const unsigned> indices){
+    double maximum=0;
+    for(const auto& range:ranges){double x=0,y=0;
+        for(unsigned i=0;i<range[1];++i){const auto& command=commands[indices[range[0]+i]];
+            if(command.delta[0]!=0)x=std::nextafter(x+std::abs(command.delta[0]),std::numeric_limits<double>::infinity());
+            if(command.delta[1]!=0)y=std::nextafter(y+std::abs(command.delta[1]),std::numeric_limits<double>::infinity());}
+        maximum=std::max(maximum,std::max(x,y));
+    }
+    return maximum?std::nextafter(previous+maximum,std::numeric_limits<double>::infinity()):previous;
+}
 // The R42 arithmetic bound applies to each object's ordered list, not the global command table.
 inline bool programEligible(std::span<const Command> commands,std::span<const Range> ranges,
                             std::span<const unsigned> indices,unsigned mxcsr)noexcept{

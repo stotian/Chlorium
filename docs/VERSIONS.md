@@ -1,6 +1,6 @@
-# Recherche active : renderer continu R57–R61 et chaîne GPU R62
+# Recherche active : entrée native directe R67 et programmes GPU/CPU R64/R68
 
-État au 8 novembre 2026, branche `research/area-pose-v6`.
+État au 9 novembre 2026, branche `research/area-pose-v6`.
 
 | Version privée | Chemin | État |
 |---|---|---|
@@ -11,6 +11,11 @@
 | v0.4.0-alpha.61 | Stockage natif sans programme graphique privé | 345 cas GPU hérités + nouveaux gardes ; Heliopolis 74–78 % diagnostiqué, aucun gain qualifié |
 | Prototype R62 hors mod | Groupes → quads → dessin, sans positions rapatriées | 266304 états/quads et128 images comparés aux fonctions natives ; pas encore intégré à GD |
 | v0.4.0-alpha.63, diagnostic | R61 actif + observation des groupes et états finaux | Heliopolis74–75% ; deux images complètes, aucun calcul natif retiré ; pas de preuve FPS |
+| Prototype R64 hors mod | Poses GPU et programmes partagés | 27867 acteurs enregistrés ; états/quads/poses finales vérifiés, géométrie de fixture |
+| v0.4.0-alpha.65 | Pages de sommets directes | Quatre passages Helio74–78 :29–33FPS vs15–17 pour R61 ; avant corrections R67, pas de référence sans mod |
+| v0.4.0-alpha.66 | Pages adaptatives | Refus de pages réduits, FPS semblables et pics parfois pires ; non retenu |
+| v0.4.0-alpha.67 | Contextes qualifiés et buffer natif conservé | Défauts de contexte et de consommateurs GPU reproduits/corrigés ; campagne actuelle distincte |
+| Prototype R68 hors mod | Calcul CPU regroupé | Correct en monde fermé ; publication complète plus lente, publication limitée proche du natif ; pas intégré |
 
 Ces versions restent expérimentales et séparées du build V10 historique ci-dessous.
 Le journal distingue les binaires effectivement testés et les modifications ultérieures.

@@ -24,6 +24,13 @@
 #ifdef CHLORIUM_DIRECT_VERTEX_AUDIT_R65
 #include "../research/R4-65/DirectStats.hpp"
 extern "C" __declspec(dllexport) const char chloriumDirectAuditIdentity[]="CHLORIUM_DIRECT_VERTEX_AUDIT_R65";
+#ifdef CHLORIUM_DIRECT_VERTEX_AUDIT_R67
+extern "C" __declspec(dllexport) const char chloriumDirectAuditIdentityR67[]="CHLORIUM_DIRECT_VERTEX_AUDIT_R67";
+extern "C" __declspec(dllexport) const char chloriumNativeAuthorityAuditIdentityR67[]="CHLORIUM_NATIVE_AUTHORITY_AUDIT_R67";
+#endif
+#ifdef CHLORIUM_ADAPTIVE_VERTEX_AUDIT_R66
+extern "C" __declspec(dllexport) const char chloriumAdaptiveAuditIdentity[]="CHLORIUM_ADAPTIVE_VERTEX_AUDIT_R66";
+#endif
 #endif
 extern "C" __declspec(dllexport) const char chloriumContinuousAuditIdentity[]="CHLORIUM_RESIDENT_CONTINUOUS_AUDIT_R57";
 #ifdef CHLORIUM_GROUP_TRACE_AUDIT_R63
@@ -266,6 +273,15 @@ bool recordNativeSnapshotStats(float percent) {
         using Stats=chlorium::research::continuous::Stats;
         const auto read=reinterpret_cast<bool(*)(Stats*,std::size_t)>(GetProcAddress(module,"ChloriumReadContinuousStatsR57"));Stats value;
         if(read && read(&value,sizeof(value))){
+#ifdef CHLORIUM_DIRECT_VERTEX_AUDIT_R67
+            if(GetProcAddress(module,"chloriumDirectContextGuardIdentity")){
+                using Mirror=chlorium::research::directvertices::NativeAuthorityStats;Mirror mirror;
+                const auto readMirror=reinterpret_cast<bool(*)(Mirror*,std::size_t)>(GetProcAddress(module,"ChloriumReadNativeAuthorityStatsR67"));
+                if(!readMirror || !readMirror(&mirror,sizeof(mirror)) || mirror.version!=67 || mirror.uploads!=value.committed)return false;
+                auto row=matjson::Value::object();row["event"]="native_vertex_authority_r67";row["percent"]=percent;
+                row["uploads"]=mirror.uploads;row["bytes"]=mirror.bytes;row["matches_committed_draws"]=true;line(row.dump());
+            }
+#endif
 #ifdef CHLORIUM_DIRECT_VERTEX_AUDIT_R65
             using Direct=chlorium::research::directvertices::Stats;Direct direct;
             const auto readDirect=reinterpret_cast<bool(*)(Direct*,std::size_t)>(GetProcAddress(module,"ChloriumReadDirectVertexStatsR65"));
@@ -928,7 +944,7 @@ void tick() {
         const bool continuous=continuousModule && GetProcAddress(continuousModule,"chloriumContinuousIdentity");
         const auto label=continuous?
 #ifdef CHLORIUM_DIRECT_VERTEX_AUDIT_R65
-            (GetProcAddress(continuousModule,"chloriumDirectVertexPagesIdentity")?"CHLORIUM R65 / DIRECT":"CHLORIUM R61 / CONTROLE R65"):
+            (GetProcAddress(continuousModule,"chloriumDirectContextGuardIdentity")?"CHLORIUM R67 / DIRECT":GetProcAddress(continuousModule,"chloriumAdaptiveVertexPagesIdentity")?"CHLORIUM R66 / DIRECT":GetProcAddress(continuousModule,"chloriumDirectVertexPagesIdentity")?"CHLORIUM R65 / DIRECT":"CHLORIUM R61 / CONTROLE R65"):
 #else
 #ifdef CHLORIUM_EXTENDED_RESIDENT_STATS_R59
             (GetProcAddress(continuousModule,"chloriumGroupTraceIdentity")?"CHLORIUM R61 + TRACE R63":GetProcAddress(continuousModule,"chloriumNativeStreamDirectIdentity")?"CHLORIUM R61 / DIAGNOSTIC":GetProcAddress(continuousModule,"chloriumRendererTimingIdentity")?"CHLORIUM R60 / DIAGNOSTIC":GetProcAddress(continuousModule,"chloriumUploadDeferralIdentity")?"AVEC CHLORIUM GPU R59":"AVEC CHLORIUM GPU R57"):

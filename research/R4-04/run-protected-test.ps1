@@ -27,7 +27,7 @@ param(
 $ErrorActionPreference = 'Stop'
 if($FullLevel -and ($Level -ne 88952972 -or $Mode -ne 'candidate' -or !$Canonical -or !$Performance)){throw 'Full-level override is restricted to the explicitly requested Grief continuous-renderer test'}
 if($PassCapture -and (!$Canonical -or $Mode -ne 'native' -or $Performance -or $WithUserMods -or $ExternalSampling -or $OpacityShadow)){throw 'Native pass capture requires its separate isolated native diagnostic'}
-if($ExternalSampling -and (!$Canonical -or $Mode -ne 'native' -or $Performance -or $WithUserMods)){throw 'External sampling requires a separate native canonical diagnostic with isolated mods'}
+if($ExternalSampling -and (!$Canonical -or $Performance -or $WithUserMods)){throw 'External sampling requires a separate canonical diagnostic with isolated mods'}
 if($OpacityShadow -and (!$Canonical -or $Mode -ne 'native' -or $Performance -or $WithUserMods -or $ExternalSampling)){throw 'Opacity shadow requires its isolated native canonical diagnostic, never a performance comparison'}
 if ($TransferRevision -ne 'initial' -and !$PersistentTransfer) { throw 'Transfer revision requires the explicit persistent profile' }
 if ($Canonical -and ($GpuExchange -or $PersistentTransfer -or $NativeBridge -or $AdaptiveUpload -or $AreaCensus -or $PoseCensus -or $BlackScreen)) {throw 'Canonical core requires its separate comparison profile'}
@@ -56,6 +56,8 @@ $taskPlan = Get-Content -LiteralPath $taskPlanPath -Raw | ConvertFrom-Json
 if($RunRevision){$taskPlan.run_revision=$RunRevision}
 if ($taskPlan.status -ne 'authorized_by_user') { throw 'Runtime campaign lacks explicit user authorization' }
 if($taskPlan.allowed_modes -and $Mode -notin $taskPlan.allowed_modes){throw 'This campaign only authorizes the selected Chlorium renderer; native baseline tests are stopped'}
+if($ExternalSampling -and $Mode -eq 'candidate' -and !$taskPlan.adaptive_sampling_r66){throw 'Candidate sampling requires its distinct R66 diagnostic plan'}
+if($taskPlan.adaptive_sampling_r66 -and (!$ExternalSampling -or $Mode -ne 'candidate')){throw 'R66 sampling plan requires its explicit candidate diagnostic flag'}
 if([bool]$taskPlan.group_trace_r63 -ne ($env:CHLORIUM_GROUP_TRACE_R63 -eq '1')){throw 'R63 trace requires its explicit campaign and diagnostic selection'}
 if($taskPlan.group_trace_r63 -and ($Mode -ne 'candidate' -or $WithUserMods -or $PassCapture)){throw 'R63 trace only permits Chlorium active with isolated mods'}
 if ($taskPlan.run_revision -and $taskPlan.run_revision -notmatch '^[a-z0-9][a-z0-9-]{0,31}$') {throw 'Invalid campaign revision'}

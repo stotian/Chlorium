@@ -5,6 +5,9 @@
 #include "../../src/renderer/GLState.hpp"
 #include "../R4-46/NativeHandoffContract.hpp"
 namespace dv=chlorium::research::directvertices;
+static PFNGLISBUFFERPROC nativeIsBuffer=nullptr;
+static unsigned bufferQueries=0;
+static GLboolean APIENTRY observeIsBuffer(GLuint name){++bufferQueries;return nativeIsBuffer(name);}
 struct TextureFixture {
     void** table;GLuint name;unsigned calls=0;
     static GLuint getName(void* self){auto& t=*static_cast<TextureFixture*>(self);++t.calls;return t.name;}
@@ -44,34 +47,70 @@ int wmain(int argc,wchar_t** argv)try{
     for(unsigned trial=0;trial<256;++trial){
         random^=random<<13;random^=random>>17;random^=random<<5;
         for(unsigned q=0;q<2;++q)for(auto& v:quads[q].corners)v.color=(random^(q*0x345678))|0x40000000u;
-        const auto first=trial%2,count=trial%3?1u:2u-first;
+        const auto first=0u,count=2u;
         atlas.dirty=true;prepare();native(&atlas,count,first);const auto expected=pixels();const auto state=GLStateSnapshot::capture();
         require(std::any_of(expected.begin(),expected.end(),[](unsigned char x){return x!=0;}),"reference draws nonempty alpha pixels");
         atlas.dirty=true;prepare();const auto getterCalls=texture.calls;unsigned nativeCalls=0;SetLastError(71);const auto fp=_mm_getcsr();
         require(adapter.draw(atlas.vertex,atlas.dirty,quads.data(),count,first,2,2,[&]{++nativeCalls;native(&atlas,count,first);SetLastError(93);}),"native draw accepts direct coherent page");
         require(GetLastError()==93 && _mm_getcsr()==fp,"added work preserves native post-call host state");
         require(nativeCalls==1 && texture.calls==getterCalls+1,"actual native body/getter execute exactly once");
-        require(atlas.vertex==buffers[0] && atlas.dirty,"canonical ownership and recovery dirt restored");
+        require(atlas.vertex==buffers[0] && !atlas.dirty,"canonical ownership and native full-upload dirty state restored");
         const auto after=GLStateSnapshot::capture();require(after.program==state.program && after.vao==state.vao && after.arrayBuffer==state.arrayBuffer && after.elementBuffer==state.elementBuffer && after.activeTexture==state.activeTexture,"actual native post-draw GL bindings preserved");
         for(unsigned i=0;i<3;++i){GLint buffer=0;glGetVertexAttribiv(i,GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING,&buffer);require(GLuint(buffer)==buffers[0],"native VAO pointer ownership restored after page draw");}
-        require(pixels()==expected,"full image equals actual native atlas including alpha and subranges");++checked;
+        require(pixels()==expected,"full image equals actual native atlas including alpha");++checked;
     }
     unsigned unexpected=0;atlas.dirty=false;require(!adapter.draw(atlas.vertex,atlas.dirty,quads.data(),1,0,2,2,[&]{++unexpected;}),"clean GPU-authoritative draw declines before callback");
     atlas.dirty=true;require(!adapter.draw(atlas.vertex,atlas.dirty,quads.data(),2,1,2,2,[&]{++unexpected;}),"invalid subrange declines");require(!unexpected,"declined native callback remains caller-owned");
+    require(!adapter.draw(atlas.vertex,atlas.dirty,quads.data(),1,1,2,2,[&]{++unexpected;}),"valid partial range stays native to preserve authority outside its upload");
     prepare();atlas.dirty=true;glEnable(0xffffffffu);
-    require(adapter.draw(atlas.vertex,atlas.dirty,quads.data(),1,0,2,2,[&]{native(&atlas,1,0);}),"pending error does not prevent safe native draw");
+    require(adapter.draw(atlas.vertex,atlas.dirty,quads.data(),2,0,2,2,[&]{native(&atlas,2,0);}),"pending error does not prevent safe native draw");
     require(glGetError()==GL_INVALID_ENUM && glGetError()==GL_NO_ERROR,"added path preserves preexisting native GL error");
-    glBindBuffer(GL_ARRAY_BUFFER,buffers[0]);const auto mapped=glMapBufferRange(GL_ARRAY_BUFFER,0,sizeof(quads),GL_MAP_READ_BIT);
-    require(mapped && !adapter.draw(atlas.vertex,atlas.dirty,quads.data(),1,0,2,2,[&]{++unexpected;}),"mapped native store declines before leasing");glUnmapBuffer(GL_ARRAY_BUFFER);
-    bool unwound=false;try{adapter.draw(atlas.vertex,atlas.dirty,quads.data(),1,0,2,2,[&]{throw std::runtime_error("owned unwind witness");});}catch(const std::runtime_error&){unwound=true;}
+    atlas.dirty=true;glBindBuffer(GL_ARRAY_BUFFER,buffers[0]);const auto mapped=glMapBufferRange(GL_ARRAY_BUFFER,0,sizeof(quads),GL_MAP_READ_BIT);
+    require(mapped && !adapter.draw(atlas.vertex,atlas.dirty,quads.data(),2,0,2,2,[&]{++unexpected;}),"mapped native store declines before leasing");glUnmapBuffer(GL_ARRAY_BUFFER);
+    bool unwound=false;try{adapter.draw(atlas.vertex,atlas.dirty,quads.data(),2,0,2,2,[&]{throw std::runtime_error("owned unwind witness");});}catch(const std::runtime_error&){unwound=true;}
     require(unwound && atlas.vertex==buffers[0] && atlas.dirty,"unwinding fences owned memory and restores native ownership");
+    const auto nativeContext=wglGetCurrentContext();const auto nativeDC=wglGetCurrentDC();
+    const auto foreign=wglCreateContext(nativeDC);require(foreign && wglMakeCurrent(nativeDC,foreign),"create unrelated context");
+    nativeIsBuffer=glIsBuffer;glIsBuffer=observeIsBuffer;bufferQueries=0;
+    const auto foreignAccepted=adapter.draw(atlas.vertex,atlas.dirty,quads.data(),2,0,2,2,[&]{++unexpected;});glIsBuffer=nativeIsBuffer;
+    require(wglMakeCurrent(nativeDC,nativeContext) && wglDeleteContext(foreign),"restore native context after foreign probe");
+    require(!foreignAccepted && bufferQueries==0,"foreign context declines before native GLEW buffer dispatch");
+    for(auto& q:quads)for(auto& vertex:q.corners)vertex.color=0xff21f4d3u;
+    atlas.dirty=true;prepare();require(adapter.draw(atlas.vertex,atlas.dirty,quads.data(),2,0,2,2,[&]{native(&atlas,2,0);}),"accelerated full draw before native GPU consumer");
+    const auto accelerated=pixels();prepare();glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,atlas.index);glDrawElements(GL_TRIANGLES,12,GL_UNSIGNED_SHORT,nullptr);
+    require(pixels()==accelerated,"subsequent native GPU consumer sees the same canonical vertex bytes");
+    // A native partial draw outside an accelerated batch can clear atlas-wide recovery dirt.
+    auto partialRecovery=[&](bool guard){
+        for(auto& vertex:quads[0].corners)vertex.color=0xffff0000u;
+        atlas.dirty=true;prepare();native(&atlas,2,0);
+        for(auto& vertex:quads[0].corners)vertex.color=0xff00ff00u;
+        atlas.dirty=true;prepare();GLuint deferred=0;glGenBuffers(1,&deferred);glBindBuffer(GL_ARRAY_BUFFER,deferred);glBufferData(GL_ARRAY_BUFFER,sizeof(quads),quads.data(),GL_DYNAMIC_DRAW);
+        {chlorium::snapshot::NativeVertexLease legacy(atlas.vertex,atlas.dirty,deferred);native(&atlas,2,0);}
+        for(auto& vertex:quads[1].corners)vertex.color=0x808000ffu;
+        prepare();
+        if(guard){dv::PartialDirtyRecovery recovery(true,atlas.dirty,1,1,2);native(&atlas,1,1);}
+        else native(&atlas,1,1);
+        const auto retained=atlas.dirty;prepare();native(&atlas,2,0);const auto observed=pixels();
+        atlas.dirty=true;prepare();native(&atlas,2,0);const auto expected=pixels();
+        require((observed==expected)==guard && retained==guard,"outside-batch partial recovery preserves the next full native image");
+        glDeleteBuffers(1,&deferred);
+    };
+    partialRecovery(false);partialRecovery(true);
     dv::DirectVertexPages pages;const auto source=std::as_bytes(std::span(quads));
-    for(unsigned i=0;i<16;++i){const auto id=pages.acquire(source);require(id!=0,"bounded distinct pages acquired");require(!pages.acquire(source),"nested acquire cannot overwrite leased page");require(pages.finish(),"draw completion fences page");}
+    for(unsigned i=0;i<dv::DirectVertexPages::pageCount;++i){const auto id=pages.acquire(source);require(id!=0,"bounded distinct pages acquired");require(!pages.acquire(source),"nested acquire cannot overwrite leased page");require(pages.finish(),"draw completion fences page");}
     pages.denyReuse=true;const auto uploads=pages.metrics.uploads;require(!pages.acquire(source) && pages.metrics.busy==1 && pages.metrics.uploads==uploads,"all busy pages decline without host wait or mutation");
     pages.denyReuse=false;glFinish();require(pages.acquire(source)!=0 && pages.finish(),"completed pages wrap safely");
-    require(pages.metrics.allocated==dv::DirectVertexPages::maxBytes,"memory bounded to 24 MiB per renderer");
+#ifdef CHLORIUM_ADAPTIVE_VERTEX_PAGES_R66
+    require(pages.metrics.allocated==dv::pageStorage(source.size())*dv::DirectVertexPages::pageCount,"small pages allocate their bounded rounded capacity");
+    std::vector<std::byte> bigger(16385,std::byte{0xa7});glFinish();const auto larger=pages.acquire(bigger);require(larger!=0,"completed small page grows for a later large atlas");
+    require(pages.finish(),"grown page is fenced");GLint old=0;glGetIntegerv(GL_COPY_READ_BUFFER,&old);glBindBuffer(GL_COPY_READ_BUFFER,larger);
+    std::vector<std::byte> actual(bigger.size());glGetBufferSubData(GL_COPY_READ_BUFFER,0,actual.size(),actual.data());glBindBuffer(GL_COPY_READ_BUFFER,old);require(actual==bigger,"grown coherent buffer holds exact native input bytes");
+#else
+    require(pages.metrics.allocated==dv::DirectVertexPages::maxBytes,"fixed pages allocate exactly 24 MiB");
+#endif
+    require(pages.metrics.allocated<=dv::DirectVertexPages::maxBytes,"memory bounded to 24 MiB per renderer");
     const auto dc=wglGetCurrentDC();const auto context=wglGetCurrentContext();require(wglMakeCurrent(nullptr,nullptr)!=0,"detach fixture context");require(!pages.acquire(source),"absent context rejects before GL");require(wglMakeCurrent(dc,context)!=0,"restore fixture context");
     require(!adapter.fenceFailures && glGetError()==GL_NO_ERROR,"native direct stream has no fence or GL errors");
-    std::cout<<"R65 actual native atlas: images="<<checked<<" native_callbacks="<<adapter.metrics().uploads<<" allocated="<<adapter.metrics().allocated<<" no duplicate draw, compute shader, framebuffer backup or GPU copy; NOT GD frametime\n";
+    std::cout<<"Direct actual native atlas: images="<<checked<<" leases="<<adapter.metrics().uploads<<" allocated="<<adapter.metrics().allocated<<" no duplicate draw, compute shader, framebuffer backup or GPU copy; NOT GD frametime\n";
     glDeleteBuffers(2,buffers);glDeleteVertexArrays(1,&vao);glDeleteTextures(2,textures);glDeleteFramebuffers(1,&fbo);glDeleteProgram(shader);return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}

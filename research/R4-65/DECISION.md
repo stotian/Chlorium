@@ -40,3 +40,37 @@ all prior exclusions; five additional tests protect balanced loaded/loaded runs.
 
 Decision: retain isolated pending replicated in-game frame distributions and
 level visual diagnostics. No native-only run, main-install change or release.
+
+## R67 recovery corrections
+
+An unrelated-current-context fixture initially fails: the adapter queries a
+native GLEW buffer before checking its page's context generation. Move page/context
+qualification before native buffer queries; rejected reservations are fenced.
+The test then passes with zero native buffer dispatches in the foreign context.
+
+A second actual-native witness interleaves an accelerated full draw, an external
+native partial draw and a full native fallback. Without recovery, the partial draw
+clears atlas-wide dirty and the next image uses stale canonical vertices. A shared
+PartialDirtyRecovery scope now covers owner-thread native calls outside the batch
+after a lease, under the same closed callback graph. The existing partial-dirty
+rule is reused. The witness reproduces the wrong image without that scope and
+matches the full native image with it. Native callbacks/draw counts remain intact.
+
+Full-only qualification was added: a partial upload does not make the remaining
+CPU quad prefix authoritative. Partial draws remain native.
+
+A third witness then FAILED: an additional native GL draw using the restored
+canonical VAO read old vertices even though the accelerated image was correct.
+Dirty recovery alone cannot protect native GPU consumers outside the atlas.
+R67 therefore retains the canonical full native upload before its owned-page draw.
+Successful calls restore the native clean flag; exceptions still retain recovery.
+The live partial-dirty workaround is no longer needed because canonical storage
+is never deferred. Its historical counterexample remains in the owned tests.
+The subsequent-consumer witness now passes, together with 256 alpha images,
+foreign-context, partial-decline, pending-error and unwind checks. An explicit
+native-authority export reports one canonical upload per committed draw. Packager
+and runner reject earlier R67 binaries without that identity/telemetry.
+
+R67 is separately fingerprinted; R65/R66 FPS results describe their frozen earlier
+binaries and are not relabelled as current R67 performance proof. Retaining the
+canonical upload adds work; its actual cost must be measured in the paired campaign.

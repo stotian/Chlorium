@@ -1528,3 +1528,35 @@ Le premier contrôle R61 sans timing était invalide (shader oublié dans le paq
 zéro lot engagé) : exclu, paquet corrigé et shader vérifié avant relance. Campagne
 deux versions Chlorium uniquement, même auditeur et paramètres, en cours. Aucune
 preuve de gain global, de fidélité de niveaux ou d'absence d'écrans noirs déclarée.
+
+### R66–R68 — contrôle des coûts complets et de la cohérence (9 novembre)
+
+R66, quatre passages Helio74–78 avec même auditeur : R65 34.69/35.54FPS,
+R66 35.35/35.39FPS ; p95 R65 34.87/35.58ms, R66 36.73/35.08ms.
+Refus de pages171/173 seulement, mais aucun gain convaincant ; ne pas promouvoir.
+Le gain mémoire de la petite fixture ne se retrouve pas dans le niveau réel24MiB.
+
+R67 : contexte étranger interrogé trop tôt reproduit puis corrigé. Dessin partiel
+hors lot accéléré : ancien protocole pouvait effacer la récupération, reproduit.
+Un troisième témoin révèle un consommateur GPU natif lisant des sommets anciens
+après un dessin accéléré pourtant correct. Correction actuelle : conserver le
+transfert canonique complet, nettoyer le flag comme le natif, accélérer uniquement
+les lots complets/sales. 256 images et témoins passent. Export de preuve native
+par dessin ; anciens binaires R67 refusés par les nouveaux gardes. Coût à mesurer.
+Grief24–65 sur ce binaire atteint la cible,61 169 transferts canoniques correspondant
+aux dessins. Huit événements sombres reviennent aux mêmes pourcentages que sur le
+protocole précédent ; effet du niveau plausible, pas une preuve globale zéro noir.
+
+R68 : programmes CPU communs avec R64, états regroupés et deux voies SSE2.
+56912 états comparés, témoins de poses GD exacts ;1178 objets de fixture comparés
+sur1536octets et états FP. Callback natif mutant montre que l'indépendance ne peut
+pas être supposée. Noyau0.254ms vsboucle native fermée1.418ms ; publication
+complète2.494ms, champs déplacés seulement1.392ms. Pas de gain complet convaincant,
+aucun hook ajouté au jeu. R64 repasse55734 états/quads etdeux images après partage
+du lecteur et du calcul de bornes.
+
+Relevé CPU R66 distinct : premier relevé potentiellement perturbé, exclu des parts
+de temps. Répétition sans compilation :189positions de thread entre74.43–77.30%,
+aucun contexte manquant/erreur de nettoyage. Ce sont des positions murales, pas des
+pourcentages CPU inclusifs. Graphify :91sources,1682nœuds/2785liens,0tokenLLM ;
+deux analyses partielles etun fichier sans symboles, pas une preuve des alias natifs.

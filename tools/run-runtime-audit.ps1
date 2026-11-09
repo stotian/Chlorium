@@ -86,6 +86,9 @@ try {
     $supportsCanonical = $binary.Contains('CHLORIUM_CANONICAL_CORE_AUDIT_V10')
     $supportsContinuous = $binary.Contains('CHLORIUM_RESIDENT_CONTINUOUS_AUDIT_R57')
     $supportsDirectPagesR65 = $binary.Contains('CHLORIUM_DIRECT_VERTEX_AUDIT_R65')
+    $supportsAdaptivePagesR66 = $binary.Contains('CHLORIUM_ADAPTIVE_VERTEX_AUDIT_R66')
+    $supportsDirectGuardR67 = $binary.Contains('CHLORIUM_DIRECT_VERTEX_AUDIT_R67')
+    $supportsNativeAuthorityR67 = $binary.Contains('CHLORIUM_NATIVE_AUTHORITY_AUDIT_R67')
     if($supportsDirectPagesR65 -and ($Native -or $WithUserMods -or $groupTraceDiagnostic)){throw 'R65 campaign requires Chlorium active, isolated mods and no movement trace'}
     if($groupTraceDiagnostic -and !$binary.Contains('CHLORIUM_GROUP_TRACE_AUDIT_R63')){throw 'R63 trace requires its identified independent auditor'}
     $opacityHashAuditBinary = $binary.Contains('CHLORIUM_OPACITY_HASH_AUDIT_R36')
@@ -116,7 +119,7 @@ try {
     if($PassCapture -and (!$Native -or $VisualWatch -or $WithUserMods -or $ExternalSampling -or $OpacityShadow -or !$measurementOnly -or !$supportsCanonical)){throw 'Native pass capture is an isolated native diagnostic, never a performance comparison'}
     if($opacityShadowBinary -ne [bool]$OpacityShadow){throw 'Opacity shadow requires its explicit diagnostic flag and matching auditor'}
     if($OpacityShadow -and (!$Native -or $VisualWatch -or $WithUserMods -or $ExternalSampling -or !$measurementOnly -or !$supportsCanonical)){throw 'Opacity shadow requires its isolated native diagnostic profile without image capture or sampling'}
-    if($ExternalSampling -and (!$Native -or $VisualWatch -or $WithUserMods -or !$measurementOnly -or !$binary.Contains('CHLORIUM_EXTERNAL_SAMPLING_AUDIT_V2'))){throw 'External sampling requires its isolated native diagnostic auditor; never use it as a performance run'}
+    if($ExternalSampling -and ((!$Native -and (!$supportsAdaptivePagesR66 -or !$ProductionPackage)) -or $VisualWatch -or $WithUserMods -or !$measurementOnly -or !$binary.Contains('CHLORIUM_EXTERNAL_SAMPLING_AUDIT_V2'))){throw 'External sampling requires its isolated native or identified R66 diagnostic; never use it as a performance run'}
     if ($VisualWatch -and (!$binary.Contains('CHLORIUM_VISUAL_READBACK_V2') -or
         !$binary.Contains('CHLORIUM_PRESENTED_CAPTURE_ONLY_V3') -or !$binary.Contains('CHLORIUM_READBACK_STATE_GUARDS_V5'))) {
         throw 'Rebuild visual diagnostics with presented-frame reads, scoped GL restoration, and complete probe/file coverage'
@@ -181,7 +184,11 @@ if ($measurementOnly -and !$Native) {
         }
         if($groupTraceDiagnostic -ne $binary.Contains('CHLORIUM_GROUP_STATE_TRACE_R63')){throw 'R63 trace candidate and explicit diagnostic selection must match'}
         $rendererTimingDiagnostic = $binary.Contains('CHLORIUM_RENDERER_TIMING_R60')
-        $rendererVariant = if($binary.Contains('CHLORIUM_DIRECT_VERTEX_PAGES_R65')){'direct-pages-r65'}elseif($binary.Contains('CHLORIUM_R61_UNTIMED_CONTROL_R65')){'stream-control-r65'}else{'previous-profile'}
+        $rendererVariant = if($binary.Contains('CHLORIUM_DIRECT_CONTEXT_GUARD_R67')){'direct-pages-r67'}elseif($binary.Contains('CHLORIUM_ADAPTIVE_VERTEX_PAGES_R66')){'adaptive-pages-r66'}elseif($binary.Contains('CHLORIUM_DIRECT_VERTEX_PAGES_R65')){'direct-pages-r65'}elseif($binary.Contains('CHLORIUM_R61_UNTIMED_CONTROL_R65')){'stream-control-r65'}else{'previous-profile'}
+        if($rendererVariant -eq 'direct-pages-r67' -and !$supportsDirectGuardR67){throw 'R67 requires its matching context-recovery auditor and mode label'}
+        if($rendererVariant -eq 'direct-pages-r67' -and (!$supportsNativeAuthorityR67 -or !$binary.Contains('CHLORIUM_NATIVE_VERTEX_AUTHORITY_R67'))){throw 'R67 must keep native vertex storage authoritative and report its copies'}
+        if($rendererVariant -eq 'adaptive-pages-r66' -and !$supportsAdaptivePagesR66){throw 'R66 requires its matching identified auditor and mode label'}
+        if($ExternalSampling -and $rendererVariant -ne 'adaptive-pages-r66'){throw 'Candidate sampling is restricted to the identified R66 renderer'}
         if($rendererVariant -ne 'previous-profile' -and (!$supportsDirectPagesR65 -or $rendererTimingDiagnostic)){throw 'R65 performance profiles require their identified auditor without renderer timing'}
         if($supportsDirectPagesR65 -and $rendererVariant -eq 'previous-profile'){throw 'R65 auditor cannot mislabel another renderer'}
         $binary = $null
