@@ -9,6 +9,9 @@
 #ifdef CHLORIUM_NATIVE_FIELD_WATCH_R69
 #include "../R4-69/TraceAdapter.hpp"
 #endif
+#ifdef CHLORIUM_NATIVE_ROTATION_TRACE_R72
+#include "../R4-72/TraceAdapter.hpp"
+#endif
 #ifdef CHLORIUM_DIRECT_VERTEX_PAGES_R65
 #include "../R4-65/DirectAtlas.hpp"
 #include "../R4-65/DirectStats.hpp"
@@ -370,12 +373,18 @@ class $modify(ChloriumContinuousFrame,CCDisplayLinkDirector){
 #ifdef CHLORIUM_NATIVE_FIELD_WATCH_R69
         if(ownerThread.load()==GetCurrentThreadId())chlorium::research::fieldtrace::begin(PlayLayer::get(),isolatedIndexWriters && directCallbacks && enabled());
 #endif
+#ifdef CHLORIUM_NATIVE_ROTATION_TRACE_R72
+        if(ownerThread.load()==GetCurrentThreadId())chlorium::research::rotationtrace::begin(PlayLayer::get(),isolatedIndexWriters && directCallbacks && enabled());
+#endif
         CCDisplayLinkDirector::mainLoop();
 #ifdef CHLORIUM_GROUP_STATE_TRACE_R63
         if(ownerThread.load()==GetCurrentThreadId())chlorium::research::grouptrace::end();
 #endif
 #ifdef CHLORIUM_NATIVE_FIELD_WATCH_R69
         if(ownerThread.load()==GetCurrentThreadId())chlorium::research::fieldtrace::end();
+#endif
+#ifdef CHLORIUM_NATIVE_ROTATION_TRACE_R72
+        if(ownerThread.load()==GetCurrentThreadId())chlorium::research::rotationtrace::end();
 #endif
     }
 };

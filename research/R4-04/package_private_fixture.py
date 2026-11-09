@@ -10,7 +10,7 @@ from build_history import preserve_previous
 
 root = Path(__file__).resolve().parents[2]
 profile = sys.argv[1] if len(sys.argv) == 2 else ""
-if profile not in ("native-field-watch-r69", "measurement-field-watch-r69", "native-direct-pages-r67", "measurement-direct-pages-r67", "native-adaptive-pages-r66", "measurement-adaptive-pages-r66", "native-direct-pages-r65", "native-stream-control-r65", "measurement-direct-pages-r65", "native-resident-deferred-r59", "native-resident-timed-r60", "native-stream-direct-r61", "native-group-trace-r63", "native-resident-fast-r58", "native-resident-continuous-r57", "native-opacity-hash-r36", "measurement-native-pass-v10", "measurement-canonical-v10-r4","measurement-resident-continuous-r57","measurement-resident-deferred-r59", "measurement-resident-timed-r60", "measurement-group-trace-r63", "measurement-canonical-v10-r3", "measurement-canonical-opacity-shadow-v10", "measurement-canonical-sampling-v10", "measurement-canonical-v10-r2", "measurement-canonical-v10", "native-canonical-v10", "quad-v4", "quad-v4-scope-r2", "quad-audit-r3", "native-vertex-black-v5", "measurement-v5", "measurement-audit-r2", "measurement-black-watch-v5", "measurement-area-census-v5", "measurement-area-visible-v5", "measurement-area-frames-v5", "measurement-pose-census-v6", "native-adaptive-upload-v6", "measurement-upload-v6", "native-draw-bridge-v7", "native-gpu-exchange-v8", "native-persistent-transfer-v9", "measurement-transfer-v9", "measurement-transfer-v9-r2"):
+if profile not in ("native-rotation-trace-r72", "measurement-rotation-trace-r72", "native-field-watch-r69", "measurement-field-watch-r69", "native-direct-pages-r67", "measurement-direct-pages-r67", "native-adaptive-pages-r66", "measurement-adaptive-pages-r66", "native-direct-pages-r65", "native-stream-control-r65", "measurement-direct-pages-r65", "native-resident-deferred-r59", "native-resident-timed-r60", "native-stream-direct-r61", "native-group-trace-r63", "native-resident-fast-r58", "native-resident-continuous-r57", "native-opacity-hash-r36", "measurement-native-pass-v10", "measurement-canonical-v10-r4","measurement-resident-continuous-r57","measurement-resident-deferred-r59", "measurement-resident-timed-r60", "measurement-group-trace-r63", "measurement-canonical-v10-r3", "measurement-canonical-opacity-shadow-v10", "measurement-canonical-sampling-v10", "measurement-canonical-v10-r2", "measurement-canonical-v10", "native-canonical-v10", "quad-v4", "quad-v4-scope-r2", "quad-audit-r3", "native-vertex-black-v5", "measurement-v5", "measurement-audit-r2", "measurement-black-watch-v5", "measurement-area-census-v5", "measurement-area-visible-v5", "measurement-area-frames-v5", "measurement-pose-census-v6", "native-adaptive-upload-v6", "measurement-upload-v6", "native-draw-bridge-v7", "native-gpu-exchange-v8", "native-persistent-transfer-v9", "measurement-transfer-v9", "measurement-transfer-v9-r2"):
     raise SystemExit("Choose an explicit compiled research profile")
 out = root / "build-research" / profile
 build = json.loads((out / "build-fingerprint.json").read_text(encoding="utf-8"))
@@ -23,8 +23,8 @@ if hashlib.sha256(binary).hexdigest() != build["dll_sha256"]:
 if build.get("source_archive_sha256"):
     if hashlib.sha256((out / "source-inputs.zip").read_bytes()).hexdigest() != build["source_archive_sha256"]:
         raise SystemExit("Source archive fingerprint mismatch")
-base_profile = {"native-field-watch-r69":"native-direct-pages-r67", "measurement-field-watch-r69":"measurement-direct-pages-r67"}.get(profile, profile)
-for selected, marker in (("native-field-watch-r69", b"CHLORIUM_NATIVE_FIELD_WATCH_R69"), ("measurement-field-watch-r69", b"CHLORIUM_FIELD_WATCH_AUDIT_R69")):
+base_profile = {"native-rotation-trace-r72":"native-direct-pages-r67", "measurement-rotation-trace-r72":"measurement-direct-pages-r67", "native-field-watch-r69":"native-direct-pages-r67", "measurement-field-watch-r69":"measurement-direct-pages-r67"}.get(profile, profile)
+for selected, marker in (("native-rotation-trace-r72",b"CHLORIUM_NATIVE_ROTATION_TRACE_R72"), ("measurement-rotation-trace-r72",b"CHLORIUM_ROTATION_TRACE_AUDIT_R72"), ("native-field-watch-r69", b"CHLORIUM_NATIVE_FIELD_WATCH_R69"), ("measurement-field-watch-r69", b"CHLORIUM_FIELD_WATCH_AUDIT_R69")):
     if (profile == selected) != (marker in binary):
         raise SystemExit("R69 diagnostic identity/profile mismatch")
 audit = base_profile.startswith("measurement-")
@@ -142,6 +142,9 @@ if profile=="native-direct-pages-r67":
 if profile in ("native-field-watch-r69", "measurement-field-watch-r69"):
     manifest["name"]="Chlorium R67 native field watch R69 (diagnostic)" if not audit else "Chlorium R69 independent field-watch auditor"
     manifest["description"]="Isolated two-frame native field access observation; not a performance run or CPU offload"
+if profile in ("native-rotation-trace-r72", "measurement-rotation-trace-r72"):
+    manifest["name"]="Chlorium R67 native rotation trace R72 (diagnostic)" if not audit else "Chlorium R72 independent rotation-trace auditor"
+    manifest["description"]="Isolated native rotation parameter/post-position observation; not a performance run or CPU offload"
 manifest["settings"].pop("ingame_enable", None)
 manifest["settings"].pop("use_mapped_buffers", None)
 package = out / (manifest["id"] + ".geode")

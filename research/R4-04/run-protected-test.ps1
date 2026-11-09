@@ -16,6 +16,7 @@ param(
     [switch]$OpacityShadow,
     [switch]$PassCapture,
     [switch]$FieldWatch,
+    [switch]$RotationTrace,
     [switch]$Performance,
     [switch]$BlackScreen,
     [ValidateSet('initial','visible','frames')][string]$CensusRevision='initial',
@@ -26,6 +27,7 @@ param(
     [string]$PlanPath
 )
 $ErrorActionPreference = 'Stop'
+if($RotationTrace -and (!$Canonical -or $Mode -ne 'candidate' -or $Performance -or $WithUserMods -or $ExternalSampling -or $OpacityShadow -or $PassCapture -or $FieldWatch)){throw 'R72 rotation trace requires its isolated candidate diagnostic; never a performance test'}
 if($FieldWatch -and (!$Canonical -or $Mode -ne 'candidate' -or $Performance -or $WithUserMods -or $ExternalSampling -or $OpacityShadow -or $PassCapture)){throw 'R69 field watch requires its isolated candidate diagnostic; never a performance test'}
 if($FullLevel -and ($Level -ne 88952972 -or $Mode -ne 'candidate' -or !$Canonical -or !$Performance)){throw 'Full-level override is restricted to the explicitly requested Grief continuous-renderer test'}
 if($PassCapture -and (!$Canonical -or $Mode -ne 'native' -or $Performance -or $WithUserMods -or $ExternalSampling -or $OpacityShadow)){throw 'Native pass capture requires its separate isolated native diagnostic'}
@@ -62,6 +64,8 @@ if($ExternalSampling -and $Mode -eq 'candidate' -and !$taskPlan.adaptive_samplin
 if($taskPlan.adaptive_sampling_r66 -and (!$ExternalSampling -or $Mode -ne 'candidate')){throw 'R66 sampling plan requires its explicit candidate diagnostic flag'}
 if([bool]$taskPlan.group_trace_r63 -ne ($env:CHLORIUM_GROUP_TRACE_R63 -eq '1')){throw 'R63 trace requires its explicit campaign and diagnostic selection'}
 if([bool]$taskPlan.field_watch_r69 -ne [bool]$FieldWatch){throw 'R69 field watch requires its distinct campaign and explicit diagnostic flag'}
+if([bool]$taskPlan.rotation_trace_r72 -ne [bool]$RotationTrace){throw 'R72 rotation trace requires its distinct campaign and explicit diagnostic flag'}
+if($RotationTrace -and $taskPlan.group_trace_r63){throw 'R72 rotation trace cannot combine movement capture'}
 if($FieldWatch -and $taskPlan.group_trace_r63){throw 'R69 field watch cannot combine group capture'}
 if($taskPlan.group_trace_r63 -and ($Mode -ne 'candidate' -or $WithUserMods -or $PassCapture)){throw 'R63 trace only permits Chlorium active with isolated mods'}
 if ($taskPlan.run_revision -and $taskPlan.run_revision -notmatch '^[a-z0-9][a-z0-9-]{0,31}$') {throw 'Invalid campaign revision'}
@@ -103,6 +107,7 @@ if ($ExternalSampling) { $taskCampaign+='-sampling' }
 if ($OpacityShadow) { $taskCampaign+='-opacity-shadow' }
 if ($PassCapture) { $taskCampaign+='-pass-capture' }
 if ($FieldWatch) { $taskCampaign+='-field-watch' }
+if ($RotationTrace) { $taskCampaign+='-rotation-trace' }
 if ($Performance) { $taskCampaign+='-performance' }
 if ($AreaCensus -and ($Level -ne 133260800 -or $Mode -ne 'native')) { throw 'Area census is a native Orbit diagnostic only' }
 $taskRun = Join-Path $taskCampaign "$Level-$Mode"
@@ -269,6 +274,7 @@ try {
     if ($OpacityShadow) {$taskParameters.OpacityShadow=$true;$taskParameters.VisualWatch=$false}
     if ($PassCapture) {$taskParameters.PassCapture=$true;$taskParameters.VisualWatch=$false}
     if ($FieldWatch) {$taskParameters.FieldWatch=$true;$taskParameters.VisualWatch=$false}
+    if ($RotationTrace) {$taskParameters.RotationTrace=$true;$taskParameters.VisualWatch=$false}
     if ($WithUserMods) { $taskParameters.WithUserMods=$true }
     if ($taskParameters.VisualWatch) { $taskParameters.CapturePercent = switch ($Level) { 88952972 { @(45,55,64.5) } 129598490 { @(76.99,77.17) } 133260800 { @(89.5,96.5) } } }
     & (Join-Path $taskRoot 'tools/run-runtime-audit.ps1') @taskParameters

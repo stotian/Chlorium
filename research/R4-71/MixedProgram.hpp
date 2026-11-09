@@ -18,7 +18,7 @@ inline bool fixtureInput(std::span<const State> states,std::span<const Command> 
         for(auto x:s.position)if(!grouptape::bounded(x))return false;for(auto x:s.offset)if(!std::isfinite(x) || std::abs(x)>65536)return false;}
     for(const auto& c:commands){if(c.control[1]>1 || c.control[2]>1 || c.control[3])return false;
         for(auto x:c.delta)if(!grouptape::bounded(x))return false;
-        for(auto values:{std::span(c.linear),std::span(c.affineCenter),std::span(c.move)})for(auto x:values)if(!std::isfinite(x) || std::abs(x)>65536 || (x && std::abs(x)<0x1p-16f))return false;
+        for(auto values:{std::span(c.linear),std::span(c.affineCenter),std::span(c.move)})for(auto x:values)if(!std::isfinite(x) || std::abs(x)>65536 || (x && std::abs(x)<0x1p-126f))return false;
         if(c.move[2] || c.move[3] || (c.control[1] && (c.delta[0] || c.delta[1])))return false;}
     for(auto i:indices)if(i>=commands.size())return false;
     for(auto r:ranges){if(r[1]>64 || r[0]>indices.size() || r[1]>indices.size()-r[0])return false;for(unsigned k=1;k<r[1];++k)if(indices[r[0]+k]<indices[r[0]+k-1])return false;}

@@ -13,6 +13,13 @@ spec.loader.exec_module(comparison)
 
 
 class DiagnosticGuard(TestCase):
+    def test_rotation_trace_cannot_be_mislabeled_as_fps_evidence(self):
+        for left,right in ((True,False),(False,True),(True,True)):
+            rows=[([],[],{},{"native_rotation_trace_diagnostic":left}),([],[],{},{"native_rotation_trace_diagnostic":right})]
+            with patch.object(comparison,"read",side_effect=rows),patch.object(Path,"write_text")as output:
+                with self.assertRaisesRegex(ValueError,"Native rotation trace"):
+                    comparison.compare(Path("old_chlorium"),Path("new_chlorium"),Path("unused"))
+                output.assert_not_called()
     def test_field_watch_cannot_be_mislabeled_as_fps_evidence(self):
         for left,right in ((True,False),(False,True),(True,True)):
             rows=[([],[],{},{"native_field_watch_diagnostic":left}),([],[],{},{"native_field_watch_diagnostic":right})]

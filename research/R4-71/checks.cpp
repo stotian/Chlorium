@@ -39,6 +39,7 @@ struct MixedGpu {
         require(glGetError()==GL_NO_ERROR,"mixed owned dispatch/readback");std::swap(buffers[0],buffers[2]);return out;
     }
 };
+#ifndef CHLORIUM_R71_FIXTURE_ONLY
 int wmain(int argc,wchar_t** argv)try{
     SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOGPFAULTERRORBOX);require(argc==4,"GD image, Cocos DLL and mixed.comp required");
     const auto saved=_mm_getcsr();struct Restore{unsigned value;~Restore(){_mm_setcsr(value);}}restore{saved};
@@ -74,3 +75,4 @@ int wmain(int argc,wchar_t** argv)try{
         const auto actual=gpu.run(seed,commands,ranges,indices,unsigned(commands.size()),frame==0);require(!std::memcmp(actual.data(),expected.data(),actual.size()*sizeof(mp::State)),"four mixed resident recurrences without position upload");comparisons+=actual.size();}
     std::cout<<"PASS "<<comparisons<<" native/GPU mixed translation/root-rotation states; 4 resident recurrences; orientation, callbacks, reader closure and GD FPS remain unqualified\n";return 0;
 }catch(const std::exception& e){std::cerr<<"FAIL "<<e.what()<<'\n';return 1;}
+#endif

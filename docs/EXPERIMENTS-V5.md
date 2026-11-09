@@ -1578,3 +1578,12 @@ du GD réel avecdeux imports Cocos relogés.271128 états complets exacts,64 com
 17 classes,quatre modes FP etquatre récurrences sans renvoi de positions.
 Témoin de cancellation contre une simplification incorrecte. Corpus synthétique,
 pas d'orientation/callbacks/lecteurs CPU qualifiés, aucun gain FPS revendiqué.
+
+R72 : capture native de rotations surHelio74–74.5, R67 actif.512 témoins ABI,
+trois groupes décodeur,sept gardes.1631 opérations fermées/78 acteurs/245 paramètres
+partagés ;1631 états48octets exacts rejoués surGPU,aucun rejet. Contrôles FP capturés,
+orientation etlecteurs CPU nonqualifiés.1273 discontinuités de positions entre1475
+opérations voisines : les mouvements intercalés interdisent un rejeu résident de
+rotations seules. Aucun gainFPS, aucune suppression CPU.92 sauvegardes restaurées.
+Stockage :129 anciennes sauvegardes restaurées dédupliquées par liens physiques
+atomiques après SHA256 ;11444 fichiers,chemins/octets préservés,3.77Go libérés.
