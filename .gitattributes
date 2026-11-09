@@ -9,4 +9,5 @@
 *.ps1 text eol=crlf
 *.cmd text eol=crlf
 *.png binary
+research/R4-62/group_quads.comp text eol=lf
 

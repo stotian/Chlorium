@@ -3,6 +3,7 @@
 #include "../R4-42/movement_checks.cpp"
 #undef wmain
 #include "../R4-33/ResidentRecords.hpp"
+#include "RootPacket.hpp"
 
 using Geometry=chlorium::research::resident::Geometry;
 using Parameters=chlorium::research::resident::Parameters;
@@ -17,20 +18,7 @@ struct ObserveDownloads {
     ObserveDownloads(){originalDownload=saved;downloads=0;glGetBufferSubData=observeDownload;}
     ~ObserveDownloads(){glGetBufferSubData=saved;}
 };
-static bool rootPacketEligible(std::span<const State> states,std::span<const Geometry> geometry,std::span<const Parameters> parameters){
-    if(states.empty() || geometry.size()!=states.size() || parameters.size()!=states.size())return false;
-    for(unsigned i=0;i<states.size();++i){
-        const auto& g=geometry[i];const auto& p=parameters[i];
-        if(g.control[0]!=1 || g.control[1] || g.control[2] || g.control[3] ||
-           p.translationZFlags[0] || p.translationZFlags[1] || (p.translationZFlags[3]&~(1u|512u|1024u)))return false;
-        SpriteRecord source{};std::copy_n(g.rect,4,source.localRect);std::copy_n(p.matrix,4,source.matrix);
-        source.matrix[4]=std::bit_cast<unsigned>(float(states[i].position[0]));
-        source.matrix[5]=std::bit_cast<unsigned>(float(states[i].position[1]));
-        source.z=p.translationZFlags[2];source.flags=p.translationZFlags[3];
-        if(!chlorium::research::corners::domain(source))return false;
-    }
-    return true;
-}
+using chlorium::research::resident::rootPacketEligible;
 struct Fused {
     GLuint shader=0,buffers[7]{};GLint count=-1,prefix=-1;unsigned size=0,commandCount=0;
     Dispatch compute=nullptr;std::uint64_t frameUploads=0;
@@ -81,6 +69,7 @@ static GLuint makeVao(GLuint buffer,GLuint indices){
     glVertexAttribPointer(2,2,GL_FLOAT,GL_FALSE,24,reinterpret_cast<void*>(16));
     for(unsigned n=0;n<3;++n)glEnableVertexAttribArray(n);return vao;
 }
+#ifndef CHLORIUM_R62_FIXTURE_ONLY
 int wmain(int argc,wchar_t** argv)try{
     SetErrorMode(SEM_FAILCRITICALERRORS|SEM_NOGPFAULTERRORBOX);
     require(argc==6,"GD-image Cocos-DLL fused.comp captured-native.vert captured-native.frag");
@@ -197,3 +186,4 @@ int wmain(int argc,wchar_t** argv)try{
     }
     return 0;
 }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}
+#endif

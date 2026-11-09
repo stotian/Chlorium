@@ -66,6 +66,12 @@ def predict(state, dx, dy, stamp, mxcsr):
     x, y, lx, ly, previous_stamp, flags = STATE.unpack(state)
     if mxcsr & 0x7f80 != 0x1f80 or not all(bounded(v) for v in (x, y, dx, dy)):
         return None
+    return apply_move(state, dx, dy, stamp)
+
+
+def apply_move(state, dx, dy, stamp):
+    """Closed arithmetic only; callers must validate their rounding and input domain."""
+    x, y, lx, ly, previous_stamp, flags = STATE.unpack(state)
     if not flags & 1 and previous_stamp != stamp:
         lx, ly = struct.unpack('<2I', struct.pack('<2f', x, y))
         previous_stamp = stamp

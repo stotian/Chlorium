@@ -1492,3 +1492,21 @@ Décision : garder R63 comme outil d'intégration, aucune promotion ni gain FPS
 annoncé. Suite : programme GPU global à listes partagées, avec≤64 opérations
 PAR OBJET plutôt que≤64 commandes dans tout le niveau. Lecteurs CPU, sections,
 hiérarchies et écritures hors mouvements restent à qualifier avant offload natif.
+
+### R64 — positions résidentes et programmes de groupes partagés (9 novembre)
+
+Prototype GPU concret : limite de64 opérations PAR OBJET et8192 commandes
+globales, classes partagées stables entre images. Capture Helio complète compilée
+en27867 acteurs/104 classes ;409/461 commandes,48/56 opérations maximum.
+891744 octets d'états initiaux puis33452 octets de programmes sur deux images,
+sans réenvoyer les positions ni les relire avant le dessin. Sur GPU Intel UHD,
+55734 états/quads identiques aux fixtures natives et deux images non vides
+identiques. Positions finales identiques aux témoins GD enregistrés, géométrie
+artificielle : aucune preuve de fidélité du niveau réel ou de gain FPS.
+
+Cas synthétique80 commandes, doublons et annulation vers2^-84 vérifiés ; refus
+des programmes invalides, contexte absent et arrondi incompatible avant dessin.
+Une image sans commandes conserve les états. Repli/liaisons SSBO,VAO,programme,
+FP/LastError contrôlés. R62 repasse266304 états/quads et128 images après extraction
+du validateur partagé. Garder isolé : lecteurs CPU, intégration réelle et contrat
+d'erreurs GL non qualifiés. Aucun calcul natif retiré, aucun paquet normal modifié.
