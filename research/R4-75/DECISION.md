@@ -81,3 +81,20 @@ the existing native rotation oracle object and pinned game/Cocos files.
 Decision: keep isolated. Helio's qualified geometry is exact in owned replay,
 Orbit's resident ownership remains incomplete, and no CPU work or game frametime
 has been saved by this component. The normal renderer is not promoted.
+
+## Orbit writer diagnosis
+
+The shorter 89–89.5% diagnostic completed without deaths. Native stack unwinding
+through the Geode detour returned no game frames for all64 bounded witnesses;
+that attempt did not identify a writer. It was replaced with thread-local scoped
+phase tags around native processFollowActions/processTransformActions, enabled
+only during capture. Native functions and section callbacks still execute once;
+LastError/FP state is preserved, and phases unwind on exceptions.
+
+The phase-tagged successful Orbit capture contains2,496 rotations/32 actors,
+2,464 position discontinuities, and64 first-gap witnesses (one/actor/frame).
+All64 occurred in processFollowActions. Strict root/geometry provenance and four
+decoder test groups pass. This is bounded attribution, not all-writer closure.
+Pinned static decoding independently shows its native X/Y additions and section
+callback at0x2309af. Follow arithmetic must enter the mixed program; manufacturing
+before-states or silently reseeding every change would not prove GPU ownership.

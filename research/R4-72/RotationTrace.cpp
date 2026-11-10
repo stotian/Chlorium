@@ -33,7 +33,12 @@ MoveScope* currentMove=nullptr;
 #ifdef CHLORIUM_WIDE_ROOT_SAMPLE_R75
 unsigned movedSamples=0;std::array<bool,128> movedActor{};
 constexpr unsigned actorLimit=32,movedLimit=16;
-std::array<Hook*,2> observerHooks{};unsigned observerHookCount=0,enabledObserverHooks=0;
+std::array<Hook*,4> observerHooks{};unsigned observerHookCount=0,enabledObserverHooks=0;
+thread_local unsigned originPhase=0;
+struct OriginContext {unsigned previous;explicit OriginContext(unsigned phase){HostState preserve;previous=originPhase;originPhase=phase;}~OriginContext(){HostState preserve;originPhase=previous;}};
+struct Origin {unsigned uid=0,objectId=0,frame=0,rowOrdinal=0,phase=0;};
+std::array<Origin,64> origins{};unsigned originCount=0;
+std::array<std::array<double,2>,128> lastPosition{};std::array<bool,128> positionKnown{};std::array<unsigned,128> originFrames{};
 rootgeometry::Stats geometryStats;std::vector<rootgeometry::Row> geometryRows;
 #else
 constexpr unsigned actorLimit=128;
@@ -59,6 +64,17 @@ mixedprogram::State read(GameObject* object){
     constexpr unsigned offsets[]{0x512,0x2c8,0x368,0x369,0x351,0x352,0x350,0x513};for(unsigned k=0;k<8;++k)state.flags|=unsigned(bytes[offsets[k]]!=0)<<k;
     return state;
 }
+#ifdef CHLORIUM_WIDE_ROOT_SAMPLE_R75
+void trackPosition(GameObject* object,bool unknown){
+    auto found=actorSlots.find(reinterpret_cast<std::uintptr_t>(object));if(found==actorSlots.end())return;const auto index=found->second;
+    if(actors[index].second!=object->m_uID){stats.reasons|=OwnerLost;return;}
+    const auto state=read(object);
+    if(unknown && positionKnown[index] && std::memcmp(lastPosition[index].data(),state.position,16) && originFrames[index]!=frame && originCount<origins.size()){
+        auto& origin=origins[originCount++];origin.uid=object->m_uID;origin.objectId=unsigned(object->m_objectID);origin.frame=frame;origin.rowOrdinal=unsigned(rows.size());origin.phase=originPhase;originFrames[index]=frame;
+    }
+    std::memcpy(lastPosition[index].data(),state.position,16);positionKnown[index]=true;
+}
+#endif
 #ifdef CHLORIUM_MIXED_TRACE_R74
 struct MoveScope {
     MoveScope* previous=nullptr;GJBaseGameLayer* layer=nullptr;CCObject** members=nullptr;unsigned expected=0,visited=0,stamp=0;double dx=0,dy=0;
@@ -89,6 +105,9 @@ struct MoveScope {
         row.reserved|=unsigned(movedActor[slot])<<17;
 #endif
         rows.push_back(row);seeds[slot]=row.after;seen[slot]=true;
+#ifdef CHLORIUM_WIDE_ROOT_SAMPLE_R75
+        trackPosition(object,false);
+#endif
     }
 };
 #endif
@@ -130,6 +149,10 @@ void finish()noexcept{
     }catch(...){stats.reasons|=Output;}
     stats.complete=stats.reasons==0;
 #ifdef CHLORIUM_WIDE_ROOT_SAMPLE_R75
+    try{const auto* path=std::getenv("CHLORIUM_AUDIT_OUTPUT");if(!path){stats.reasons|=Output;stats.complete=0;return;}
+        std::ofstream file(std::string(path)+".origins-r75.json",std::ios::out|std::ios::noreplace);file<<"{\"diagnostic_only\":true,\"bounded_first_gap_per_actor_frame\":true,\"phases\":{\"0\":\"other\",\"1\":\"processFollowActions\",\"2\":\"processTransformActions\"},\"witnesses\":[";
+        for(unsigned i=0;i<originCount;++i){const auto& origin=origins[i];if(i)file<<',';file<<"{\"uid\":"<<origin.uid<<",\"object_id\":"<<origin.objectId<<",\"frame\":"<<origin.frame<<",\"root_row_ordinal\":"<<origin.rowOrdinal<<",\"phase\":"<<origin.phase<<'}';}file<<"]}\n";file.flush();if(!file){stats.reasons|=Output;stats.complete=0;}
+    }catch(...){stats.reasons|=Output;stats.complete=0;}
     geometryStats.complete=geometryStats.frames==2 && geometryStats.records && !geometryStats.missing && !geometryStats.reasons && !stats.reasons;
     rootgeometry::Header geometryHeader;geometryHeader.frames=geometryStats.frames;geometryHeader.records=geometryStats.records;geometryHeader.actors=stats.actors;geometryHeader.reasons=geometryStats.reasons|stats.reasons;geometryHeader.matched=geometryStats.matched;geometryHeader.unsupported=geometryStats.unsupported;
     geometryHeader.owner=header.owner;geometryHeader.ownerUid=header.ownerUid;geometryHeader.thread=header.thread;geometryHeader.percent=header.percent;
@@ -169,13 +192,20 @@ void observe(chlorium::affine::Point* out,const chlorium::affine::Point* point,c
 void post(GJBaseGameLayer* layer,GameObject* object)noexcept{
     if(!stats.active || GetCurrentThreadId()!=ownerThread)return;
 #ifdef CHLORIUM_MIXED_TRACE_R74
-    if(pending==SIZE_MAX){if(currentMove)currentMove->post(object);return;}
+    if(pending==SIZE_MAX){if(currentMove)currentMove->post(object);
+#ifdef CHLORIUM_WIDE_ROOT_SAMPLE_R75
+        else if(object)trackPosition(object,true);
+#endif
+        return;}
 #else
     if(pending==SIZE_MAX)return;
 #endif
     auto& row=rows[pending];
     if(reinterpret_cast<std::uintptr_t>(layer)!=header.owner || !object || reinterpret_cast<std::uintptr_t>(object)!=row.address || object->m_uID!=row.uid){stats.reasons|=OwnerLost;return;}
     row.after=read(object);row.closed=1;pending=SIZE_MAX;
+#ifdef CHLORIUM_WIDE_ROOT_SAMPLE_R75
+    trackPosition(object,false);
+#endif
 }
 #ifdef CHLORIUM_WIDE_ROOT_SAMPLE_R75
 void snapshotGeometry(PlayLayer* play){
@@ -249,6 +279,8 @@ class $modify(ChloriumRotationTraceSections,GJBaseGameLayer){
         using namespace chlorium::research::rotationtrace;
         for(auto* hook:self.getAllHooks()){hook->setAutoEnable(false);if(observerHookCount<observerHooks.size())observerHooks[observerHookCount++]=hook;else stats.reasons|=Setup;}
     }
+    void processFollowActions(){chlorium::research::rotationtrace::OriginContext scope(1);GJBaseGameLayer::processFollowActions();}
+    void processTransformActions(bool visibleFrame){chlorium::research::rotationtrace::OriginContext scope(2);GJBaseGameLayer::processTransformActions(visibleFrame);}
 #endif
 #ifdef CHLORIUM_MIXED_TRACE_R74
     void moveObjects(CCArray* objects,double dx,double dy,bool lockPlayerY){

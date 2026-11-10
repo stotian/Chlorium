@@ -11,6 +11,20 @@ sys.path.insert(0,str(ROOT/'research/R4-72'))
 from analyze_trace import HEADER as ROOT_HEADER,STATE,decode as decode_root
 HEADER=struct.Struct('<8s8IQIId');SPRITE=struct.Struct('<2Q26IQ16I');META=struct.Struct('<4I2Q');ROW_BYTES=368
 
+def decode_origins(raw,root_raw):
+    if len(raw)>16384:raise ValueError('Origin sidecar outside bounded byte budget')
+    root=decode_root(root_raw,mixed=True);data=json.loads(raw)
+    if data.get('diagnostic_only') is not True or data.get('bounded_first_gap_per_actor_frame') is not True or data.get('phases')!={'0':'other','1':'processFollowActions','2':'processTransformActions'}:raise ValueError('Unknown origin sidecar metadata')
+    rows=data.get('witnesses');seen=set();counts=Counter()
+    identities={struct.unpack_from('<I',root_raw,at+184)[0] for at in range(ROOT_HEADER.size,len(root_raw),208)}
+    if not isinstance(rows,list) or len(rows)>64:raise ValueError('Origin witness count exceeds budget')
+    for row in rows:
+        if set(row)!={'uid','object_id','frame','root_row_ordinal','phase'} or any(type(v) is not int for v in row.values()):raise ValueError('Unknown origin witness fields')
+        key=(row['uid'],row['frame'])
+        if row['uid'] not in identities or row['frame'] not in (1,2) or row['phase'] not in (0,1,2) or not 0<=row['object_id']<=0xffffffff or not 0<=row['root_row_ordinal']<=root['rows'] or key in seen:raise ValueError('Foreign or duplicate origin witness')
+        seen.add(key);counts[data['phases'][str(row['phase'])]]+=1
+    return dict(diagnostic_only=True,bounded_first_gaps=len(rows),phase_counts=dict(counts),complete_writer_closure=False)
+
 
 def decode(raw,root_raw):
     roots=decode_root(root_raw,mixed=True);root=ROOT_HEADER.unpack_from(root_raw)
@@ -37,6 +51,8 @@ def analyze(geometry,trace,report):
     if not events or events[-1].get('event')!='finished' or events[-1].get('success') is not True or len(records)!=1 or not records[0].get('read') or not records[0].get('complete') or records[0].get('missing') or records[0].get('reasons'):raise ValueError('Independent geometry audit is incomplete')
     if p.get('wide_root_geometry_diagnostic') is not True or p.get('native') is not False or p.get('mod_profile')!='isolated':raise ValueError('Expected isolated active R75 geometry diagnostic')
     raw=geometry.read_bytes();root_raw=trace.read_bytes();summary=decode(raw,root_raw)
+    origins=Path(str(report)+'.origins-r75.json')
+    if origins.exists():summary['origins']=decode_origins(origins.read_bytes(),root_raw)
     if any(records[0].get(k)!=summary[k] for k in ('records','matched','unsupported')) or records[0].get('frames')!=2:raise ValueError('Geometry differs from independent auditor counters')
     return dict(diagnostic_only=True,game_fps_evidence=False,global_reader_closure=False,geometry_sha256=hashlib.sha256(raw).hexdigest(),root_sha256=hashlib.sha256(root_raw).hexdigest(),summary=summary,provenance=p)
 

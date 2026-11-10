@@ -1614,3 +1614,8 @@ Helio74–74.5 atteint sans mort,526 opérations/29 objets,42 commandes,3classes
 1334 positions exactes,18 quads GPU visibles96octets exacts et40 replisnatifs.
 Uneinitialisation1392octets;CPU/lecteurs toujoursnatifs, émission horsdujeu :
 preuve de composant borné, aucun gain de frametime ou activation normale.
+Orbit89–89.5 atteint sansmort :2496rotations,2464discontinuités. La pile viaGeode
+ne résout aucun appelant; sonde remplacée parcontextes natifs bornés.64premiers
+écarts/32objets/2images se produisent dansprocessFollowActions. Quatre groupes
+decodeR75 passent,analyseprovenance stricte complète. Prochain moteur : intégrer
+l'opération de suivi native, avec un oracle, sans inventer d'entrées de calcul.

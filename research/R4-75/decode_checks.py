@@ -4,7 +4,8 @@ import unittest
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'R4-72'))
 from decode_checks import fixture
 sys.path.insert(0,str(Path(__file__).resolve().parent))
-from analyze_geometry import HEADER,SPRITE,META,decode
+from analyze_geometry import HEADER,SPRITE,META,decode,decode_origins
+import json
 from analyze_trace import STATE
 
 def geometry():
@@ -16,6 +17,14 @@ def geometry():
     return header+rows,root
 
 class GeometryChecks(unittest.TestCase):
+    def test_bounded_origin_phases(self):
+        _,root=geometry();data=dict(diagnostic_only=True,bounded_first_gap_per_actor_frame=True,phases={'0':'other','1':'processFollowActions','2':'processTransformActions'},witnesses=[dict(uid=19,object_id=1,frame=1,root_row_ordinal=1,phase=1)])
+        self.assertEqual(decode_origins(json.dumps(data).encode(),root)['phase_counts'],{'processFollowActions':1})
+        for key,value in (('uid',999),('frame',3),('root_row_ordinal',999),('phase',3)):
+            bad=json.loads(json.dumps(data));bad['witnesses'][0][key]=value
+            with self.assertRaises(ValueError):decode_origins(json.dumps(bad).encode(),root)
+        data['witnesses']*=2
+        with self.assertRaises(ValueError):decode_origins(json.dumps(data).encode(),root)
     def test_linked_frame_witnesses(self):
         raw,root=geometry();self.assertEqual(decode(raw,root)['matched'],2)
     def test_malformed_and_foreign_identity(self):
