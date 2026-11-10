@@ -1,3 +1,7 @@
+#ifdef CHLORIUM_LIVE_ROOT_AUDIT_R78
+#include "../research/R4-78/TraceAdapter.hpp"
+extern "C" __declspec(dllexport) const char chloriumLiveRootAuditIdentity[]="CHLORIUM_LIVE_ROOT_AUDIT_R78";
+#endif
 // Private, collision-preserving benchmark. Never included in normal builds.
 #include <Geode/Geode.hpp>
 #include <Geode/modify/CCDisplayLinkDirector.hpp>
@@ -307,6 +311,15 @@ bool recordRotationTrace(){
     const auto module=GetModuleHandleW(L"local.chlorium.dll");const auto read=module?reinterpret_cast<bool(*)(Stats*,std::size_t)>(GetProcAddress(module,"ChloriumReadRotationTraceR72")):nullptr;
     const bool ok=read && read(&value,sizeof(value));auto row=matjson::Value::object();row["event"]="native_rotation_trace_r72";row["version"]=value.version;row["read"]=ok;row["complete"]=value.complete;row["reasons"]=value.reasons;row["frames"]=value.frames;row["rows"]=value.rows;row["closed"]=value.closed;row["actors"]=value.actors;row["global_reader_closure"]=false;line(row.dump());
     return ok && value.version==Stats{}.version && value.complete && !value.reasons && value.frames==2 && value.rows && value.closed==value.rows;
+#else
+    return true;
+#endif
+}
+bool recordLiveRootDraw(){
+#ifdef CHLORIUM_LIVE_ROOT_AUDIT_R78
+    using Stats=chlorium::research::liveroot::Stats;Stats value;const auto module=GetModuleHandleW(L"local.chlorium.dll");const auto read=module?reinterpret_cast<bool(*)(Stats*,std::size_t)>(GetProcAddress(module,"ChloriumReadLiveRootDrawR78")):nullptr;
+    const bool ok=read && read(&value,sizeof(value));auto row=matjson::Value::object();row["event"]="live_root_draw_r78";row["read"]=ok;row["frames"]=value.frames;row["drawn_mask"]=value.drawnMask;row["draws"]=value.draws;row["quads"]=value.quads;row["verified_bytes"]=value.verifiedBytes;row["failures"]=value.failures;row["declines"]=value.declines;row["cpu_preparation_removed"]=false;row["performance_evidence"]=false;line(row.dump());
+    return ok && value.version==78 && value.frames==2 && value.drawnMask==3 && value.draws && value.quads && value.verifiedBytes && !value.failures;
 #else
     return true;
 #endif
@@ -692,7 +705,7 @@ void finish(bool fullLevel, const char* reason) {
     recordAffineStats(PlayLayer::get() ? PlayLayer::get()->getCurrentPercent() : -1.f);
     const bool snapshotsActive = recordNativeSnapshotStats(PlayLayer::get() ? PlayLayer::get()->getCurrentPercent() : -1.f);
     const bool visualVerified = frameWatch.coverageComplete();
-    const bool fieldWatchVerified = recordNativeFieldWatch() && recordRotationTrace() && recordRootGeometry();
+    const bool fieldWatchVerified = recordNativeFieldWatch() && recordRotationTrace() && recordRootGeometry() && recordLiveRootDraw();
     bool passCaptureVerified = true;
 #ifdef CHLORIUM_NATIVE_PASS_CAPTURE
     passCaptureVerified = chlorium::research::pass::finish();
@@ -1007,7 +1020,7 @@ void tick() {
         const bool continuous=continuousModule && GetProcAddress(continuousModule,"chloriumContinuousIdentity");
         const auto label=continuous?
 #ifdef CHLORIUM_DIRECT_VERTEX_AUDIT_R65
-            (GetProcAddress(continuousModule,"chloriumFollowTraceIdentity")?"CHLORIUM R67 + FOLLOW R76":GetProcAddress(continuousModule,"chloriumWideRootSampleIdentity")?"CHLORIUM R67 + ROOT R75":GetProcAddress(continuousModule,"chloriumMixedTraceIdentity")?"CHLORIUM R67 + MIX R74":GetProcAddress(continuousModule,"chloriumCanonicalGpuCopyIdentity")?"CHLORIUM R73 / GPU":GetProcAddress(continuousModule,"chloriumRotationTraceIdentity")?"CHLORIUM R67 + ROT R72":GetProcAddress(continuousModule,"chloriumNativeFieldWatchIdentity")?"CHLORIUM R67 + WATCH R69":GetProcAddress(continuousModule,"chloriumDirectContextGuardIdentity")?"CHLORIUM R67 / DIRECT":GetProcAddress(continuousModule,"chloriumAdaptiveVertexPagesIdentity")?"CHLORIUM R66 / DIRECT":GetProcAddress(continuousModule,"chloriumDirectVertexPagesIdentity")?"CHLORIUM R65 / DIRECT":"CHLORIUM R61 / CONTROLE R65"):
+            (GetProcAddress(continuousModule,"chloriumLiveRootDrawIdentity")?"CHLORIUM R78 / GPU ROOTS+QUADS":GetProcAddress(continuousModule,"chloriumFollowTraceIdentity")?"CHLORIUM R67 + FOLLOW R76":GetProcAddress(continuousModule,"chloriumWideRootSampleIdentity")?"CHLORIUM R67 + ROOT R75":GetProcAddress(continuousModule,"chloriumMixedTraceIdentity")?"CHLORIUM R67 + MIX R74":GetProcAddress(continuousModule,"chloriumCanonicalGpuCopyIdentity")?"CHLORIUM R73 / GPU":GetProcAddress(continuousModule,"chloriumRotationTraceIdentity")?"CHLORIUM R67 + ROT R72":GetProcAddress(continuousModule,"chloriumNativeFieldWatchIdentity")?"CHLORIUM R67 + WATCH R69":GetProcAddress(continuousModule,"chloriumDirectContextGuardIdentity")?"CHLORIUM R67 / DIRECT":GetProcAddress(continuousModule,"chloriumAdaptiveVertexPagesIdentity")?"CHLORIUM R66 / DIRECT":GetProcAddress(continuousModule,"chloriumDirectVertexPagesIdentity")?"CHLORIUM R65 / DIRECT":"CHLORIUM R61 / CONTROLE R65"):
 #else
 #ifdef CHLORIUM_EXTENDED_RESIDENT_STATS_R59
             (GetProcAddress(continuousModule,"chloriumGroupTraceIdentity")?"CHLORIUM R61 + TRACE R63":GetProcAddress(continuousModule,"chloriumNativeStreamDirectIdentity")?"CHLORIUM R61 / DIAGNOSTIC":GetProcAddress(continuousModule,"chloriumRendererTimingIdentity")?"CHLORIUM R60 / DIAGNOSTIC":GetProcAddress(continuousModule,"chloriumUploadDeferralIdentity")?"AVEC CHLORIUM GPU R59":"AVEC CHLORIUM GPU R57"):

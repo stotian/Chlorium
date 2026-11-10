@@ -6,8 +6,12 @@
 #include <charconv>
 #include <unordered_map>
 #include <optional>
+#ifdef CHLORIUM_LIVE_ROOT_DRAW_R78
+#include "../R4-78/TraceAdapter.hpp"
+#endif
 #ifdef CHLORIUM_WIDE_ROOT_SAMPLE_R75
 #include "../R4-75/GeometryTrace.hpp"
+#include "../R4-75/GameGeometry.hpp"
 #include "../R4-33/SpriteCorners.hpp"
 #endif
 using namespace geode::prelude;
@@ -245,16 +249,7 @@ void snapshotGeometry(PlayLayer* play){
     const auto* data=play->m_objects->data;
     for(unsigned i=0;i<data->num;++i){auto* object=static_cast<GameObject*>(data->arr[i]);if(!object)continue;auto slot=actorSlots.find(reinterpret_cast<std::uintptr_t>(object));if(slot==actorSlots.end())continue;
         if(object->m_uID!=actors[slot->second].second || found[slot->second]){geometryStats.reasons|=OwnerLost;continue;}found[slot->second]=true;
-        rootgeometry::Row row;row.root=read(object);row.frame=frame;row.controls=controls;row.roles=roles(object);row.atlas=reinterpret_cast<std::uintptr_t>(object->m_pobTextureAtlas);row.batch=reinterpret_cast<std::uintptr_t>(object->m_pobBatchNode);
-        auto& source=row.source;source.sprite=source.root=reinterpret_cast<std::uintptr_t>(object);source.id=source.rootId=object->m_uID;source.rootFlags=1;source.atlasIndex=object->m_uAtlasIndex;
-        source.parent=reinterpret_cast<std::uintptr_t>(object->m_pParent);source.objectId=object->m_objectID;source.objectType=unsigned(object->m_objectType);source.groupCount=unsigned(object->m_groupCount);
-        using pass::nativeFlag;
-        source.flags=nativeFlag(&object->m_bShouldBeHidden)|nativeFlag(&object->m_bDirty)<<1|nativeFlag(&object->m_bRecursiveDirty)<<2|nativeFlag(&object->m_bFlipX)<<3|nativeFlag(&object->m_bFlipY)<<4|nativeFlag(&object->m_bRectRotated)<<5|nativeFlag(&object->m_bUseVertexMod)<<6|nativeFlag(&object->m_bDontDraw)<<7|nativeFlag(&object->m_bOpacityModifyRGB)<<8|nativeFlag(&object->_realOpacity)<<9|nativeFlag(&object->m_bVisible)<<10;
-        std::memcpy(source.matrix,&object->m_transformToBatch,24);const void* rect[]{&object->m_obOffsetPosition.x,&object->m_obOffsetPosition.y,&object->m_obRect.size.width,&object->m_obRect.size.height};
-        for(unsigned k=0;k<4;++k)std::memcpy(source.localRect+k,rect[k],4);std::memcpy(source.anchor,&object->m_obAnchorPointInPoints,8);std::memcpy(&source.z,&object->m_fVertexZ,4);
-        const void* mods[]{&object->m_fTlVertexMod,&object->m_fTrVertexMod,&object->m_fBlVertexMod,&object->m_fBrVertexMod};const void* bounds[]{&object->m_fTextureLeft,&object->m_fTextureRight,&object->m_fTextureBottom,&object->m_fTextureTop};
-        for(unsigned k=0;k<4;++k){std::memcpy(source.vertexMods+k,mods[k],4);std::memcpy(source.textureBounds+k,bounds[k],4);}std::memcpy(&row.quad,&object->m_sQuad,96);
-        auto predicted=row.quad;if(corners::materialize(source,predicted)){source.quadMatches=!std::memcmp(&predicted,&row.quad,96);geometryStats.matched+=source.quadMatches;}else ++geometryStats.unsupported;
+        const auto captured=rootgeometry::capture(object,read(object),frame,roles(object));auto row=captured.row;geometryStats.matched+=row.source.quadMatches;geometryStats.unsupported+=!captured.supported;
         if(geometryRows.size()>=256){geometryStats.reasons|=Overflow;break;}geometryRows.push_back(row);
     }
     for(unsigned i=0;i<stats.actors;++i)if(!found[i]){++geometryStats.missing;geometryStats.reasons|=OwnerLost;}
@@ -338,3 +333,12 @@ class $modify(ChloriumRotationTraceSections,GJBaseGameLayer){
         GJBaseGameLayer::updateObjectSection(object);
     }
 };
+
+#ifdef CHLORIUM_LIVE_ROOT_DRAW_R78
+namespace chlorium::research::rotationtrace {
+liveroot::Status livePrepare(cocos2d::CCTextureAtlas* atlas,cocos2d::CCSpriteBatchNode* batch)noexcept{
+    HostState preserve;if(!stats.active || stats.reasons || GetCurrentThreadId()!=ownerThread || pending!=SIZE_MAX || currentMove)return liveroot::Status::inactive;
+    return liveroot::prepare(atlas,batch,rows,frame);
+}
+}
+#endif

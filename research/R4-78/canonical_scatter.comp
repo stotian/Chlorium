@@ -1,0 +1,32 @@
+#version 430 core
+#extension GL_ARB_gpu_shader_fp64 : require
+layout(local_size_x=64) in;
+struct State {dvec2 position;uvec2 last;uint stamp;uint flags;vec2 offset;uvec2 reserved;};
+struct Geometry {uvec4 rect;uvec4 uv01;uvec4 uv23;uvec4 control;};
+struct Dynamic {uvec4 abcd;uvec4 translationZFlags;uvec4 colors;};
+layout(std430,binding=0) readonly buffer States {State states[];};
+layout(std430,binding=1) readonly buffer Geometries {Geometry geometry[];};
+layout(std430,binding=2) readonly buffer Parameters {Dynamic parameters[];};
+layout(std430,binding=3) writeonly buffer Output {uint words[];};
+layout(std430,binding=5) readonly buffer ParameterClasses {uint classes[];};
+uniform uint objectCount;
+void main(){
+    uint i=gl_GlobalInvocationID.x;if(i>=objectCount)return;Geometry g=geometry[i];
+    if(g.control.x==0u)return;
+    Dynamic p=parameters[classes[i]];
+    // Bias is qualified against native translation, never inferred from anchors/parents.
+    precise float tx=float(states[g.control.y].position.x)+uintBitsToFloat(p.translationZFlags.x);
+    precise float ty=float(states[g.control.y].position.y)+uintBitsToFloat(p.translationZFlags.y);
+    for(uint corner=0u;corner<4u;++corner){
+        precise float x1=uintBitsToFloat(g.rect.x),y1=uintBitsToFloat(g.rect.y);
+        precise float x=corner<2u?x1:x1+uintBitsToFloat(g.rect.z);
+        precise float y=(corner&1u)==0u?y1+uintBitsToFloat(g.rect.w):y1;
+        precise float a=uintBitsToFloat(p.abcd.x),b=uintBitsToFloat(p.abcd.y),nc=uintBitsToFloat(p.abcd.z^0x80000000u),d=uintBitsToFloat(p.abcd.w);
+        precise float ax=a*x,bx=b*x,cy=nc*y,dy=d*y;
+        precise float outX=(ax-cy)+tx;
+        precise float outY=(corner&1u)==0u?(dy+bx)+ty:(bx+dy)+ty;
+        uvec4 uv=corner<2u?g.uv01:g.uv23;uvec2 coords=(corner&1u)==0u?uv.xy:uv.zw;uint at=g.control.w*24u+corner*6u;
+        words[at]=floatBitsToUint(outX);words[at+1u]=floatBitsToUint(outY);words[at+2u]=p.translationZFlags.z;
+        words[at+3u]=p.colors[corner];words[at+4u]=coords.x;words[at+5u]=coords.y;
+    }
+}

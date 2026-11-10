@@ -1644,3 +1644,9 @@ objets0.411/0.452ms médian,0.482/0.603ms pirebatch selondiversité. Reconstruct
 2.34/4.00msrestentcoûteuses. AssertionsCPUetretoursR75 passent. Ni octets ni ce
 microbenchmark ne sontdesFPSjeu. Intégrationlive/étatGL/échecs/lifetimesàqualifier;
 garderisolé. Détails research/R4-77/DECISION.md.
+
+R78 : passage canoniqueGPU avec sauvegarde6SSBO dont3, poison vérifié puis
+réécritureGPU vérifiée avant dessinCocos.128images/8échecsforcés natifs exacts;
+runtime racines64/32/60positions réelles exactes(Orbit/Grief/Helio). Paquets
+natif/auditeurcompilés, intégrationlive2images codée mais NONtestée dansGD :
+quota5h tombéà3% à09:11UTC. Garderisolé,aucunFPS/promotionsuccèsliveannoncé.

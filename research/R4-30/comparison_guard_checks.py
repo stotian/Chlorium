@@ -14,7 +14,7 @@ spec.loader.exec_module(comparison)
 
 class DiagnosticGuard(TestCase):
     def test_independent_root_geometry_flags_reject_without_parent_flag(self):
-        for key in ('mixed_native_trace_diagnostic','wide_root_geometry_diagnostic','follow_native_trace_diagnostic'):
+        for key in ('mixed_native_trace_diagnostic','wide_root_geometry_diagnostic','follow_native_trace_diagnostic','live_root_draw_diagnostic'):
             for left,right in ((True,False),(False,True),(True,True)):
                 rows=[([],[],{},{key:left}),([],[],{},{key:right})]
                 with patch.object(comparison,'read',side_effect=rows),patch.object(Path,'write_text') as output:

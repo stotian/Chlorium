@@ -13,6 +13,7 @@ $groupTraceDiagnostic = $env:CHLORIUM_GROUP_TRACE_R63 -eq '1'
 $mixedTraceR74=$false
 $wideRootR75=$false
 $followTraceR76=$false
+$liveRootR78=$false
 if($env:CHLORIUM_ROTATION_TRACE_R72 -and !$RotationTrace){throw 'Inherited R72 rotation trace requires explicit diagnostic selection'}
 if($RotationTrace -and ($Native -or $VisualWatch -or $WithUserMods -or $ExternalSampling -or $PassCapture -or $OpacityShadow -or $FieldWatch -or $groupTraceDiagnostic -or $AtlasStorageRegression -or $StartupDiagnostic -or !$ProductionPackage)){throw 'R72 rotation trace requires Chlorium active, isolated mods and no combined diagnostic'}
 if($RotationTrace -and @('CHLORIUM_QUAD_READ_WATCH','CHLORIUM_OPACITY_INVOCATIONS','CHLORIUM_MOVE_COMMAND_CENSUS','CHLORIUM_NATIVE_PRODUCER_CAPTURE','CHLORIUM_NATIVE_BATCH_REPLAY','CHLORIUM_RESIDENT_NATIVE_REPLAY','CHLORIUM_OPAQUE_INPUT_CENSUS','CHLORIUM_OWNED_REGISTER_ORACLE','CHLORIUM_STARTUP_DEATH_WATCH','CHLORIUM_FIELD_WATCH_R69' | Where-Object {[Environment]::GetEnvironmentVariable($_,'Process') -eq '1'}).Count){throw 'R72 rotation trace cannot combine capture diagnostics'}
@@ -102,6 +103,7 @@ try {
     $supportsMixedTraceR74 = $binary.Contains('CHLORIUM_MIXED_TRACE_AUDIT_R74')
     $supportsWideRootR75 = $binary.Contains('CHLORIUM_WIDE_ROOT_AUDIT_R75')
     $supportsFollowTraceR76 = $binary.Contains('CHLORIUM_FOLLOW_TRACE_AUDIT_R76')
+    $supportsLiveRootR78 = $binary.Contains('CHLORIUM_LIVE_ROOT_AUDIT_R78')
     if([bool]$FieldWatch -ne $binary.Contains('CHLORIUM_FIELD_WATCH_AUDIT_R69')){throw 'R69 field watch requires its matching independent auditor'}
     if([bool]$RotationTrace -ne $binary.Contains('CHLORIUM_ROTATION_TRACE_AUDIT_R72')){throw 'R72 rotation trace requires its matching independent auditor'}
     if($supportsDirectPagesR65 -and ($Native -or $WithUserMods -or $groupTraceDiagnostic)){throw 'R65 campaign requires Chlorium active, isolated mods and no movement trace'}
@@ -206,8 +208,10 @@ if ($measurementOnly -and !$Native) {
         if($wideRootR75 -ne $supportsWideRootR75){throw 'R75 root/geometry sampling requires its matching independent auditor'}
         $followTraceR76=$binary.Contains('CHLORIUM_FOLLOW_TRACE_R76')
         if($followTraceR76 -ne $supportsFollowTraceR76){throw 'R76 Follow sampling requires its matching independent auditor'}
+        $liveRootR78=$binary.Contains('CHLORIUM_LIVE_ROOT_DRAW_R78')
+        if($liveRootR78 -ne $supportsLiveRootR78){throw 'R78 live root draw requires its matching independent auditor'}
         $rendererTimingDiagnostic = $binary.Contains('CHLORIUM_RENDERER_TIMING_R60')
-        $rendererVariant = if($binary.Contains('CHLORIUM_CANONICAL_GPU_COPY_R73')){'canonical-gpu-copy-r73'}elseif($binary.Contains('CHLORIUM_DIRECT_CONTEXT_GUARD_R67')){'direct-pages-r67'}elseif($binary.Contains('CHLORIUM_ADAPTIVE_VERTEX_PAGES_R66')){'adaptive-pages-r66'}elseif($binary.Contains('CHLORIUM_DIRECT_VERTEX_PAGES_R65')){'direct-pages-r65'}elseif($binary.Contains('CHLORIUM_R61_UNTIMED_CONTROL_R65')){'stream-control-r65'}else{'previous-profile'}
+        $rendererVariant = if($binary.Contains('CHLORIUM_LIVE_ROOT_DRAW_R78')){'live-canonical-draw-r78'}elseif($binary.Contains('CHLORIUM_CANONICAL_GPU_COPY_R73')){'canonical-gpu-copy-r73'}elseif($binary.Contains('CHLORIUM_DIRECT_CONTEXT_GUARD_R67')){'direct-pages-r67'}elseif($binary.Contains('CHLORIUM_ADAPTIVE_VERTEX_PAGES_R66')){'adaptive-pages-r66'}elseif($binary.Contains('CHLORIUM_DIRECT_VERTEX_PAGES_R65')){'direct-pages-r65'}elseif($binary.Contains('CHLORIUM_R61_UNTIMED_CONTROL_R65')){'stream-control-r65'}else{'previous-profile'}
         if($rendererVariant -eq 'canonical-gpu-copy-r73' -and !$supportsCanonicalCopyR73){throw 'R73 requires its matching GPU-copy auditor and mode label'}
         if($rendererVariant -in @('direct-pages-r67','canonical-gpu-copy-r73') -and !$supportsDirectGuardR67){throw 'R67 requires its matching context-recovery auditor and mode label'}
         if($rendererVariant -in @('direct-pages-r67','canonical-gpu-copy-r73') -and (!$supportsNativeAuthorityR67 -or !$binary.Contains('CHLORIUM_NATIVE_VERTEX_AUTHORITY_R67'))){throw 'R67 must keep native vertex storage authoritative and report its copies'}
@@ -362,6 +366,7 @@ try {
         mixed_native_trace_diagnostic = [bool]$mixedTraceR74
         wide_root_geometry_diagnostic = [bool]$wideRootR75
         follow_native_trace_diagnostic = [bool]$followTraceR76
+        live_root_draw_diagnostic = [bool]$liveRootR78
         movement_command_census_diagnostic = ($env:CHLORIUM_MOVE_COMMAND_CENSUS -eq '1')
         native_batch_replay_diagnostic = ($env:CHLORIUM_NATIVE_BATCH_REPLAY -eq '1')
         zero_fragment_discard_diagnostic = ($env:CHLORIUM_ZERO_FRAGMENT_DISCARD -eq '1')

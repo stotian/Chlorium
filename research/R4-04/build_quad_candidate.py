@@ -54,6 +54,8 @@ profiles = {
     "--direct-measure-r67": "measurement-direct-pages-r67",
     "--wide-root-r75": "native-wide-root-r75",
     "--wide-root-measure-r75": "measurement-wide-root-r75",
+    "--live-root-r78": "native-live-root-r78",
+    "--live-root-measure-r78": "measurement-live-root-r78",
     "--follow-trace-r76": "native-follow-trace-r76",
     "--follow-trace-measure-r76": "measurement-follow-trace-r76",
     "--mixed-trace-r74": "native-mixed-trace-r74",
@@ -78,7 +80,8 @@ selected = sys.argv[1] if len(sys.argv) == 2 else ""
 if selected == "--opacity-shadow":
     raise SystemExit("R4-30 observer build blocked: installed-loader native-register compatibility has not been verified")
 profile = profiles[selected]
-follow_trace_r76 = selected in ("--follow-trace-r76", "--follow-trace-measure-r76")
+live_root_r78 = selected in ("--live-root-r78", "--live-root-measure-r78")
+follow_trace_r76 = live_root_r78 or selected in ("--follow-trace-r76", "--follow-trace-measure-r76")
 wide_root_r75 = follow_trace_r76 or selected in ("--wide-root-r75", "--wide-root-measure-r75")
 if wide_root_r75:selected = "--mixed-trace-measure-r74" if profile.startswith("measurement-") else "--mixed-trace-r74"
 measurement = profile.startswith("measurement-")
@@ -167,6 +170,9 @@ if selected in ("--resident-continuous", "--resident-fast", "--resident-deferred
         if follow_trace_r76:
             flags += ["/DCHLORIUM_FOLLOW_TRACE_R76=1"]
             sources += [root/"research/R4-76/FollowGateway.asm"]
+        if live_root_r78:
+            flags += ["/DCHLORIUM_LIVE_ROOT_DRAW_R78=1"]
+            sources += [root/"research/R4-78/LiveDraw.cpp"]
     if selected=="--stream-control-r65":
         flags += ["/DCHLORIUM_R61_UNTIMED_CONTROL_R65=1"]
 if selected in ("--direct-measure-r65", "--adaptive-measure-r66", "--direct-measure-r67", "--field-watch-measure", "--rotation-trace-measure", "--canonical-copy-measure-r73", "--mixed-trace-measure-r74"):
@@ -182,6 +188,7 @@ if selected in ("--rotation-trace-measure", "--mixed-trace-measure-r74"):
     if selected=="--mixed-trace-measure-r74":flags += ["/DCHLORIUM_MIXED_TRACE_AUDIT_R74=1"]
     if wide_root_r75:flags += ["/DCHLORIUM_WIDE_ROOT_AUDIT_R75=1"]
     if follow_trace_r76:flags += ["/DCHLORIUM_FOLLOW_TRACE_AUDIT_R76=1"]
+    if live_root_r78:flags += ["/DCHLORIUM_LIVE_ROOT_AUDIT_R78=1"]
 if selected=="--field-watch-measure":
     flags += ["/DCHLORIUM_FIELD_WATCH_AUDIT_R69=1"]
 if selected=="--opacity-hash":
@@ -291,6 +298,7 @@ if selected=="--field-watch-measure":
     manifest.update(backend="CHLORIUM_FIELD_WATCH_AUDIT_R69",version="v0.4.0-alpha.69")
 if wide_root_r75:manifest.update(backend="CHLORIUM_WIDE_ROOT_AUDIT_R75" if measurement else "CHLORIUM_WIDE_ROOT_SAMPLE_R75",version="v0.4.0-alpha.75")
 if follow_trace_r76:manifest.update(backend="CHLORIUM_FOLLOW_TRACE_AUDIT_R76" if measurement else "CHLORIUM_FOLLOW_TRACE_R76",version="v0.4.0-alpha.76")
+if live_root_r78:manifest.update(backend="CHLORIUM_LIVE_ROOT_AUDIT_R78" if measurement else "CHLORIUM_LIVE_ROOT_DRAW_R78",version="v0.4.0-alpha.78")
 for source in sources:
     manifest["sources"].append({"path": source.name, "sha256": fingerprint(source)})
 for header in (root / "src" / "renderer").glob("*.hpp"):
@@ -330,6 +338,8 @@ for pattern in ("*.cpp", "*.hpp", "*.asm"):
     snapshot_files.update((root / "research/R4-74").rglob(pattern))
     snapshot_files.update((root / "research/R4-75").rglob(pattern))
     snapshot_files.update((root / "research/R4-76").rglob(pattern))
+    snapshot_files.update((root / "research/R4-77").rglob(pattern))
+    snapshot_files.update((root / "research/R4-78").rglob(pattern))
 for folder in ("src", "legacy", "tests", "research/R4-08", "research/R4-11", "research/R4-17", "research/R4-30", "research/R4-32", "research/R4-33", "research/R4-34", "research/R4-35", "research/R4-36", "research/R4-37", "research/R4-41", "research/R4-42", "research/R4-43", "research/R4-44", "research/R4-45", "research/R4-46", "research/R4-47", "research/R4-48", "research/R4-49", "research/R4-54"):
     for pattern in ("*.cpp", "*.hpp", "*.h"):
         snapshot_files.update((root / folder).rglob(pattern))

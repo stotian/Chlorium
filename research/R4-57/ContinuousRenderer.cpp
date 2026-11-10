@@ -1,3 +1,6 @@
+#ifdef CHLORIUM_LIVE_ROOT_DRAW_R78
+#include "../R4-78/TraceAdapter.hpp"
+#endif
 #include <Geode/Geode.hpp>
 #include <Geode/modify/CCSpriteBatchNode.hpp>
 #include <Geode/modify/CCTextureAtlas.hpp>
@@ -428,6 +431,17 @@ class $modify(ChloriumContinuousAtlas,CCTextureAtlas){
             drawn=enabled() && directCallbacks && currentBatch->m_pobTextureAtlas==this &&
                 chlorium::research::handoff::standardTexture(GetModuleHandleW(L"libcocos2d.dll"),m_pTexture);
         }
+#ifdef CHLORIUM_LIVE_ROOT_DRAW_R78
+        if(drawn && m_bDirty && m_pQuads && m_pBuffersVBO[0] && !first && count==m_uTotalQuads && count && count<=m_uCapacity && count<=16384){
+            const auto result=chlorium::research::rotationtrace::livePrepare(this,currentBatch);
+            if(result==chlorium::research::liveroot::Status::gpu){
+                {chlorium::snapshot::NativeVertexLease lease(m_pBuffersVBO[0],m_bDirty,m_pBuffersVBO[0]);drawNative();}
+                m_bDirty=false;++directAtlas.canonicalUploads;directAtlas.canonicalBytes+=std::size_t(count)*96;
+                ++stats.committed;stats.committedQuads+=count;chlorium::research::liveroot::submitted();return;
+            }
+            if(result==chlorium::research::liveroot::Status::native){drawNative();++stats.nativeFallbacks;return;}
+        }
+#endif
         if(drawn && directAtlas.draw(m_pBuffersVBO[0],m_bDirty,m_pQuads,count,first,m_uTotalQuads,m_uCapacity,drawNative)){
             ++stats.committed;stats.committedQuads+=count;
         }else{++stats.nativeFallbacks;drawNative();}
