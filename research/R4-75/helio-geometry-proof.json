@@ -1,0 +1,83 @@
+{
+  "revision": "R75",
+  "diagnostic_only": true,
+  "normal_activation_proven": false,
+  "game_fps_evidence": false,
+  "live_cpu_preparation_removed": false,
+  "level": 129598490,
+  "section": [
+    74,
+    74.5
+  ],
+  "quality": "full",
+  "shake": false,
+  "noclip": false,
+  "target_fps": 120,
+  "mod_profile": "isolated",
+  "campaign_completed": true,
+  "main_installation_changed": false,
+  "restored_profile_files": 92,
+  "candidate_sha256": "29adadd65a9f6c488fe5eae27e0d22a139dad00175f04750975e8c463a1b8925",
+  "geometry_sha256": "e0f49bc2842eb8dbb480bd4d68ac585a487fd96d3903dc23df1da5cb2bc3e9c5",
+  "root_sha256": "c8a0974ac57397167e22561df050c04157aedd5ab9bf456f1654f2b88199a1e7",
+  "native_capture": {
+    "root": {
+      "frames": 2,
+      "rows": 526,
+      "actors": 29,
+      "native_calls": 70249,
+      "percent": 74.01640319824219,
+      "unique_commands": 42,
+      "position_changes": 526,
+      "nonzero_local_rotations": 247,
+      "movement_rows": 279,
+      "rotation_rows": 247,
+      "input_source_counts": {
+        "0": 247,
+        "1": 279
+      },
+      "position_continuity_breaks": 0,
+      "max_actor_steps_per_frame": 22,
+      "shared_command_bytes": 3360,
+      "per_invocation_command_bytes": 42080,
+      "controls": {
+        "0x1f80": 526
+      }
+    },
+    "records": 58,
+    "actors": 29,
+    "matched": 50,
+    "unsupported": 8,
+    "visible_nonhidden": 26,
+    "dirty": 0,
+    "batched": 55,
+    "source_flags": {
+      "256": 3,
+      "1280": 29,
+      "1920": 8,
+      "1824": 18
+    }
+  },
+  "owned_gpu": {
+    "resident_actors": 29,
+    "joint_classes": 3,
+    "positions_compared": 1334,
+    "prefix_mismatches": 0,
+    "resident_mismatches": 0,
+    "seed_position_upload_frames": 1,
+    "initial_state_bytes": 1392,
+    "shared_command_bytes": 3360,
+    "program_index_bytes": 168,
+    "gpu_quads": 18,
+    "nonempty_gpu_quads": 18,
+    "native_fallback_quads": 40,
+    "quad_mismatches": 0
+  },
+  "negative_cases": [
+    "Orbit: all32 programs discontinuous; two deaths; campaign invalid",
+    "Initial Helio geometry: all invisible, zero GPU quads; fixture rejected",
+    "Initial128actor Orbit collector: row overflow; rejected"
+  ],
+  "measurement_sha256": "b1f35927e4f39441a545d675aeb94b1430054cf31756b9838df0f189903f8fe9",
+  "source_archive_sha256": "8c656b62288b72c361d0559c8c3c23c882bb4f48d08f414ed25bae61a38b9e8c"
+}

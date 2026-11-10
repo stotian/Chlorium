@@ -23,7 +23,7 @@ def decode(raw, mixed=False):
         address,actor_uid,frame,closed,angle,controls,reserved=TAIL.unpack_from(raw,at+176)
         if not address or address&7 or not actor_uid or frame not in (1,2) or frame<last_frame or closed!=1:raise ValueError('Invalid native rotation row identity/window')
         if any(before[8:]) or any(after[8:]) or before[5]&~255 or after[5]&~255:raise ValueError('Unknown native state fields')
-        if reserved&~(0x1ff03 if mixed else 0) or controls&~0xffff:raise ValueError('Unknown native FP capture metadata')
+        if reserved&~(0x3ff03 if mixed else 0) or controls&~0xffff:raise ValueError('Unknown native FP capture metadata')
         kind=command[15]
         if kind>1 or (not mixed and kind!=1) or command[16]>1 or command[17] or (kind==1 and any(command[:2])) or command[12] or command[13]:raise ValueError('Invalid captured root-rotation command')
         if mixed and ((kind==0 and (any(command[2:14]) or command[16] or angle or not reserved&1)) or (kind==1 and reserved&3) or (reserved&2 and not reserved&1)):raise ValueError('Invalid joint input-source metadata')

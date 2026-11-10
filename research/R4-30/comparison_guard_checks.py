@@ -13,6 +13,14 @@ spec.loader.exec_module(comparison)
 
 
 class DiagnosticGuard(TestCase):
+    def test_independent_root_geometry_flags_reject_without_parent_flag(self):
+        for key in ('mixed_native_trace_diagnostic','wide_root_geometry_diagnostic'):
+            for left,right in ((True,False),(False,True),(True,True)):
+                rows=[([],[],{},{key:left}),([],[],{},{key:right})]
+                with patch.object(comparison,'read',side_effect=rows),patch.object(Path,'write_text') as output:
+                    with self.assertRaisesRegex(ValueError,'Native root/geometry'):
+                        comparison.compare(Path('old_chlorium'),Path('new_chlorium'),Path('unused'))
+                    output.assert_not_called()
     def test_rotation_trace_cannot_be_mislabeled_as_fps_evidence(self):
         for left,right in ((True,False),(False,True),(True,True)):
             rows=[([],[],{},{"native_rotation_trace_diagnostic":left}),([],[],{},{"native_rotation_trace_diagnostic":right})]

@@ -11,8 +11,8 @@ en visant 120 FPS stables. Aucun code Sodium n'est intégré.
 
 ## État actuel
 
-**La recherche active porte sur l'entrée GPU directe R67 et les programmes
-de groupes GPU R64/R68. Aucun candidat
+**La recherche active porte sur les programmes mixtes GPU R74/R75 et leur
+couplage à la géométrie native, avec R67 comme référence en jeu. Aucun candidat
 n'atteint encore les critères de promotion dans une version normale.**
 
 - R57 dessine réellement les lots d'objets pendant la partie avec du stockage GPU
@@ -105,6 +105,14 @@ capture réelle Heliopolis, 78 objets / deux images produisent 17 004 positions
 exactes, avec une seule initialisation des positions. Les calculs natifs, les
 lecteurs CPU et le rendu du jeu restent présents : aucun gain FPS n'en découle
 encore. Le transfert R73 a régressé en jeu et n'est pas activé.
+
+R75 capture aussi les quads natifs et prépare leur émission depuis les poses GPU.
+Sur une capture Heliopolis, 18 quads visibles sont reproduits exactement en
+rejeu GPU et 40 autres conservent leur sortie native. Les calculs CPU restent payés.
+Sur Orbit, des transformations intercalées restent absentes du programme : les
+objets concernés sont refusés et restent natifs. Le découpage des longues séquences
+passe 1 540 états natifs/GPU en fixture, sans démontrer un gain en jeu.
+[Résultats et limites R75](research/R4-75/DECISION.md).
 
 ## Suivi
 

@@ -52,6 +52,8 @@ profiles = {
     "--adaptive-measure-r66": "measurement-adaptive-pages-r66",
     "--direct-pages-r67": "native-direct-pages-r67",
     "--direct-measure-r67": "measurement-direct-pages-r67",
+    "--wide-root-r75": "native-wide-root-r75",
+    "--wide-root-measure-r75": "measurement-wide-root-r75",
     "--mixed-trace-r74": "native-mixed-trace-r74",
     "--mixed-trace-measure-r74": "measurement-mixed-trace-r74",
     "--canonical-copy-r73": "native-canonical-copy-r73",
@@ -74,6 +76,8 @@ selected = sys.argv[1] if len(sys.argv) == 2 else ""
 if selected == "--opacity-shadow":
     raise SystemExit("R4-30 observer build blocked: installed-loader native-register compatibility has not been verified")
 profile = profiles[selected]
+wide_root_r75 = selected in ("--wide-root-r75", "--wide-root-measure-r75")
+if wide_root_r75:selected = "--mixed-trace-measure-r74" if selected=="--wide-root-measure-r75" else "--mixed-trace-r74"
 measurement = profile.startswith("measurement-")
 native_audit = selected == "--native-audit"
 canonical = profile in ("native-canonical-v10", "native-opacity-hash-r36")
@@ -156,6 +160,7 @@ if selected in ("--resident-continuous", "--resident-fast", "--resident-deferred
         flags += ["/DCHLORIUM_NATIVE_ROTATION_TRACE_R72=1"]
         sources += [root/"research/R4-72/RotationTrace.cpp",root/"research/R4-72/PointGateway.asm"]
         if selected=="--mixed-trace-r74":flags += ["/DCHLORIUM_MIXED_TRACE_R74=1"]
+        if wide_root_r75:flags += ["/DCHLORIUM_WIDE_ROOT_SAMPLE_R75=1"]
     if selected=="--stream-control-r65":
         flags += ["/DCHLORIUM_R61_UNTIMED_CONTROL_R65=1"]
 if selected in ("--direct-measure-r65", "--adaptive-measure-r66", "--direct-measure-r67", "--field-watch-measure", "--rotation-trace-measure", "--canonical-copy-measure-r73", "--mixed-trace-measure-r74"):
@@ -169,6 +174,7 @@ if selected=="--canonical-copy-measure-r73":
 if selected in ("--rotation-trace-measure", "--mixed-trace-measure-r74"):
     flags += ["/DCHLORIUM_ROTATION_TRACE_AUDIT_R72=1"]
     if selected=="--mixed-trace-measure-r74":flags += ["/DCHLORIUM_MIXED_TRACE_AUDIT_R74=1"]
+    if wide_root_r75:flags += ["/DCHLORIUM_WIDE_ROOT_AUDIT_R75=1"]
 if selected=="--field-watch-measure":
     flags += ["/DCHLORIUM_FIELD_WATCH_AUDIT_R69=1"]
 if selected=="--opacity-hash":
@@ -276,6 +282,7 @@ if selected=="--field-watch":
     manifest.update(backend="CHLORIUM_NATIVE_FIELD_WATCH_R69",version="v0.4.0-alpha.69")
 if selected=="--field-watch-measure":
     manifest.update(backend="CHLORIUM_FIELD_WATCH_AUDIT_R69",version="v0.4.0-alpha.69")
+if wide_root_r75:manifest.update(backend="CHLORIUM_WIDE_ROOT_AUDIT_R75" if measurement else "CHLORIUM_WIDE_ROOT_SAMPLE_R75",version="v0.4.0-alpha.75")
 for source in sources:
     manifest["sources"].append({"path": source.name, "sha256": fingerprint(source)})
 for header in (root / "src" / "renderer").glob("*.hpp"):
@@ -313,6 +320,7 @@ for pattern in ("*.cpp", "*.hpp", "*.asm"):
     snapshot_files.update((root / "research/R4-71").rglob(pattern))
     snapshot_files.update((root / "research/R4-72").rglob(pattern))
     snapshot_files.update((root / "research/R4-74").rglob(pattern))
+    snapshot_files.update((root / "research/R4-75").rglob(pattern))
 for folder in ("src", "legacy", "tests", "research/R4-08", "research/R4-11", "research/R4-17", "research/R4-30", "research/R4-32", "research/R4-33", "research/R4-34", "research/R4-35", "research/R4-36", "research/R4-37", "research/R4-41", "research/R4-42", "research/R4-43", "research/R4-44", "research/R4-45", "research/R4-46", "research/R4-47", "research/R4-48", "research/R4-49", "research/R4-54"):
     for pattern in ("*.cpp", "*.hpp", "*.h"):
         snapshot_files.update((root / folder).rglob(pattern))

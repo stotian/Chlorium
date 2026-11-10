@@ -1597,3 +1597,20 @@ Zéro discontinuité,12 classes,17004 positions exactes parpréfixe+pont réside
 2images,uneinitialisation de3744octets,17120octets decommandes et856d'indices.
 Composant seul : calculs/centres CPU toujoursnatifs, ni géométriecomplète niFPS
 prouvés. Aucune suppressiond'observateur ;versionnormale conservée.
+
+R75 (10 novembre) : capture géométrie native en fin d'image et émission GPU isolée.
+Orbit128 acteurs sature à65536 lignes : rejet. Collecte bornée32 acteurs, hooks
+observateurs actifs seulement sur2images :5504 rotations,172 commandes,64quads,
+captures indépendantes complètes.3328 discontinuités de positions :32/32 programmes
+résidents refusés; aucun mouvement capturé. Deux morts89.879/89.888% invalident
+la campagne. Aucun gainFPS ou succès réel de géométrieGPU revendiqué.
+Séquences longues découpées par64 :1540 états48octets exacts contre oracle natif,
+192 étapes,quatre modesFP,quatre images résidentes et rejets de plages malformées.
+13groupes de gardes comparaison et3groupes decodeR75 passent. Maintenir isolé;
+identifier les transformations intercalées. Détails :research/R4-75/DECISION.md.
+Helio initial :32 programmes exacts mais64quads tous natifs, aucun objet visible;
+le test échoue correctement. Sélection des nouveaux acteurs visible/batchée :
+Helio74–74.5 atteint sans mort,526 opérations/29 objets,42 commandes,3classes,
+1334 positions exactes,18 quads GPU visibles96octets exacts et40 replisnatifs.
+Uneinitialisation1392octets;CPU/lecteurs toujoursnatifs, émission horsdujeu :
+preuve de composant borné, aucun gain de frametime ou activation normale.
