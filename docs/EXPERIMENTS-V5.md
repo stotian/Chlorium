@@ -1633,3 +1633,14 @@ parcampagne,installationprincipale inchangée. Allocationobservation rendue
 catchable pourconserver l'appel natif;OOMnoninjectée. CPU/lecteurs toujoursnatifs,
 niFPSglobaux niactivationnormale. Prochain chantier : donnéesGPU retenues et
 paramètres partagés pourréduire lesretransferts durenderer, sans retirerlesgarde.
+
+R77 : géométrieGPU retenue,paramètres48B partagésbitàbit,replis96B empaquetés,
+sortiedirectedansunVBOcanonique owned (pasl'atlasdujeu),sanscopieGPUintermédiaire.
+RejeuxR76 exacts96B,positions inchangées :octetsGL réellementenvoyés Orbit8272/13312
+(-37.86%),Grief2048/6656(-69.23%),Helio9140/12688(-27.96%),GPU30/30/18quads.
+CritiqueCPU : arbreclasses unique65536 coûte27.05ms,doncrejetdu rebuild systématique.
+Cache validantlesgroupes courants+repliidentité après256clés :régimestable65536
+objets0.411/0.452ms médian,0.482/0.603ms pirebatch selondiversité. Reconstructions
+2.34/4.00msrestentcoûteuses. AssertionsCPUetretoursR75 passent. Ni octets ni ce
+microbenchmark ne sontdesFPSjeu. Intégrationlive/étatGL/échecs/lifetimesàqualifier;
+garderisolé. Détails research/R4-77/DECISION.md.

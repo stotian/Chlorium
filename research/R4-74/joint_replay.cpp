@@ -1,7 +1,11 @@
 #define CHLORIUM_R72_REPLAY_LIBRARY_ONLY 1
 #include "../R4-72/replay_checks.cpp"
 #ifdef CHLORIUM_REAL_GEOMETRY_R75
+#ifdef CHLORIUM_CLASS_GEOMETRY_R77
+#include "../R4-77/Emitter.hpp"
+#else
 #include "../R4-75/Emitter.hpp"
+#endif
 #endif
 using ActorKey=std::pair<std::uint64_t,unsigned>;
 struct JointActor {std::vector<const rt::Row*> rows[2];unsigned group=0;};
@@ -67,7 +71,11 @@ int wmain(int argc,wchar_t** argv)try{
         }
     }
 #ifdef CHLORIUM_REAL_GEOMETRY_R75
+#ifdef CHLORIUM_CLASS_GEOMETRY_R77
+    chlorium::research::rootgeometry::ClassEmitter emitter(argv[4]);
+#else
     chlorium::research::rootgeometry::Emitter emitter(argv[4]);
+#endif
 #endif
     unsigned residentFailures=0;for(unsigned frame=0;frame<2;++frame){_mm_setcsr(0x1f80);const auto actual=runChunks(gpu,initial,frames[frame],unsigned(frames[frame].commands.size()),frame==0);
         for(unsigned i=0;i<actors.size();++i){residentFailures+=std::memcmp(actual[i].position,actors[i]->rows[frame].back()->after.position,16)!=0;++compared;}
@@ -80,6 +88,9 @@ int wmain(int argc,wchar_t** argv)try{
 #ifdef CHLORIUM_REAL_GEOMETRY_R75
     std::cout<<"{\"real_geometry\":true,\"gpu_quads\":"<<emitter.admitted<<",\"nonempty_gpu_quads\":"<<emitter.nonempty<<",\"native_fallback_quads\":"<<emitter.fallbacks<<",\"end_root_changes\":"<<emitter.endRootChanges<<",\"bias_declines\":"<<emitter.biasDeclines<<",\"quad_mismatches\":0,\"live_cpu_preparation_removed\":false,\"game_fps_evidence\":false}\n";
     require(emitter.nonempty,"native bytes matched only via fallback/empty geometry; no actual geometry acceleration proof");
+#ifdef CHLORIUM_CLASS_GEOMETRY_R77
+    std::cout<<"{\"retained_class_emitter\":true,\"frames\":"<<emitter.frames<<",\"allocations\":"<<emitter.allocations<<",\"peak_parameter_classes\":"<<emitter.peakClasses<<",\"cpu_uploaded_bytes\":"<<emitter.uploadedBytes<<",\"geometry_bytes\":"<<emitter.geometryBytes<<",\"parameter_bytes\":"<<emitter.parameterBytes<<",\"slot_bytes\":"<<emitter.slotBytes<<",\"native_fallback_bytes\":"<<emitter.fallbackBytes<<",\"r75_emitter_input_bytes\":"<<emitter.legacyBytes<<",\"canonical_gpu_copy_bytes\":0,\"game_fps_evidence\":false}\n";
+#endif
 #endif
     const auto commandBytes=(frames[0].commands.size()+frames[1].commands.size())*sizeof(mp::Command);const auto indexBytes=(frames[0].indices.size()+frames[1].indices.size())*4;
     std::cout<<"{\"diagnostic_only\":true,\"captured_actors\":"<<candidates.size()<<",\"resident_actors\":"<<actors.size()<<",\"joint_classes\":"<<classes.size()<<",\"positions_compared\":"<<compared<<",\"prefix_mismatches\":"<<failures<<",\"resident_mismatches\":"<<residentFailures<<",\"seed_position_upload_frames\":1,\"initial_state_bytes\":"<<initial.size()*sizeof(mp::State)<<",\"shared_command_bytes\":"<<commandBytes<<",\"program_index_bytes\":"<<indexBytes<<",\"global_reader_closure\":false,\"game_fps_evidence\":false}\n";

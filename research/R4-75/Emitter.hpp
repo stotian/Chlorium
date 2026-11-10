@@ -2,6 +2,15 @@
 #include "GeometryTrace.hpp"
 #include "../R4-33/SpriteEncoding.hpp"
 namespace chlorium::research::rootgeometry {
+struct Admission {bool accepted=false,poseDeclined=false,rootChanged=false;unsigned biasDeclines=0;};
+inline Admission encodeNativeRow(const Row& row,std::span<const mixedprogram::State> states,unsigned poseSlot,resident::Geometry& g,resident::Parameters& p){
+    resident::encodeSprite(row.source,row.quad,g,p);Admission result;const bool poseValid=poseSlot<states.size();g.control[1]=poseValid?poseSlot:0;result.poseDeclined=!poseValid;
+    bool accept=poseValid && (row.controls&0x7f80u)==0x1f80u && row.atlas && row.batch && row.source.quadMatches && !(row.source.flags&(1u|2u|64u|128u)) && (row.source.flags&1536u)==1536u && g.control[0];
+    if(poseValid && std::memcmp(states[poseSlot].position,row.root.position,16)){accept=false;result.rootChanged=true;}
+    auto bias=[&](unsigned axis){const auto pose=_mm_cvtsd_ss(_mm_setzero_ps(),_mm_set_sd(row.root.position[axis]));const auto target=corners::bits(row.source.matrix[4+axis]);const auto value=_mm_sub_ss(target,pose);const auto roundtrip=_mm_add_ss(pose,value);
+        const auto bits=std::bit_cast<unsigned>(_mm_cvtss_f32(roundtrip));if(bits!=row.source.matrix[4+axis]){accept=false;++result.biasDeclines;}p.translationZFlags[axis]=std::bit_cast<unsigned>(_mm_cvtss_f32(value));};
+    if(accept){bias(0);bias(1);}g.control[0]=accept;result.accepted=accept;return result;
+}
 inline std::vector<Row> readGeometry(const std::filesystem::path& file,const std::filesystem::path& rootFile){
     require(std::filesystem::file_size(file)>=sizeof(Header) && std::filesystem::file_size(file)<=sizeof(Header)+256*sizeof(Row),"bounded native geometry file");
     std::ifstream input(file,std::ios::binary);Header h;input.read(reinterpret_cast<char*>(&h),sizeof(h));
@@ -23,13 +32,8 @@ public:
     ~Emitter(){glDeleteBuffers(4,buffers_);if(shader_)glDeleteProgram(shader_);}
     void check(GLuint residentState,std::span<const mixedprogram::State> states,std::span<const Row* const> rows,std::span<const unsigned> poseSlots){
         require(poseSlots.size()==rows.size() && !states.empty(),"complete geometry/pose association");std::vector<resident::Geometry> geometry(rows.size());std::vector<resident::Parameters> parameters(rows.size());std::vector<snapshot::NativeQuadState> native(rows.size()),fallback(rows.size());
-        for(unsigned i=0;i<rows.size();++i){const auto& row=*rows[i];native[i]=row.quad;auto& g=geometry[i];auto& p=parameters[i];resident::encodeSprite(row.source,row.quad,g,p);
-            const bool poseValid=poseSlots[i]<states.size();g.control[1]=poseValid?poseSlots[i]:0;if(!poseValid)++poseDeclines;
-            bool accept=poseValid && (row.controls&0x7f80u)==0x1f80u && row.atlas && row.batch && row.source.quadMatches && !(row.source.flags&(1u|2u|64u|128u)) && (row.source.flags&1536u)==1536u && g.control[0];
-            if(poseValid && std::memcmp(states[poseSlots[i]].position,row.root.position,16)){accept=false;++endRootChanges;}
-            auto bias=[&](unsigned axis){const auto pose=_mm_cvtsd_ss(_mm_setzero_ps(),_mm_set_sd(row.root.position[axis]));const auto target=corners::bits(row.source.matrix[4+axis]);const auto value=_mm_sub_ss(target,pose);const auto roundtrip=_mm_add_ss(pose,value);
-                const auto bits=std::bit_cast<unsigned>(_mm_cvtss_f32(roundtrip));if(bits!=row.source.matrix[4+axis]){accept=false;++biasDeclines;}p.translationZFlags[axis]=std::bit_cast<unsigned>(_mm_cvtss_f32(value));};
-            if(accept){bias(0);bias(1);}g.control[0]=accept;if(accept){++admitted;nonempty+=(row.source.localRect[2]&0x7fffffffu)!=0 && (row.source.localRect[3]&0x7fffffffu)!=0;}else{++fallbacks;fallback[i]=native[i];}
+        for(unsigned i=0;i<rows.size();++i){const auto& row=*rows[i];native[i]=row.quad;const auto result=encodeNativeRow(row,states,poseSlots[i],geometry[i],parameters[i]);poseDeclines+=result.poseDeclined;endRootChanges+=result.rootChanged;biasDeclines+=result.biasDeclines;
+            if(result.accepted){++admitted;nonempty+=(row.source.localRect[2]&0x7fffffffu)!=0 && (row.source.localRect[3]&0x7fffffffu)!=0;}else{++fallbacks;fallback[i]=native[i];}
         }
         glUseProgram(shader_);glMemoryBarrier(0x2000);glBindBufferBase(storage,0,residentState);
         auto upload=[&](unsigned buffer,unsigned binding,const auto values){glBindBuffer(storage,buffers_[buffer]);glBufferData(storage,values.size_bytes(),values.data(),GL_DYNAMIC_DRAW);glBindBufferBase(storage,binding,buffers_[buffer]);};

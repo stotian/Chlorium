@@ -1,0 +1,138 @@
+{
+  "revision": "R77",
+  "owned_fixture_only": true,
+  "live_game_atlas": false,
+  "game_fps_evidence": false,
+  "normal_activation_proven": false,
+  "runs": [
+    {
+      "level_name": "orbit",
+      "geometry": {
+        "real_geometry": true,
+        "gpu_quads": 30,
+        "nonempty_gpu_quads": 30,
+        "native_fallback_quads": 34,
+        "end_root_changes": 0,
+        "bias_declines": 0,
+        "quad_mismatches": 0,
+        "live_cpu_preparation_removed": false,
+        "game_fps_evidence": false
+      },
+      "transfers": {
+        "retained_class_emitter": true,
+        "frames": 2,
+        "allocations": 1,
+        "peak_parameter_classes": 20,
+        "cpu_uploaded_bytes": 8272,
+        "geometry_bytes": 3456,
+        "parameter_bytes": 1440,
+        "slot_bytes": 208,
+        "native_fallback_bytes": 3168,
+        "r75_emitter_input_bytes": 13312,
+        "canonical_gpu_copy_bytes": 0,
+        "game_fps_evidence": false
+      },
+      "poses": {
+        "diagnostic_only": true,
+        "captured_actors": 32,
+        "resident_actors": 32,
+        "joint_classes": 1,
+        "positions_compared": 5184,
+        "prefix_mismatches": 0,
+        "resident_mismatches": 0,
+        "seed_position_upload_frames": 1,
+        "initial_state_bytes": 1536,
+        "shared_command_bytes": 12640,
+        "program_index_bytes": 632,
+        "global_reader_closure": false,
+        "game_fps_evidence": false
+      }
+    },
+    {
+      "level_name": "grief",
+      "geometry": {
+        "real_geometry": true,
+        "gpu_quads": 30,
+        "nonempty_gpu_quads": 30,
+        "native_fallback_quads": 2,
+        "end_root_changes": 0,
+        "bias_declines": 0,
+        "quad_mismatches": 0,
+        "live_cpu_preparation_removed": false,
+        "game_fps_evidence": false
+      },
+      "transfers": {
+        "retained_class_emitter": true,
+        "frames": 2,
+        "allocations": 1,
+        "peak_parameter_classes": 13,
+        "cpu_uploaded_bytes": 2048,
+        "geometry_bytes": 1024,
+        "parameter_bytes": 768,
+        "slot_bytes": 64,
+        "native_fallback_bytes": 192,
+        "r75_emitter_input_bytes": 6656,
+        "canonical_gpu_copy_bytes": 0,
+        "game_fps_evidence": false
+      },
+      "poses": {
+        "diagnostic_only": true,
+        "captured_actors": 16,
+        "resident_actors": 16,
+        "joint_classes": 3,
+        "positions_compared": 160,
+        "prefix_mismatches": 0,
+        "resident_mismatches": 0,
+        "seed_position_upload_frames": 1,
+        "initial_state_bytes": 768,
+        "shared_command_bytes": 480,
+        "program_index_bytes": 24,
+        "global_reader_closure": false,
+        "game_fps_evidence": false
+      }
+    },
+    {
+      "level_name": "helio",
+      "geometry": {
+        "real_geometry": true,
+        "gpu_quads": 18,
+        "nonempty_gpu_quads": 18,
+        "native_fallback_quads": 43,
+        "end_root_changes": 0,
+        "bias_declines": 0,
+        "quad_mismatches": 0,
+        "live_cpu_preparation_removed": false,
+        "game_fps_evidence": false
+      },
+      "transfers": {
+        "retained_class_emitter": true,
+        "frames": 2,
+        "allocations": 2,
+        "peak_parameter_classes": 9,
+        "cpu_uploaded_bytes": 9140,
+        "geometry_bytes": 3904,
+        "parameter_bytes": 864,
+        "slot_bytes": 244,
+        "native_fallback_bytes": 4128,
+        "r75_emitter_input_bytes": 12688,
+        "canonical_gpu_copy_bytes": 0,
+        "game_fps_evidence": false
+      },
+      "poses": {
+        "diagnostic_only": true,
+        "captured_actors": 31,
+        "resident_actors": 30,
+        "joint_classes": 3,
+        "positions_compared": 1080,
+        "prefix_mismatches": 0,
+        "resident_mismatches": 0,
+        "seed_position_upload_frames": 1,
+        "initial_state_bytes": 1440,
+        "shared_command_bytes": 2560,
+        "program_index_bytes": 128,
+        "global_reader_closure": false,
+        "game_fps_evidence": false
+      }
+    }
+  ]
+}
