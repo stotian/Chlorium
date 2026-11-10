@@ -114,6 +114,11 @@ objets concernés sont refusés et restent natifs. Le découpage des longues sé
 passe 1 540 états natifs/GPU en fixture, sans démontrer un gain en jeu.
 [Résultats et limites R75](research/R4-75/DECISION.md).
 
+R76 ajoute les mouvements de suivi natifs au programme GPU. Les échantillons
+Orbit, Grief et Heliopolis passent les comparaisons de positions/quads en rejeu,
+avec replis natifs pour les objets refusés. Le CPU du jeu reste actif : cela
+ne démontre pas encore d'accélération. [Preuves R76](research/R4-76/DECISION.md).
+
 ## Suivi
 
 [Journal des expériences](docs/EXPERIMENTS-V5.md) · [Versions](docs/VERSIONS.md) ·

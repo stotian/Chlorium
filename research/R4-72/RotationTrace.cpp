@@ -5,12 +5,17 @@
 #include <fstream>
 #include <charconv>
 #include <unordered_map>
+#include <optional>
 #ifdef CHLORIUM_WIDE_ROOT_SAMPLE_R75
 #include "../R4-75/GeometryTrace.hpp"
 #include "../R4-33/SpriteCorners.hpp"
 #endif
 using namespace geode::prelude;
 extern "C" void R72PointGateway();
+#ifdef CHLORIUM_FOLLOW_TRACE_R76
+extern "C" void R76FollowGateway();
+extern "C" __declspec(dllexport) const char chloriumFollowTraceIdentity[]="CHLORIUM_FOLLOW_TRACE_R76";
+#endif
 extern "C" __declspec(dllexport) const char chloriumRotationTraceIdentity[]="CHLORIUM_NATIVE_ROTATION_TRACE_R72";
 #ifdef CHLORIUM_MIXED_TRACE_R74
 extern "C" __declspec(dllexport) const char chloriumMixedTraceIdentity[]="CHLORIUM_MIXED_NATIVE_TRACE_R74";
@@ -25,6 +30,9 @@ struct HostState {unsigned fp=_mm_getcsr();DWORD error=GetLastError();~HostState
 using Apply=chlorium::affine::Apply;
 Stats stats;Header header;std::vector<Row> rows;std::array<std::pair<std::uintptr_t,unsigned>,128> actors{};
 std::size_t pending=SIZE_MAX;unsigned frame=0;bool finished=false;DWORD ownerThread=0;Patch* patch=nullptr;void* slot=nullptr;Apply native=nullptr;
+#ifdef CHLORIUM_FOLLOW_TRACE_R76
+Patch* followPatch=nullptr;void* followSlot=nullptr;using Count=unsigned(*)(const CCArray*);Count nativeCount=nullptr;
+#endif
 #ifdef CHLORIUM_MIXED_TRACE_R74
 std::unordered_map<std::uintptr_t,unsigned> actorSlots;
 unsigned roles(GameObject* o){return unsigned(o->m_hasAreaParent!=0)|unsigned(o->m_hasGroupParent!=0)<<1|unsigned(o->m_isTrigger!=0)<<2|unsigned(o->m_isUIObject!=0)<<3|unsigned(o->m_hasParticles!=0)<<4|unsigned(o->m_usesAudioScale!=0)<<5|unsigned(o->m_hasAnimatedChild!=0)<<6|unsigned(o->m_colorGroupCount>0)<<7|unsigned(o->m_opacityGroupCount>0)<<8;}
@@ -77,9 +85,9 @@ void trackPosition(GameObject* object,bool unknown){
 #endif
 #ifdef CHLORIUM_MIXED_TRACE_R74
 struct MoveScope {
-    MoveScope* previous=nullptr;GJBaseGameLayer* layer=nullptr;CCObject** members=nullptr;unsigned expected=0,visited=0,stamp=0;double dx=0,dy=0;
+    MoveScope* previous=nullptr;GJBaseGameLayer* layer=nullptr;CCObject** members=nullptr;unsigned expected=0,visited=0,stamp=0,kind=0,axes=0;double dx=0,dy=0;
     std::array<mixedprogram::State,128> seeds{};std::array<bool,128> seeded{},seen{};
-    MoveScope(GJBaseGameLayer* owner,CCArray* array,double x,double y)noexcept:layer(owner),dx(x),dy(y){
+    MoveScope(GJBaseGameLayer* owner,CCArray* array,double x,double y,unsigned operation=0,unsigned mask=0):layer(owner),kind(operation),axes(mask),dx(x),dy(y){
         HostState preserve;if(!stats.active || GetCurrentThreadId()!=ownerThread || reinterpret_cast<std::uintptr_t>(owner)!=header.owner || !array || !array->data || !array->data->arr)return;
         if(array->data->num>1000000){stats.reasons|=Overflow;return;}members=array->data->arr;stamp=owner->m_gameState.m_commandIndex;
 #ifdef CHLORIUM_WIDE_ROOT_SAMPLE_R75
@@ -97,7 +105,7 @@ struct MoveScope {
         ++header.calls;if(visited>=expected || members[visited]!=object){stats.reasons|=MissingPost;return;}++visited;
         auto at=actorSlots.find(reinterpret_cast<std::uintptr_t>(object));if(at==actorSlots.end())return;const auto slot=at->second;if(!seeded[slot])return;
         if(object->m_uID!=actors[slot].second){stats.reasons|=OwnerLost;return;}if(rows.size()>=65536){stats.reasons|=Overflow;return;}
-        Row row;row.before=seeds[slot];row.after=read(object);row.command.delta[0]=dx;row.command.delta[1]=dy;row.command.control[0]=stamp;
+        Row row;row.before=seeds[slot];row.after=read(object);row.command.delta[0]=dx;row.command.delta[1]=dy;row.command.control[0]=stamp;row.command.control[1]=kind;row.command.control[2]=axes;
         row.address=reinterpret_cast<std::uintptr_t>(object);row.uid=object->m_uID;row.frame=frame;row.closed=1;row.controls=_mm_getcsr();
         // Move seeds are call-entry snapshots; duplicates continue from the prior pre-callback witness.
         row.reserved=1u|unsigned(seen[slot])<<1|roles(object)<<8;
@@ -110,6 +118,17 @@ struct MoveScope {
 #endif
     }
 };
+#ifdef CHLORIUM_FOLLOW_TRACE_R76
+struct FollowContext;thread_local FollowContext* currentFollow=nullptr;
+struct FollowContext {
+    FollowContext* previous=nullptr;std::optional<MoveScope> scope;
+    FollowContext(){HostState preserve;previous=currentFollow;currentFollow=this;}
+    ~FollowContext(){HostState preserve;scope.reset();currentFollow=previous;}
+    void begin(GJBaseGameLayer* owner,CCArray* array,const unsigned char* source,unsigned x,unsigned y){
+        scope.reset();double delta[2];std::memcpy(delta,source+0x38,16);scope.emplace(owner,array,delta[0],delta[1],2,unsigned(x!=0)|unsigned(y!=0)<<1);
+    }
+};
+#endif
 #endif
 bool install(){
     wchar_t executable[1024]{};if(!GetModuleFileNameW(nullptr,executable,1024) || _wcsicmp(executable,L"C:\\Users\\stoti\\Chlorium\\test-game\\GeometryDash.exe"))return false;
@@ -131,11 +150,23 @@ bool install(){
     slot=chlorium::matrix::allocateNearCallSlot(sites,reinterpret_cast<std::uintptr_t>(&R72PointGateway),reinterpret_cast<std::uintptr_t>(game)+0xa3a000);if(!slot)return false;
     ByteVector bytes{0xff,0x15,0,0,0,0};const auto displacement=std::int32_t(reinterpret_cast<std::uintptr_t>(slot)-(sites[0]+6));std::memcpy(bytes.data()+2,&displacement,4);
     auto result=Mod::get()->patch(const_cast<unsigned char*>(game+0x22be5f),std::move(bytes));if(!result){VirtualFree(slot,0,MEM_RELEASE);slot=nullptr;return false;}patch=result.unwrap();
-    // Geode owns the patch lifetime; keep its single read-only pointer page until process exit.
+    // Geode owns patch lifetimes; keep their read-only pointer pages until process exit.
+#ifdef CHLORIUM_FOLLOW_TRACE_R76
+    nativeCount=reinterpret_cast<Count>(const_cast<unsigned char*>(cocos+0x69c0));
+    if(*reinterpret_cast<const Count*>(game+0x516e00)!=nativeCount || hash(cocos+0x69c0,16)!=0x947b5236ff403801ull || hash(game+0x2305a0,0x479)!=0x657121568d903dd6ull)return false;
+    const unsigned char countCall[]{0xff,0x15,0x2f,0x65,0x2e,0};if(std::memcmp(game+0x2308cb,countCall,6))return false;
+    const std::array<std::uintptr_t,1> followSites{reinterpret_cast<std::uintptr_t>(game)+0x2308cb};
+    followSlot=chlorium::matrix::allocateNearCallSlot(followSites,reinterpret_cast<std::uintptr_t>(&R76FollowGateway),reinterpret_cast<std::uintptr_t>(game)+0xa3a000);if(!followSlot)return false;
+    ByteVector followBytes{0xff,0x15,0,0,0,0};const auto followDisplacement=std::int32_t(reinterpret_cast<std::uintptr_t>(followSlot)-(followSites[0]+6));std::memcpy(followBytes.data()+2,&followDisplacement,4);
+    auto followResult=Mod::get()->patch(const_cast<unsigned char*>(game+0x2308cb),std::move(followBytes));if(!followResult){VirtualFree(followSlot,0,MEM_RELEASE);followSlot=nullptr;return false;}followPatch=followResult.unwrap();
+#endif
     return true;
 }
 void finish()noexcept{
     if(finished)return;finished=true;stats.active=0;if(pending!=SIZE_MAX)stats.reasons|=MissingPost;
+#ifdef CHLORIUM_FOLLOW_TRACE_R76
+    if(followPatch && !followPatch->disable())stats.reasons|=Setup;
+#endif
 #ifdef CHLORIUM_WIDE_ROOT_SAMPLE_R75
     while(enabledObserverHooks)if(!observerHooks[--enabledObserverHooks]->disable())stats.reasons|=Setup;
 #endif
@@ -144,7 +175,7 @@ void finish()noexcept{
     if(stats.frames!=2 || !stats.rows || stats.closed!=stats.rows)stats.reasons|=MissingPost;
     header.frames=stats.frames;header.rows=stats.rows;header.actors=stats.actors;header.reasons=stats.reasons;
     try{const auto* path=std::getenv("CHLORIUM_AUDIT_OUTPUT");if(!path){stats.reasons|=Output;return;}
-        std::ofstream file(std::string(path)+(traceVersion==74?".mixed-r74.bin":".rotation-r72.bin"),std::ios::binary|std::ios::out|std::ios::noreplace);
+        std::ofstream file(std::string(path)+(traceVersion==76?".mixed-r76.bin":traceVersion==74?".mixed-r74.bin":".rotation-r72.bin"),std::ios::binary|std::ios::out|std::ios::noreplace);
         if(!file){stats.reasons|=Output;return;}file.write(reinterpret_cast<const char*>(&header),sizeof(header));file.write(reinterpret_cast<const char*>(rows.data()),rows.size()*sizeof(Row));file.flush();if(!file)stats.reasons|=Output;
     }catch(...){stats.reasons|=Output;}
     stats.complete=stats.reasons==0;
@@ -268,6 +299,13 @@ extern "C" chlorium::affine::Point* R72Observe(chlorium::affine::Point* out,cons
 extern "C" __declspec(dllexport) bool ChloriumReadRotationTraceR72(chlorium::research::rotationtrace::Stats* out,std::size_t size){
     using namespace chlorium::research::rotationtrace;if(!out || size!=sizeof(*out) || GetCurrentThreadId()!=ownerThread)return false;*out=stats;return true;
 }
+#ifdef CHLORIUM_FOLLOW_TRACE_R76
+extern "C" unsigned R76ObserveFollow(CCArray* array,GJBaseGameLayer* layer,const unsigned char* source,unsigned x,unsigned y)noexcept{
+    using namespace chlorium::research::rotationtrace;const auto result=nativeCount(array);HostState preserve;
+    try{if(stats.active && GetCurrentThreadId()==ownerThread && currentFollow && source && reinterpret_cast<std::uintptr_t>(layer)==header.owner && layer->m_uID==header.ownerUid)currentFollow->begin(layer,array,source,x,y);}catch(...){stats.reasons|=Fault;}
+    return result;
+}
+#endif
 #ifdef CHLORIUM_WIDE_ROOT_SAMPLE_R75
 extern "C" __declspec(dllexport) bool ChloriumReadRootGeometryR75(chlorium::research::rootgeometry::Stats* out,std::size_t size){
     using namespace chlorium::research::rotationtrace;if(!out || size!=sizeof(*out) || GetCurrentThreadId()!=ownerThread)return false;*out=geometryStats;return true;
@@ -279,14 +317,19 @@ class $modify(ChloriumRotationTraceSections,GJBaseGameLayer){
         using namespace chlorium::research::rotationtrace;
         for(auto* hook:self.getAllHooks()){hook->setAutoEnable(false);if(observerHookCount<observerHooks.size())observerHooks[observerHookCount++]=hook;else stats.reasons|=Setup;}
     }
-    void processFollowActions(){chlorium::research::rotationtrace::OriginContext scope(1);GJBaseGameLayer::processFollowActions();}
+    void processFollowActions(){chlorium::research::rotationtrace::OriginContext scope(1);
+#ifdef CHLORIUM_FOLLOW_TRACE_R76
+        chlorium::research::rotationtrace::FollowContext follow;
+#endif
+        GJBaseGameLayer::processFollowActions();}
     void processTransformActions(bool visibleFrame){chlorium::research::rotationtrace::OriginContext scope(2);GJBaseGameLayer::processTransformActions(visibleFrame);}
 #endif
 #ifdef CHLORIUM_MIXED_TRACE_R74
     void moveObjects(CCArray* objects,double dx,double dy,bool lockPlayerY){
         using namespace chlorium::research::rotationtrace;
         bool capture=false;{HostState preserve;capture=stats.active && GetCurrentThreadId()==ownerThread;}
-        if(capture){MoveScope scope(this,objects,dx,dy);GJBaseGameLayer::moveObjects(objects,dx,dy,lockPlayerY);return;}
+        if(capture){std::optional<MoveScope> scope;{HostState preserve;try{scope.emplace(this,objects,dx,dy);}catch(...){stats.reasons|=Fault;}}
+            GJBaseGameLayer::moveObjects(objects,dx,dy,lockPlayerY);return;}
         GJBaseGameLayer::moveObjects(objects,dx,dy,lockPlayerY);
     }
 #endif

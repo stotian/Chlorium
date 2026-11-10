@@ -19,7 +19,7 @@ void main(){
             if(c.delta.x!=0.0lf && (s.flags&2u)==0u)p.x=c.delta.x+p.x;
             if(c.delta.y!=0.0lf)p.y=c.delta.y+p.y;
             s.flags|=48u;
-        }else{
+        }else if(c.control.y==1u){
             s.flags=(s.flags&~128u)|(c.control.z<<7u)|96u;
             precise double rx=p.x-double(s.offset.x);rx=rx-double(c.affineCenter.z);
             precise double ry=p.y-double(s.offset.y);ry=ry-double(c.affineCenter.w);
@@ -36,6 +36,11 @@ void main(){
             precise double nx=double(mx)-p.x;nx=nx+double(s.offset.x);nx=nx+p.x;
             precise double ny=double(my)-p.y;ny=ny+double(s.offset.y);ny=ny+p.y;
             p=dvec2(nx,ny);
+        }else{
+            // Native Follow adds enabled axes even for zero deltas, in Y then X order.
+            if((c.control.z&2u)!=0u)p.y=p.y+c.delta.y;
+            s.flags|=48u;
+            if((c.control.z&1u)!=0u && (s.flags&2u)==0u)p.x=p.x+c.delta.x;
         }
     }
     s.position=p;results[i]=s;

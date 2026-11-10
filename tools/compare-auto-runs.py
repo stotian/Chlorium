@@ -79,7 +79,7 @@ def read(report, expected_loaded):
 
 
 def validate_conditions(a, ar, ap, b, br, bp):
-    if any(p.get(key) for p in (ap,bp) for key in ('mixed_native_trace_diagnostic','wide_root_geometry_diagnostic')):
+    if any(p.get(key) for p in (ap,bp) for key in ('mixed_native_trace_diagnostic','wide_root_geometry_diagnostic','follow_native_trace_diagnostic')):
         raise ValueError('Native root/geometry diagnostics cannot be used as performance comparisons')
     if ap.get('native_rotation_trace_diagnostic') or bp.get('native_rotation_trace_diagnostic'):
         raise ValueError('Native rotation trace diagnostics cannot be used as performance comparisons')

@@ -1,0 +1,243 @@
+{
+  "revision": "R76",
+  "diagnostic_only": true,
+  "game_fps_evidence": false,
+  "normal_activation_proven": false,
+  "live_cpu_preparation_removed": false,
+  "oracle": {
+    "full_native_gpu_states": 24720,
+    "gateway_abi_witnesses": 512,
+    "legacy_native_gpu_states": 271128
+  },
+  "runs": [
+    {
+      "level": 133260800,
+      "section": [
+        89,
+        89.5
+      ],
+      "resident_actors": 32,
+      "joint_classes": 1,
+      "positions_compared": 5184,
+      "gpu_quads": 30,
+      "native_fallback_quads": 34,
+      "initial_state_bytes": 1536,
+      "shared_command_bytes": 12640,
+      "program_index_bytes": 632,
+      "candidate_sha256": "ae80186f53a0c0a9741bb3b11c22e349613368b1914a0abbd242d59ceb0d101c",
+      "measurement_sha256": "aec9eef8d7c437cfd15642e442745117b8e79406818a63b3bea8dc7a250d7767",
+      "root_sha256": "9ac83339a7581bacf50aa3bb89a9eb21e00a885d4392d279cc973ecb2cb92076",
+      "geometry_sha256": "91ced1b6e9efef77bfe4a367afa3158646828ac2bad0c15a53434eb28d4bd4a2",
+      "capture": {
+        "root": {
+          "frames": 2,
+          "rows": 5056,
+          "actors": 32,
+          "native_calls": 790541,
+          "percent": 89.0530776977539,
+          "unique_commands": 158,
+          "position_changes": 5056,
+          "nonzero_local_rotations": 2528,
+          "movement_rows": 0,
+          "rotation_rows": 2528,
+          "follow_rows": 2528,
+          "input_source_counts": {
+            "0": 2528,
+            "1": 2528
+          },
+          "position_continuity_breaks": 0,
+          "max_actor_steps_per_frame": 96,
+          "shared_command_bytes": 12640,
+          "per_invocation_command_bytes": 404480,
+          "controls": {
+            "0x1f80": 5056
+          }
+        },
+        "records": 64,
+        "actors": 32,
+        "matched": 30,
+        "unsupported": 24,
+        "visible_nonhidden": 50,
+        "dirty": 6,
+        "batched": 54,
+        "source_flags": {
+          "1824": 30,
+          "1920": 18,
+          "1958": 2,
+          "800": 10,
+          "902": 4
+        },
+        "origins": {
+          "diagnostic_only": true,
+          "bounded_first_gaps": 0,
+          "phase_counts": {},
+          "complete_writer_closure": false
+        }
+      },
+      "campaign_completed": true,
+      "requested_fps": 120,
+      "quality": "full",
+      "shake": false,
+      "noclip": false,
+      "mod_profile": "isolated",
+      "restored_profile_files": 92,
+      "main_installation_changed": false,
+      "seed_position_upload_frames": 1,
+      "prefix_mismatches": 0,
+      "resident_mismatches": 0,
+      "quad_mismatches": 0
+    },
+    {
+      "level": 88952972,
+      "section": [
+        25,
+        26
+      ],
+      "resident_actors": 16,
+      "joint_classes": 3,
+      "positions_compared": 160,
+      "gpu_quads": 30,
+      "native_fallback_quads": 2,
+      "initial_state_bytes": 768,
+      "shared_command_bytes": 480,
+      "program_index_bytes": 24,
+      "candidate_sha256": "ae80186f53a0c0a9741bb3b11c22e349613368b1914a0abbd242d59ceb0d101c",
+      "measurement_sha256": "aec9eef8d7c437cfd15642e442745117b8e79406818a63b3bea8dc7a250d7767",
+      "root_sha256": "aed8705ab6d62e2b0b93bb8e8f469925722a203490ec0b05ed268ccdf05351ee",
+      "geometry_sha256": "4e783e161b0f2176a55368914a946a95617cc02a35fe50c0db3cfdc5cbe41952",
+      "capture": {
+        "root": {
+          "frames": 2,
+          "rows": 32,
+          "actors": 16,
+          "native_calls": 6300,
+          "percent": 25.003129959106445,
+          "unique_commands": 6,
+          "position_changes": 32,
+          "nonzero_local_rotations": 0,
+          "movement_rows": 32,
+          "rotation_rows": 0,
+          "follow_rows": 0,
+          "input_source_counts": {
+            "1": 32
+          },
+          "position_continuity_breaks": 0,
+          "max_actor_steps_per_frame": 1,
+          "shared_command_bytes": 480,
+          "per_invocation_command_bytes": 2560,
+          "controls": {
+            "0x1f80": 32
+          }
+        },
+        "records": 32,
+        "actors": 16,
+        "matched": 30,
+        "unsupported": 2,
+        "visible_nonhidden": 32,
+        "dirty": 0,
+        "batched": 32,
+        "source_flags": {
+          "1792": 18,
+          "1824": 12,
+          "1920": 2
+        },
+        "origins": {
+          "diagnostic_only": true,
+          "bounded_first_gaps": 0,
+          "phase_counts": {},
+          "complete_writer_closure": false
+        }
+      },
+      "campaign_completed": true,
+      "requested_fps": 120,
+      "quality": "full",
+      "shake": false,
+      "noclip": false,
+      "mod_profile": "isolated",
+      "restored_profile_files": 92,
+      "main_installation_changed": false,
+      "seed_position_upload_frames": 1,
+      "prefix_mismatches": 0,
+      "resident_mismatches": 0,
+      "quad_mismatches": 0
+    },
+    {
+      "level": 129598490,
+      "section": [
+        74,
+        74.5
+      ],
+      "resident_actors": 30,
+      "joint_classes": 3,
+      "positions_compared": 1080,
+      "gpu_quads": 18,
+      "native_fallback_quads": 43,
+      "initial_state_bytes": 1440,
+      "shared_command_bytes": 2560,
+      "program_index_bytes": 128,
+      "candidate_sha256": "984cb0f32010fbd5dbac7e9392e4562b416fafc84e9671efbd2374643c85f6f9",
+      "measurement_sha256": "aec9eef8d7c437cfd15642e442745117b8e79406818a63b3bea8dc7a250d7767",
+      "root_sha256": "eed45019295bcfd8a77c62207a024a0933a53a011d1336b82b44ace81b7c694b",
+      "geometry_sha256": "3c0b6408b2d385b9bc005763721da6813dc5be0950afdd0fc71b7ba117caa09b",
+      "capture": {
+        "root": {
+          "frames": 2,
+          "rows": 440,
+          "actors": 31,
+          "native_calls": 66751,
+          "percent": 74.0014877319336,
+          "unique_commands": 32,
+          "position_changes": 440,
+          "nonzero_local_rotations": 204,
+          "movement_rows": 236,
+          "rotation_rows": 204,
+          "follow_rows": 0,
+          "input_source_counts": {
+            "0": 204,
+            "1": 236
+          },
+          "position_continuity_breaks": 0,
+          "max_actor_steps_per_frame": 16,
+          "shared_command_bytes": 2560,
+          "per_invocation_command_bytes": 35200,
+          "controls": {
+            "0x1f80": 440
+          }
+        },
+        "records": 61,
+        "actors": 31,
+        "matched": 50,
+        "unsupported": 9,
+        "visible_nonhidden": 25,
+        "dirty": 2,
+        "batched": 56,
+        "source_flags": {
+          "256": 3,
+          "1280": 29,
+          "1920": 7,
+          "902": 2,
+          "1824": 18,
+          "800": 2
+        },
+        "origins": {
+          "diagnostic_only": true,
+          "bounded_first_gaps": 0,
+          "phase_counts": {},
+          "complete_writer_closure": false
+        }
+      },
+      "campaign_completed": true,
+      "requested_fps": 120,
+      "quality": "full",
+      "shake": false,
+      "noclip": false,
+      "mod_profile": "isolated",
+      "restored_profile_files": 92,
+      "main_installation_changed": false,
+      "seed_position_upload_frames": 1,
+      "prefix_mismatches": 0,
+      "resident_mismatches": 0,
+      "quad_mismatches": 0
+    }
+  ]
+}

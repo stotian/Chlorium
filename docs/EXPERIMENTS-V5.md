@@ -1619,3 +1619,17 @@ ne résout aucun appelant; sonde remplacée parcontextes natifs bornés.64premie
 écarts/32objets/2images se produisent dansprocessFollowActions. Quatre groupes
 decodeR75 passent,analyseprovenance stricte complète. Prochain moteur : intégrer
 l'opération de suivi native, avec un oracle, sans inventer d'entrées de calcul.
+
+R76 : Follow natif ajouté au programmeGPU (axes activés mêmeavec delta0,YpuisX).
+Oracle166octets duGD épinglé :24720 états48octets exacts;512témoins ABIcount,
+271128 états de l'ancien mélange toujours exacts,3groupes decodeR76/4R75 passent.
+Collecte aux entrées réelles de boucles,callcount/callbacks natifs conservés.
+Orbit89–89.5 sansmort :5056opérations,32objets,uneclasse,5184positions et30quadsGPU
+exacts;34replisnatifs. Zérodiscontinuité grâceaux2528Follow manquants auparavant.
+Grief25–26 sansmort :16objets/3classes,160positions/30quadsGPU exacts,2replis.
+Helio74–74.5 sansmort :30objetsrésidents/31capturés,1080positions/18quadsGPU
+exacts,43replis;unobjet apparu trop tard correctementrefusé.92fichiers restaurés
+parcampagne,installationprincipale inchangée. Allocationobservation rendue
+catchable pourconserver l'appel natif;OOMnoninjectée. CPU/lecteurs toujoursnatifs,
+niFPSglobaux niactivationnormale. Prochain chantier : donnéesGPU retenues et
+paramètres partagés pourréduire lesretransferts durenderer, sans retirerlesgarde.

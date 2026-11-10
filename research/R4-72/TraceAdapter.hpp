@@ -2,7 +2,9 @@
 #include "../R4-71/MixedProgram.hpp"
 class PlayLayer;
 namespace chlorium::research::rotationtrace {
-#if defined(CHLORIUM_MIXED_TRACE_R74) || defined(CHLORIUM_MIXED_TRACE_AUDIT_R74)
+#if defined(CHLORIUM_FOLLOW_TRACE_R76) || defined(CHLORIUM_FOLLOW_TRACE_AUDIT_R76)
+inline constexpr unsigned traceVersion=76;
+#elif defined(CHLORIUM_MIXED_TRACE_R74) || defined(CHLORIUM_MIXED_TRACE_AUDIT_R74)
 inline constexpr unsigned traceVersion=74;
 #else
 inline constexpr unsigned traceVersion=72;
@@ -13,7 +15,9 @@ struct alignas(16) Row {
     std::uint64_t address=0;unsigned uid=0,frame=0,closed=0;float localRotation=0;unsigned controls=0,reserved=0;
 };
 struct Header {
-#if defined(CHLORIUM_MIXED_TRACE_R74) || defined(CHLORIUM_MIXED_TRACE_AUDIT_R74)
+#if defined(CHLORIUM_FOLLOW_TRACE_R76) || defined(CHLORIUM_FOLLOW_TRACE_AUDIT_R76)
+    char magic[8]{'C','H','L','M','I','X','7','6'};
+#elif defined(CHLORIUM_MIXED_TRACE_R74) || defined(CHLORIUM_MIXED_TRACE_AUDIT_R74)
     char magic[8]{'C','H','L','M','I','X','7','4'};
 #else
     char magic[8]{'C','H','L','R','O','T','7','2'};

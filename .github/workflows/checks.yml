@@ -49,11 +49,16 @@ jobs:
           build-tests\group-trace.exe build-tests\owned-trace.local.bin
           if errorlevel 1 exit /b %errorlevel%
           python research/R4-63/trace_checks.py
+          if errorlevel 1 exit /b %errorlevel%
           python research/R4-69/watch_decode_checks.py
+          if errorlevel 1 exit /b %errorlevel%
           python research/R4-72/decode_checks.py
+          if errorlevel 1 exit /b %errorlevel%
           python research/R4-74/decode_checks.py
           if errorlevel 1 exit /b %errorlevel%
           python research/R4-75/decode_checks.py
+          if errorlevel 1 exit /b %errorlevel%
+          python research/R4-76/decode_checks.py
           if errorlevel 1 exit /b %errorlevel%
           python research/R4-30/comparison_guard_checks.py
           if errorlevel 1 exit /b %errorlevel%
