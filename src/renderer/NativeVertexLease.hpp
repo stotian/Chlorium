@@ -2,6 +2,8 @@
 #include <cstdint>
 #include <stdexcept>
 namespace chlorium::snapshot {
+// CanonicalWrite may alter the VBO before declining; Cocos must refresh it from m_pQuads.
+inline void markNativeVboDirtyForFallback(bool& dirty) noexcept { dirty=true; }
 // Native Cocos executes its complete draw contract using an owned vertex store.
 // The original store remains dirty until an actual native fallback updates it.
 class NativeVertexLease {

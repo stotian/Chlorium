@@ -1,33 +1,46 @@
-# R78 — verified canonical GPU handoff, GD validation pending
+# R78 P0 — live integration and canonical VBO fallback
 
-Research prototype, disabled outside its dedicated build. Not promoted.
-Owned checks:128 complete images through the pinned native Cocos atlas function,
-8 deliberately skipped GPU dispatches rejected by poison verification and repaired
-by the full native fallback. All six SSBO ranges (including3), generic bindings,
-program, LastError, FP state, pending GL error, canonical tail bytes and no-context
-path pass. Both the poison itself and the GPU restoration are read back; a missing
-GPU write cannot pass because native data happened to be present already.
+**Status: P0 implemented and locally verified; experimental only.** R78 remains
+behind the dedicated `--live-root-r78` profile. The normal CMake configuration is
+unchanged and continues to use the canonical renderer.
 
-RootRuntime retains positions between frames, bounded64-step dispatches without
-per-chunk readback. Actual R76 input replays pass64 Orbit,32 Grief and60 Helio
-positions over two frames with one seed. CPU frame checks cover continuity,
-unsupported opcodes, duplicate identities/visits and command-table overflow.
+## Call path and state contract
 
-The dedicated native/auditor R78 packages compile and pass packaging identity/CRC
-checks. LiveDraw.cpp connects root programs and verified canonical writes to the
-actual native atlas draw for the two-frame diagnostic window. All native CPU work
-is retained. It checks current live descendant ownership/UID/index and native quad
-bytes, restores GL state and forwards native drawing once. Unsupported cases remain
-native. Its live GD validation has NOT run: quota reached3percent before launch.
-Do not claim live success, continuous availability, a global blackscreen fix,
-120FPS, or any FPS gain. The poison/readback profile is diagnostic and excluded
-from performance comparisons independently of the parent flags.
+The R78 source path is `build_quad_candidate.py --live-root-r78` →
+`R4-57/ContinuousRenderer.cpp` → `R4-72/RotationTrace.cpp::livePrepare` →
+`R4-78/LiveDraw.cpp::prepare` → `CanonicalWrite::prepare` → the native Cocos
+`drawNumberOfQuads` call. Only a drawn, standard-texture, full-atlas range with
+valid buffers enters this path. Partial ranges and unsupported paths retain the
+existing native/direct route.
 
-Next: preflight then one isolated Grief25–26 diagnostic with --RotationTrace and
-matching R78 packages. Require live_root_draw_r78 frames2, drawn_mask3, nonzero
-actual draws/quads/verified_bytes and failures0, plus complete parent captures,
-92-file restoration and unchanged main installation. If uncertain, retain native.
-Do not promote or install into the main game. Assets resources/shaders/r78-*.comp
-must match their research shader originals. Native/auditor profile hashes are in
-build-research/{native,measurement}-live-root-r78/build-fingerprint.json and package
-receipts. Builder outputs are private and not committed.
+On a verified GPU write, the native Cocos draw runs once with the canonical VBO
+visible and atlas dirtiness suppressed; successful return is then accounted by
+`submitted()`. On `Status::native`, the atlas is marked dirty before the native
+draw, so Cocos refreshes canonical `m_pQuads` even if the atlas began clean. This
+also repairs poison left by a failed dispatch/readback. No GL error is consumed to
+infer draw success; accounting means the native draw call returned.
+
+## Evidence
+
+- Local Windows fixture: 128 full-image comparisons through the pinned native
+  Cocos draw function; all images matched exactly, including the native-only
+  middle quad. Eight deliberately denied GPU dispatches fell back and restored
+  canonical VBO bytes.
+- Covered clean/dirty success and failure, failure before and after GPU mutation,
+  partial draw, contextless decline, repeated failure followed by success,
+  consecutive batches, single native submission, GL bindings/state and pending
+  error preservation. The R78 fixture script also runs the frame and source
+  contract checks.
+- R78 DLL build: compile and link passed for the experimental profile. CI now
+  runs portable dirty-state and source-contract checks; the hidden-context Cocos
+  fixture depends on local SDK/Cocos binaries and is not a CI test.
+- Independent one-pass critical review: **ACCEPT**, no P0/P1 findings.
+- `git diff --check`: passed. Live Geometry Dash: **NOT RUN**.
+  FPS improvement: **NOT MEASURED**. R79: **NOT STARTED**.
+
+## Limits and decision
+
+This proves the bounded fixture contract, not live rendering, compatibility with
+all atlases/mods, black-screen elimination, or performance. Do not install or
+promote R78 to the normal build until a separately authorized live validation
+passes. R79 remains out of scope for this P0 change.

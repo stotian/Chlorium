@@ -119,6 +119,12 @@ Orbit, Grief et Heliopolis passent les comparaisons de positions/quads en rejeu,
 avec replis natifs pour les objets refusés. Le CPU du jeu reste actif : cela
 ne démontre pas encore d'accélération. [Preuves R76](research/R4-76/DECISION.md).
 
+R78 P0 relie le prototype de racines GPU au draw natif Cocos seulement sur une
+atlas complet admissible. En cas d'échec GPU, il force la remise à jour du VBO
+depuis les quads natifs avant le repli. Le fixture local Cocos passe 128 images
+exactes et 8 échecs GPU simulés. Le profil reste expérimental : pas de validation
+dans Geometry Dash ni de gain FPS mesuré. [Détails et limites R78](research/R4-78/DECISION.md).
+
 ## Suivi
 
 [Journal des expériences](docs/EXPERIMENTS-V5.md) · [Versions](docs/VERSIONS.md) ·
