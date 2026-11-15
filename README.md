@@ -121,9 +121,11 @@ ne démontre pas encore d'accélération. [Preuves R76](research/R4-76/DECISION.
 
 R78 P0 relie le prototype de racines GPU au draw natif Cocos seulement sur une
 atlas complet admissible. En cas d'échec GPU, il force la remise à jour du VBO
-depuis les quads natifs avant le repli. Le fixture local Cocos passe 128 images
-exactes et 8 échecs GPU simulés. Le profil reste expérimental : pas de validation
-dans Geometry Dash ni de gain FPS mesuré. [Détails et limites R78](research/R4-78/DECISION.md).
+depuis les quads natifs avant le repli. Les fixtures locales passent 128 images
+exactes et 8 échecs GPU simulés. Un smoke test live sur Grief auto (88952972,
+25–26 %) a validé deux frames de préparation et le draw canonique, sans échec.
+Ce test court ne prouve ni la stabilité complète ni un gain FPS (non mesuré) :
+R78 reste expérimental. [Détails et limites R78](research/R4-78/DECISION.md).
 
 ## Suivi
 

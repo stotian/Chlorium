@@ -318,7 +318,7 @@ bool recordRotationTrace(){
 bool recordLiveRootDraw(){
 #ifdef CHLORIUM_LIVE_ROOT_AUDIT_R78
     using Stats=chlorium::research::liveroot::Stats;Stats value;const auto module=GetModuleHandleW(L"local.chlorium.dll");const auto read=module?reinterpret_cast<bool(*)(Stats*,std::size_t)>(GetProcAddress(module,"ChloriumReadLiveRootDrawR78")):nullptr;
-    const bool ok=read && read(&value,sizeof(value));auto row=matjson::Value::object();row["event"]="live_root_draw_r78";row["read"]=ok;row["frames"]=value.frames;row["drawn_mask"]=value.drawnMask;row["draws"]=value.draws;row["quads"]=value.quads;row["verified_bytes"]=value.verifiedBytes;row["failures"]=value.failures;row["declines"]=value.declines;row["cpu_preparation_removed"]=false;row["performance_evidence"]=false;line(row.dump());
+    const bool ok=read && read(&value,sizeof(value));auto row=matjson::Value::object();row["event"]="live_root_draw_r78";row["read"]=ok;row["frames"]=value.frames;row["drawn_mask"]=value.drawnMask;row["draws"]=value.draws;row["quads"]=value.quads;row["verified_bytes"]=value.verifiedBytes;row["failures"]=value.failures;row["declines"]=value.declines;row["failure_stage"]=std::string(value.failureStage);row["failure_message"]=std::string(value.failureMessage);row["cpu_preparation_removed"]=false;row["performance_evidence"]=false;line(row.dump());
     return ok && value.version==78 && value.frames==2 && value.drawnMask==3 && value.draws && value.quads && value.verifiedBytes && !value.failures;
 #else
     return true;

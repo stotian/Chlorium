@@ -1,6 +1,6 @@
 # R78 P0 — live integration and canonical VBO fallback
 
-**Status: P0 implemented and locally verified; experimental only.** R78 remains
+**Status: P0 implemented, locally verified, and live-smoke verified; experimental only.** R78 remains
 behind the dedicated `--live-root-r78` profile. The normal CMake configuration is
 unchanged and continues to use the canonical renderer.
 
@@ -31,16 +31,27 @@ infer draw success; accounting means the native draw call returned.
   consecutive batches, single native submission, GL bindings/state and pending
   error preservation. The R78 fixture script also runs the frame and source
   contract checks.
-- R78 DLL build: compile and link passed for the experimental profile. CI now
+- R78 native and measurement DLL builds: compile and link passed for the
+  experimental profiles. A targeted live smoke on Grief auto `88952972`,
+  section 25–26%, reached the requested section and exercised both R78 frames:
+  `drawn_mask=3`, 12 native submissions, 30 quads, 381,984 verified bytes,
+  zero failures and zero declines. The previous run exposed a shader resource
+  path mismatch; both shader loads now use Geode's packaged resource root.
+  Diagnostic instrumentation records the failing stage/message if setup fails.
+  The isolated test restored the user's settings byte-for-byte and removed its
+  staged packages.
+- CI now
   runs portable dirty-state and source-contract checks; the hidden-context Cocos
   fixture depends on local SDK/Cocos binaries and is not a CI test.
 - Independent one-pass critical review: **ACCEPT**, no P0/P1 findings.
-- `git diff --check`: passed. Live Geometry Dash: **NOT RUN**.
-  FPS improvement: **NOT MEASURED**. R79: **NOT STARTED**.
+- `git diff --check`: passed. Live validation is limited to the smoke section
+  above; it does not prove full-level visual fidelity or stability.
+  FPS improvement: **NOT MEASURED**.
 
 ## Limits and decision
 
-This proves the bounded fixture contract, not live rendering, compatibility with
-all atlases/mods, black-screen elimination, or performance. Do not install or
-promote R78 to the normal build until a separately authorized live validation
-passes. R79 remains out of scope for this P0 change.
+This proves the bounded fixture contract and that the experimental path can
+prepare and submit canonical geometry in a live level section. It does not prove
+compatibility with all atlases/mods, full-level stability, black-screen
+elimination, or performance. Keep R78 experimental and out of the normal build
+until broader balanced validation passes.
