@@ -1648,5 +1648,14 @@ garderisolé. Détails research/R4-77/DECISION.md.
 R78 : passage canoniqueGPU avec sauvegarde6SSBO dont3, poison vérifié puis
 réécritureGPU vérifiée avant dessinCocos.128images/8échecsforcés natifs exacts;
 runtime racines64/32/60positions réelles exactes(Orbit/Grief/Helio). Paquets
-natif/auditeurcompilés, intégrationlive2images codée mais NONtestée dansGD :
-quota5h tombéà3% à09:11UTC. Garderisolé,aucunFPS/promotionsuccèsliveannoncé.
+natif/auditeur compilés. Smoke live Grief 88952972 25–26 : 2/2 frames,
+12 draws, 30 quads, 381984 octets vérifiés, 0 échec/refus après correction du
+chemin shader. Segment court seulement; aucun gainFPS ni promotion normale.
+
+R79 : indexation binaire des lignes de trace par frame, au lieu de rescanner
+tout l'historique dans seed/compile. Ordre croissant garanti par les append R72;
+fixture ordonnée 50,002 lignes, frame/source/dirty-state checks passent, deux
+profils Windows compilés/liés. Smoke Grief auto 88952972 25–26 : 32 lignes,
+2/2 frames, 12 draws, 30 quads, 381984 octets vérifiés, 0 échec/refus; état
+partagé restauré. Smoke trop court pour quantifier le gain CPU ou les FPS; aucun
+gain jeu revendiqué, chemin toujours expérimental. Détails research/R4-79/DECISION.md.
